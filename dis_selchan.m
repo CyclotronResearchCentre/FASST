@@ -864,7 +864,7 @@ for i=1:length(A);
     end
 end
 
-A=strfind(upper(chantype(d)),'EEG');
+A=strfind(upper(chantype(d,index)),'EEG');
 EEGchan=[];
 for i=1:length(A);
     if A{i}>0
@@ -877,9 +877,9 @@ other=setdiff(index,allbad);
 
 otherknown=[];
 othernotknown=[];
-chanstr=channels(d);
+chanstr=chantype(d);
 for ff = other
-    if chanstr.order(ff)==0
+    if ~strcmpi(chanstr,'Other')
         othernotknown = [othernotknown ff];
     else
         otherknown = [otherknown ff];
@@ -908,10 +908,10 @@ idx=[otherknown othernotknown ECGchan EMGchan EOGchan eeg];
 function cleargraph(handles)
 
 A=get(handles.figure1,'Children');
-
 idx=find(strcmp(get(A,'Type'),'axes')==1);
-
-delete(get(A(idx),'Children'))
+try
+    delete(get(A(idx),'Children'))
+end
 
 function edit1_Callback(hObject, eventdata, handles)
 % hObject    handle to edit1 (see GCBO)
@@ -990,11 +990,11 @@ if ~isempty(YET)
     end
 end
 set(handles.Select,'String',Selection);
-%Select all the channels are there in the file
+%Select all the channels there are in the file
 contents = upper(chanlabels(handles.Dmeg{1}));
 [dumb1,index,dumb2]=intersect(contents,Selection);
 
-%Remove the channels concerned by the Selection
+%Remove channels concerned by the Selection
 DES = get(handles.Deselect,'String');
 temp = setdiff(DES,Selection);
 set(handles.Deselect,'String',temp);
@@ -1002,7 +1002,6 @@ set(handles.Deselect,'String',temp);
 set(handles.Select,'Value',1);
 set(handles.Deselect,'Value',1);
 [dumb1,dumb2,index2]=intersect(upper(Selection),upper(handles.names));
-
 %Indicate the placement of the electrodes selected
 idxred=index2(find(handles.crc_types(index2)<-1));
 idxblue=index2(find(handles.crc_types(index2)>-2));

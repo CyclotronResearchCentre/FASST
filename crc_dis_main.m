@@ -71,14 +71,13 @@ handles.Dmeg    =   varargin{1}.Dmeg;
 for i=1:numel(handles.Dmeg)
     handles.Dmeg{i} =   meeg(handles.Dmeg{i});
 end
-
+D = handles.Dmeg{1};
 % distinct index to make easier to select data by type
 handles.index   =   varargin{1}.index;
-indexMEEG       =   intersect(meegchannels(handles.Dmeg{1}),handles.index);
-handles.indnomeeg   =   setdiff(handles.index, indexMEEG);
-handles.indexMEEG   =   handles.index(length(handles.indnomeeg)+1:length(handles.index));
+handles.indexMEEG   =   fliplr(sort(intersect(meegchannels(handles.Dmeg{1}),handles.index)));
+handles.indnomeeg   =   setdiff(handles.index, handles.indexMEEG);
 handles.inddis      =   [handles.indnomeeg handles.indexMEEG];
-
+handles.indeeg = [meegchannels(D,'EEG') meegchannels(D,'LFP')];
 % Default values
 set(handles.normalize,'Value',0);
 
@@ -104,8 +103,16 @@ handles.megmagscale =   [];
 handles.megplanarscale  =   [];
 handles.chan        =   [];
 
-% Spike detection
-% ---------------
+%si ca revient de la détection automatique
+handles.artefacteeg = [];
+if isfield(handles.Dmeg{1},'CRC')
+    if isfield (handles.Dmeg{1}.CRC,'artefacteeg')
+        handles.artefacteeg = handles.Dmeg{1}.CRC.artefacteeg; 
+    end 
+end  
+
+%Spike detection
+%---------------
 handles.move = 0;
 if  isfield(varargin{1},'type') % We come back from the "Event_menu"
     handles.type = varargin{1}.type;
@@ -113,7 +120,7 @@ else       % It's the begining
     D      = handles.Dmeg{1};
     handles.type = {};
     if isfield(D,'CRC')
-        if isfield(D.CRC,'Event')
+        if isfield(D.CRC,'Event')&& ~isempty(events(D)) %changes made
             type_sauv = D.CRC.Event;
             tp = events(D);
             tpt = {tp(:).type};
@@ -173,6 +180,19 @@ else
 end
 
 %---------------------------------------------
+
+%-------------------------------------------
+
+if isfield(varargin{1},'base')
+    handles.base     =   varargin{1}.base;
+    
+else
+    handles.base     =   {};
+end
+
+%---------------------------------------------
+
+
 if isfield(varargin{1},'delmap')
     set(handles.delaymap,'visible','on');
     set(handles.delaymap,'Value',1);
@@ -221,6 +241,8 @@ if isfield(varargin{1},'multcomp') %if comparing multiple files
     set(handles.slider1,'SliderStep',[handles.winsize/(handles.maxx) 0.1]);
     set(handles.totaltime,'String',['/ ' num2str(handles.maxx)]);
     set(handles.currenttime,'String',num2str(round(handles.winsize/2)));
+    set(handles.totalpage,'String',['/ ' num2str(ceil(handles.maxx/handles.winsize))]);
+    set(handles.currentpage,'String',num2str(1));
     
     %disables channel slider
     set(handles.Chanslider,'enable','off')
@@ -232,47 +254,46 @@ if isfield(varargin{1},'multcomp') %if comparing multiple files
     end
     
     %handles visibility of different options
-    set(handles.Score,'enable','off','visible','off');
-    set(handles.manevent,'enable','off','visible','off');
-    set(handles.event_menu,'enable','off');
-    set(handles.counterspect,'enable','off','visible','off');
-    set(handles.pushbutton1,'enable','off','visible','off');
-    set(handles.pushbutton2,'enable','off','visible','off');
-    set(handles.popupmenu10,'enable','off','visible','off');
-    set(handles.popupmenu11,'enable','off','visible','off');
-    set(handles.radiobutton1,'enable','off','visible','off');
-    set(handles.pushbutton5,'enable','off','visible','off');
-    set(handles.pushbutton6,'enable','off','visible','off');
-    set(handles.pushbutton7,'enable','off','visible','off');
-    set(handles.NbreChan,'enable','off','visible','off');
-    set(handles.others,'enable','off','visible','off');
-    set(handles.com,'enable','off','visible','off');
-    set(handles.uipanel6,'visible','off');
-    set(handles.text22,'visible','off');
-    set(handles.text23,'visible','off');
-    set(handles.NbrechanTxt,'visible','off');
-    set(handles.NbreChan,'Value',1);
-    set(handles.Cmp_Pwr_Sp_All,'enable','on','visible','on');
-    set(handles.multfil,'enable','on');
-    set(handles.multnames,'enable','on');
-    set(handles.multchan,'enable','on');
-    set(handles.multother,'enable','on');
-    set(handles.multclose,'enable','on');
-    set(handles.axes4,'visible','off');
-    set(handles.axes5,'visible','off');
-    set(handles.addundefart,'visible','off');
-    set(handles.addonlyone,'visible','off');
-    set(handles.addspecart,'visible','off');
-    set(handles.addaro,'visible','off');
-    set(handles.addeoi,'visible','off');
-    set(handles.FPL,'visible','off');
-    set(handles.OPL,'visible','off');
-    set(handles.Delart,'visible','off');
-    set(handles.Delartonlyone,'visible','off')
+    set(handles.Score,'enable','off','visible','off')
+    set(handles.pushbutton1,'enable','off','visible','off')
+    set(handles.pushbutton2,'enable','off','visible','off')
+    set(handles.popupmenu10,'enable','off','visible','off')
+    set(handles.popupmenu11,'enable','off','visible','off')
+    set(handles.radiobutton1,'enable','off','visible','off')
+    set(handles.pushbutton5,'enable','off','visible','off')
+    set(handles.pushbutton6,'enable','off','visible','off')
+    set(handles.pushbutton7,'enable','off','visible','off')
+    set(handles.NbreChan,'enable','off','visible','off')
+    set(handles.uipanel6,'visible','off')
+    set(handles.text22,'visible','off')
+    set(handles.text23,'visible','off')
+    set(handles.NbrechanTxt,'visible','off')
+    set(handles.NbreChan,'Value',1)
+    set(handles.Cmp_Pwr_Sp_All,'enable','on','visible','on')
+    set(handles.multfil,'enable','on')
+    set(handles.multnames,'enable','on')
+    set(handles.multchan,'enable','on')
+    set(handles.multother,'enable','on')
+    set(handles.multclose,'enable','on')
+    set(handles.axes4,'visible','off')
+    set(handles.addundefart,'visible','off') 
+    set(handles.addspecart,'visible','off')
+    set(handles.addaro,'visible','off')
+    set(handles.addeoi,'visible','off')
+    set(handles.FPL,'visible','off')
+    set(handles.OPL,'visible','off')
+    set(handles.Delart,'visible','off')
     set(handles.Delaro,'visible','off')
     set(handles.Del_eoi,'visible','off')
-    set(handles.Detection,'visible','off')
-    for ii  =   1   :   size(handles.chanset,2)
+    set(handles.Delartonlyone,'visible','off')
+	set(handles.Detection,'visible','off')
+    set(handles.addonlyone,'visible','off')	
+    set(handles.others,'enable','off','visible','off')
+    set(handles.com,'enable','off','visible','off')
+	set(handles.manevent,'enable','off','visible','off')
+    set(handles.event_menu,'enable','off')
+    set(handles.counterspect,'enable','off','visible','off')	
+	for ii  =   1   :   size(handles.chanset,2)
         handles.multchanlab{ii}     =   uimenu(handles.multchan,'Label',...
             char(handles.chanset{ii}),'Callback',...
             {@Chantodisp});
@@ -284,11 +305,11 @@ if isfield(varargin{1},'multcomp') %if comparing multiple files
     set(handles.figure1,'name','Multiple files comparison')
 
 else %if only one file to display
-    set(handles.Detection,'visible','off')
+    set(handles.Detection,'visible','off') %Not ready yet
     handles.multcomp=0;
     set(handles.axes5,'visible','on');
     set(handles.axes4,'visible','on');
-    
+
     %handles date and hour and slider
     if isfield(handles.Dmeg{1},'info')
         if isfield(handles.Dmeg{1}.info,'hour')
@@ -307,12 +328,15 @@ else %if only one file to display
     set(handles.totaltime,'String',['/ ' ...
         num2str(round(nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})))]);
     set(handles.currenttime,'String',num2str(round(handles.winsize/2)));
-    
+%new index for page
+    set(handles.totalpage,'String',['/ ' ...
+        num2str(ceil((nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1}))/handles.winsize))]);
+    set(handles.currentpage,'String',num2str(1));
    % Number of channels displayed
     Nchdisp     =   str2double(get(handles.NbreChan,'String'));
     set(handles.NbreChan,'String', num2str(min(Nchdisp, length(handles.indexMEEG) + length(handles.indnomeeg))))
     Nchdisp     =   str2double(get(handles.NbreChan,'String'));
-    totind      =   length(handles.indexMEEG) + length(handles.indnomeeg);
+    totind      =   length(handles.index); %length(handles.indexMEEG) + length(handles.indnomeeg);
     set(handles.Chanslider,...
         'Min',1,...
         'Max',totind - Nchdisp+1,...
@@ -389,12 +413,13 @@ if ~handles.multcomp
     handles.displevt    =   0;
     pmstring    =   [{'All'}];
     evt         =   events(handles.Dmeg{1});
+    evt = evt(:);
     if iscell(evt)
         evt     =   cell2mat(evt);
         disp(['Warning: data not continuous (trials of 1s), only first epoch showed'])
     end
     if ~isempty(evt)
-        for i = 1:size(evt,2)
+        for i = 1:max(size(evt,2),size(evt,1))
             if ~isempty(evt(i)) && ~any(strcmpi(evt(i).type, pmstring)) &&...
                      ~isempty(evt(i).time)
                 pmstring    =   [pmstring, {evt(i).type}];
@@ -404,8 +429,7 @@ if ~handles.multcomp
     set(handles.popupmenu10,...
         'String',pmstring,...
         'Value',length(pmstring))
-    
-    pmstring    =   [{'All'}, {'Number of event'}];
+    pmstring=[{'All'}, {'Number of event'}];
     if ~isempty(evt)
         for i = 1:size(evt,2)
             if ~isempty(evt(i)) && isnumeric(evt(i).value)
@@ -421,8 +445,8 @@ if ~handles.multcomp
         'String',pmstring,...
         'Value',length(pmstring))
     handles.evt     =   evt;
-    handles.chostype    =   [1:size(evt,2)];
-    handles.chosevt     =   [1:size(evt,2)];
+    handles.chostype    =   1:max(size(evt,2),size(evt,1));
+    handles.chosevt     =   1:max(size(evt,2),size(evt,1));
     if isfield(handles.Dmeg{1},'CRC') && ...
             isfield(handles.Dmeg{1}.CRC,'lastdisp')
         slidval=handles.Dmeg{1}.CRC.lastdisp;
@@ -445,25 +469,30 @@ if ~handles.multcomp
         handles.score{2,1}  =   'Newuser';
         handles.score{1,1}  =   [0/0, 0/0];
         set(handles.figure1,'CurrentAxes',handles.axes4)
-        if isfield(varargin{1},'user')
+        %Select the scorer according to the last used
+		if isfield(varargin{1},'user')
             handles.currentscore = varargin{1}.user;
         else 
             handles.currentscore    =   1;
-        end  
-        crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize);
-        set(handles.figure1,'CurrentAxes',handles.axes1);
-        set(handles.addundefart,'visible','off');
-        set(handles.addonlyone,'visible','off');
-        set(handles.addspecart,'visible','off');
-        set(handles.addaro,'visible','off');
-        set(handles.addeoi,'visible','off');
-        set(handles.FPL,'visible','off');
-        set(handles.OPL,'visible','off');
-        set(handles.Delart,'visible','off');
-        set(handles.Delartonlyone,'visible','off');
-        set(handles.Delaro,'visible','off');
-        set(handles.Del_eoi,'visible','off');
-        set(handles.manevent,'visible','off');
+        end 
+ 
+        crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize)
+        
+
+		set(handles.figure1,'CurrentAxes',handles.axes1)
+        set(handles.addundefart,'visible','off')        
+		set(handles.addonlyone,'visible','off')
+        set(handles.addspecart,'visible','off')
+        set(handles.addaro,'visible','off')
+        set(handles.addeoi,'visible','off')
+        set(handles.FPL,'visible','off')
+        set(handles.OPL,'visible','off')
+        set(handles.Delart,'visible','off')
+        set(handles.Delartonlyone,'visible','off')
+        set(handles.Delaro,'visible','off')
+        set(handles.Del_eoi,'visible','off')
+        set(handles.manevent,'visible','off') %To make visible to put events manually
+        set(handles.Detection,'visible','on')
     end
 end
 D   =   handles.Dmeg{1};
@@ -519,6 +548,7 @@ if ~isempty(aevt)
         end
     end
 end
+
 handles.Dmeg{1}     =   D;
 save(D);
 
@@ -550,6 +580,13 @@ function slider1_Callback(hObject, eventdata, handles)
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 
 handles.displevt=0;
+%removed and then readd%%%%%%%%
+if isfield(handles,'scoring') & handles.scoring
+    set(handles.figure1,'CurrentAxes',handles.axes4)
+    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+    set(handles.figure1,'CurrentAxes',handles.axes1)
+end
+%%%%%%%%%%%%%%%%%
 mainplot(handles)
 % Update handles structure
 guidata(hObject, handles);
@@ -589,7 +626,8 @@ set(handles.edit1,'String',num2str(handles.winsize));
 set(handles.slider1,'Max',maxiwin)
 set(handles.slider1,'Min',miniwin)
 set(handles.slider1,'SliderStep',[handles.winsize/maxiwin 0.1])
-
+set(handles.totalpage,'String',['/ ' ...
+        num2str(ceil((nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1}))/handles.winsize))]);
 mainplot(handles)
 
 % Update handles structure
@@ -674,7 +712,7 @@ dis_selchan(flags);
 
 delete(handles.figure1);
 try
-    close(handles.figz);
+    close(handles.figz)
 end
 
 %Editing the 'current time' field
@@ -687,7 +725,7 @@ function currenttime_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of currenttime as a double
 
 i=handles.minsamp;
-slidval = str2num(get(hObject,'String'));
+slidval = str2double(get(hObject,'String')); % str2double is faster than str2num
 slidval = max(slidval - handles.winsize/2,1/fsample(handles.Dmeg{i}));
 
 if handles.multcomp
@@ -698,6 +736,13 @@ end
 slidval = min(slidval,maxiwin);
 set(handles.slider1,'Value',slidval)
 
+%Remove and then readd...to be checked
+if handles.scoring
+    set(handles.figure1,'CurrentAxes',handles.axes4)
+    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+    set(handles.figure1,'CurrentAxes',handles.axes1)
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 mainplot(handles)
 
 % --- Executes during object creation, after setting all properties.
@@ -711,6 +756,34 @@ function currenttime_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+%Editing the 'current time' field
+function currentpage_Callback(hObject, eventdata, handles)
+% hObject    handle to currenttime (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of currenttime as text
+%        str2double(get(hObject,'String')) returns contents of currenttime as a double
+
+i=handles.minsamp;
+pageval = floor(str2double(get(hObject,'String'))); % str2double is faster than str2num
+pageval = max(pageval,1);
+
+if handles.multcomp
+    maxiwin=floor((handles.maxx-handles.winsize)/handles.winsize);
+else
+    maxiwin=ceil((nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1}))/handles.winsize);
+end
+pageval = min(pageval,maxiwin);
+slidval = max((pageval-1)*handles.winsize,handles.winsize/2);
+set(handles.slider1,'Value',slidval)
+if handles.scoring
+    set(handles.figure1,'CurrentAxes',handles.axes4)
+    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+    set(handles.figure1,'CurrentAxes',handles.axes1)
+end
+mainplot(handles)
 
 
 % To view another file
@@ -864,7 +937,9 @@ else
 end
 [B,A] = butter(forder,[handles.filter.EMG(1)/(fsample(handles.Dmeg{i})/2),...
     handles.filter.EMG(2)/(fsample(handles.Dmeg{i})/2)],'bandpass');
-handles.filter.coeffEMG	=	[B;A];
+handles.filter.coeffEMG=[B;A];
+
+guidata(hObject, handles);
 
 % Main plot  
 mainplot(handles)
@@ -1163,7 +1238,7 @@ else
 end
 figure(z)
 axs     =   get(handles.figz,'Children');
-cleargraph(z)
+cleargraph(handles.figz) %change made
 
 if handles.multcomp
     fil     =   min(max(1,Chan),length(handles.Dmeg));
@@ -1272,7 +1347,7 @@ else
         P       =   log(P);
         plot(F,P,'Color',cmap(Col,:))
         grid on
-        titre   =   ['Power on ' chandis ];
+        titre   =   chandis;
         title(titre)
         ylabel('Log of power')
         xlabel('Frequency in Hz')
@@ -1369,7 +1444,7 @@ for ii=1:size(cmap,1)
     end
 end
 grid on
-titre=['Power on ' char(handles.chanset{Ctodis})];
+titre = char(handles.chanset{Ctodis});
 title(titre)
 legend(leg)
 ylabel('Log of power')
@@ -1410,7 +1485,6 @@ else
 end
 ylim([0 handles.scale*(i+1)])
 set(ha,'YTick',[handles.scale/2:handles.scale/2:i*handles.scale+handles.scale/2]);
-ylabels     =   zeros(length(handles.inddis)*2);
 ylabels     =   [num2str(round(handles.scale/2))];
 for j=1:i
     if handles.multcomp
@@ -1470,10 +1544,8 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 
-%--------------------------------------------------------------------------
-%Edit the number of MEEG channel to display
-%___________________________________________
 
+%Edit the number of channel to display
 function NbreChan_Callback(hObject, eventdata, handles)
 
 % hObject    handle to NbreChan (see GCBO)
@@ -1500,7 +1572,7 @@ end
 mainplot(handles);
 guidata(hObject,handles);
 
-%---the MEGPLANAR channels normalized or not
+%---the MEGPLANAR channels normalized or not (to be checked)%%%%%%
 
 function normalize_Callback(hObject, eventdata, handles)
 
@@ -1553,7 +1625,7 @@ guidata(hObject,handles);
 mainplot(handles);
 
 %--------------------------------------------------------------------------
-
+%%%%%%%%%%%%%%%%%%%%%%%end to be checked%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
 % --- Executes during object creation, after setting all properties.
 
@@ -1734,7 +1806,7 @@ function scale_meg_Callback(hObject, eventdata, handles)
 
 %ECG scale
 % --- Executes on selection change in menu scales.
-function scale_megmag_Callback(hObject, eventdata, handles) %int int
+function scale_megmag_Callback(hObject, eventdata, handles)
 % hObject    handle to scale_eeg (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -1807,7 +1879,7 @@ end
 
 chos=[];
 
-for i=1:size(handles.evt,2)
+for i=1:max(size(handles.evt,2),size(handles.evt,1)) 
     if any(strcmpi(handles.evt(i).type,evtype(evnum)))
         chos=[chos, i];
     end
@@ -1815,9 +1887,9 @@ end
 
 handles.chostype=chos;
 pmstring=[{'All'},{'Scan number'}];
-
+nsc = handles.Dmeg{1}.CRC.score{2,:};
 for i=1:size(chos,2)
-    if ~strcmpi(handles.evt(chos(i)).value, pmstring)
+    if and(~strcmpi(handles.evt(chos(i)).value, pmstring),any(strcmpi(handles.evt(chos(i)).value,nsc)))
         pmstring = [pmstring, {handles.evt(chos(i)).value}];
     end
 end
@@ -1827,7 +1899,7 @@ handles.displevt    = 0;
 
 set(handles.popupmenu11,...
     'String',pmstring,...
-    'Value',1)
+    'Value',1) %pmstring in old version... to be checked
 
 guidata(hObject, handles);
 
@@ -1850,7 +1922,6 @@ function pushbutton5_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton5 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 if handles.displevt
     ind=find(handles.displevt==handles.chosevt);
     if ind-1>0
@@ -1889,7 +1960,7 @@ end
 set(handles.slider1,'Value',slidval)
 if handles.scoring
     set(handles.figure1,'CurrentAxes',handles.axes4)
-    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize)
+    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1)
 end
 a=events(handles.Dmeg{1});
@@ -1901,6 +1972,7 @@ end
 mainplot(handles);
 delaymap_Callback(hObject, eventdata, handles);
 guidata(hObject, handles);
+
 
 
 %Goes to next event
@@ -1951,7 +2023,7 @@ end
 set(handles.slider1,'Value',slidval)
 if handles.scoring
     set(handles.figure1,'CurrentAxes',handles.axes4)
-    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize)
+    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1)
 end
 a=events(handles.Dmeg{1});
@@ -2125,9 +2197,7 @@ function Score_Callback(hObject, eventdata, handles)
 
 %% Handling score, arousal, artefact, opl/fpl information, window size & events of interest info
 handles.scoring=1;
-
 try
-
     if size(handles.Dmeg{1}.CRC.score,1)<7
         % Meaning it is an old cell array
 
@@ -2175,12 +2245,11 @@ try
     end
     handles.Dmeg{1}.CRC.score=handles.score;
     handles.currentscore=1;
-if ~isempty (handles.score{5,handles.currentscore})&&size(handles.score{5,handles.currentscore},2)<3
-    handles.score{5,1}(:,3)=0;
-end
+    if ~isempty (handles.score{5,handles.currentscore})&&size(handles.score{5,handles.currentscore},2)<3
+        handles.score{5,1}(:,3)=0;
+    end
 catch
     %Creating from scratch the right structure
-
     handles.score=cell(8,1);
     %%%%%%%%%%%%%%%%
     % From 1 to 7: %
@@ -2259,7 +2328,7 @@ handles.winsize=handles.score{3,handles.currentscore};
 
 %Changing the visibility of axes and scoring menu
 set(handles.axes4,'Visible','on')
-set(handles.fftchan,'Visible','off')
+set(handles.fftchan,'Visible','off') %to plot fft
 set(handles.score_menu,'enable','on')
 set(handles.score_stats,'enable','on')
 set(handles.score_import,'enable','on')
@@ -2269,17 +2338,17 @@ set(handles.vertgrid,'enable','on')
 set(handles.horgrid,'enable','on')
 set(handles.grid,'enable','on')
 set(handles.addundefart,'enable','on','visible','on')
-set(handles.addonlyone,'enable','on','visible','on')
+set(handles.addonlyone,'enable','on','visible','on') %artifact on single channel
 set(handles.addspecart,'enable','on','visible','on')
 set(handles.addaro,'enable','on','visible','on')
 set(handles.addeoi,'enable','on','visible','on')
 set(handles.FPL,'enable','on','visible','on')
 set(handles.OPL,'enable','on','visible','on')
 set(handles.Delart,'enable','on','visible','on')
-set(handles.Delartonlyone,'enable','on','visible','on')
+set(handles.Delartonlyone,'enable','on','visible','on') %delete artifact on single channel
 set(handles.Delaro,'enable','on','visible','on')
 set(handles.Del_eoi,'enable','on','visible','on')
-set(handles.manevent,'enable','on','visible','on');
+set(handles.manevent,'enable','on','visible','on'); %To put manual event
 
 handles.namesc = [];
 delete(get(handles.score_user,'Children'));
@@ -2298,22 +2367,22 @@ delete(get(handles.addspecart,'Children'));
 crcdef = crc_get_defaults('score');
 for iart=1:size(crcdef.lab_art,2)
     uimenu(handles.addspecart,'Label', ...
-        char(crcdef.lab_art{iart}),'Callback',{@addtypeart,handles});
+        char(crcdef.lab_art{iart}),'Callback',{@addtypeart,handles}) ;
 end
 
 delete(get(handles.axes4,'Children'));
 set(handles.figure1,'CurrentAxes',handles.axes4);
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize);
+crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
 delete(get(handles.addonlyone,'Children'));
 uimenu(handles.addonlyone,'Label', ...
         ('Start an undefined artefact on this channel'),'Callback',{@addstart,handles}) ;
-
+set(handles.edit1,'String',num2str(handles.winsize)); % To update the size of the window according to the scorer used
 % Update handles structure
 guidata(hObject, handles);
 
 %--------------------------------------------------------------------------
-%Menu for the events
+%Menu for the events (to be checked)
 %--------------------------------------------------------------------------
 
 function event_menu_Callback (hObject,eventdata,handles)
@@ -2329,14 +2398,14 @@ function Properties_Callback (hObject,eventdata,handles)
 set(handles.figure1, 'windowbuttonmotionfcn', '')
 
 slidval=get(handles.slider1,'Value');
-D=handles.Dmeg{1};
+D = handles.Dmeg{1};
 if isfield(handles.Dmeg{1},'CRC')
     D.CRC.lastdisp=slidval;
 else
-    D.CRC=struct('lastdisp',[]);
-    D.CRC.lastdisp=slidval;
+    D.CRC = struct('lastdisp',[]);
+    D.CRC.lastdisp = slidval;
 end
-handles.Dmeg{1}=D;
+handles.Dmeg{1} = D;
 save(D);
 
 flags.Dmeg  =   handles.Dmeg;
@@ -2345,7 +2414,7 @@ flags.file  =   handles.file;
 flags.index  =   handles.index;
 flags.user  =   handles.currentscore;
 
-Modif_events(flags);
+crc_modif_events(flags);
 
 
 % --------------------------------------------------------------------
@@ -2948,7 +3017,7 @@ if handles.Dmeg{1}.CRC.score{3,Val1}==handles.Dmeg{1}.CRC.score{3,Val2}
     set(handles.scorers{handles.currentscore},'Checked','on');
     delete(get(handles.axes4,'Children'));
     set(handles.figure1,'CurrentAxes',handles.axes4);
-    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize)
+    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1);
     close(fig);
 else
@@ -3013,7 +3082,7 @@ D=handles.Dmeg{1};
 save(D);
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize)
+crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
 mainplot(handles)
@@ -3045,7 +3114,7 @@ D=handles.Dmeg{1};
 save(D);
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize)
+crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
 mainplot(handles)
@@ -3078,7 +3147,7 @@ D=handles.Dmeg{1};
 save(D);
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize)
+crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
 mainplot(handles)
@@ -3114,7 +3183,7 @@ D   =   handles.Dmeg{1};
 save(D);
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize)
+crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
 mainplot(handles)
@@ -3140,7 +3209,7 @@ for isc     =   1:size(handles.score,2)
         handles.score{8,isc}    =   cell(size(handles.score{5,isc},1),1);
     end
 end
-% add the zeros on the last column
+% add the zeros on the last column (to adapt with configuration for artifacts on single channel
 if size(handles.score{5,handles.currentscore},2)<3
     for ii = 1 : size(handles.score{5,handles.currentscore},1)
         handles.score{5,handles.currentscore}(:,3)  =   0;
@@ -3605,7 +3674,7 @@ if ~isempty(handles.chan)
 end
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize)
+crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
 % Update handles structure
@@ -4005,11 +4074,11 @@ handles.score{4,handles.currentscore}(2)=cpoint;
 
 mainplot(handles)
 
-set(handles.figure1,'CurrentAxes',handles.axes4);
+set(handles.figure1,'CurrentAxes',handles.axes4)
 
 crc_plothypno(handles.axes4,...
     handles.score{4,handles.currentscore},...
-    handles,handles.score{3,handles.currentscore});
+    handles,handles.score{3,handles.currentscore})
 
 set(handles.figure1,'CurrentAxes',handles.axes1);
 
@@ -4020,9 +4089,10 @@ save(handles.Dmeg{1});
 % Update handles structure
 guidata(hObject, handles);
 
-
+%To be checked
 % --------------------------------------------------------------------
 function newtype_Callback(hObject, eventdata, handles)
+
 % hObject    handle to spike (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -4173,7 +4243,7 @@ set(handles.popupmenu11,...
 
 %Add an landmark on the top axes
 set(handles.figure1,'CurrentAxes',handles.axes4);
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize);
+crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
 
 %Store data in the figure's application 
@@ -4183,7 +4253,7 @@ mainplot(handles)
 
 function Delete_Event_Callback(hObject, eventdata, handles)
 
-Mouse = handles.Mouse; 
+Mouse = get(handles.axes1,'CurrentPoint');
 locx  = Mouse(1,1);
 
 %search the event to delete
@@ -4259,7 +4329,7 @@ set(handles.popupmenu11,...
     'Value',length(pmstring))
 
 set(handles.figure1,'CurrentAxes',handles.axes4);
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize);
+crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
 
 %update and save
@@ -4278,6 +4348,7 @@ function Deletemenu_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 % --------------------------------------------------------------------
 
+%To be checked%%%%%%%%%%%%%%
 % --------------------------------------------------------------------
 function DeletEvents_Callback(hObject, eventdata, handles)
 % hObject    handle to DeletEvents (see GCBO)
@@ -4286,6 +4357,9 @@ function DeletEvents_Callback(hObject, eventdata, handles)
 % --------------------------------------------------------------------
 handles.Mouse = get(handles.axes1,'CurrentPoint');
 guidata(hObject,handles)
+
+
+%To be checked%%%%%%%%%%%%%%
 
 % --------------------------------------------------------------------
 function Deletemenuone_Callback(hObject, eventdata, handles)
@@ -4346,6 +4420,7 @@ function new_scorer(hObject, eventdata)
 a=get(gcbo,'Parent');
 b=get(a,'Parent');
 c=get(b,'Parent');
+%to be checked = old version contained : get(c); What does it means?
 handles=guidata(gcbo);
 
 %create new scoring structure
@@ -4404,13 +4479,13 @@ handles.scorers{isc+1}=uimenu(handles.score_user,'Label', ...
     'Separator','on') ;
 set(handles.scorers{handles.currentscore},'Checked','on');
 set(handles.figure1,'CurrentAxes',handles.axes4);
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize);
+crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
 % Setting up the add artefact/arousal/event of interest.
 handles.adddeb = ones(1,size(handles.score,2));
 handles.addardeb = ones(1,size(handles.score,2));
 handles.add_eoi = ones(1,size(handles.score,2));
-mainplot(handles);
+mainplot(handles)
 % Update handles structure
 guidata(c, handles);
 return
@@ -4423,6 +4498,8 @@ function defined_scorer(hObject, eventdata)
 a=get(gcbo,'Parent');
 b=get(a,'Parent');
 c=get(b,'Parent');
+%To be checked = old version contained : get(c);
+
 handles = guidata(gcbo);
 namuser = get(gcbo,'Label');
 
@@ -4431,25 +4508,26 @@ for isc=1:size(handles.namesc,2)
         handles.currentscore=isc;
         set(gcbo, 'Checked', 'on');
     else
-        set(handles.scorers{isc},'Checked','off');
+        set(handles.scorers{isc},'Checked','off')
     end
 end
+
 set(handles.figure1,'CurrentAxes',handles.axes4);
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize);
+crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
-mainplot(handles);
+mainplot(handles)
 % Update handles structure
 guidata(c, handles);
 return
 
 % -------------------------------------------------------------------
-
+%To be checked : new subfunctions in click
 % --- Click
 function click(hObject, eventdata, handles)
 
 Mouse = get(handles.axes4,'CurrentPoint');
 
-if Mouse(1,2) > 0
+if Mouse(1,2) > 0   %Even without score sleep, possibility to access from axes4 where we want on main screen
     slidval = Mouse(1);
     slidval = floor(slidval/handles.winsize)*handles.winsize;
     slidval = max(slidval,1/fsample(handles.Dmeg{1}));
@@ -4479,14 +4557,13 @@ Mouse2 = get(handles.axes1,'CurrentPoint');
 X = get(handles.axes1,'XTick');
 Y = get(handles.axes1,'YTick');
 
-if and(and(Mouse2(1,1)<X(end),Mouse2(1,1)>X(1)),and(Mouse2(1,2)<Y(end),Mouse2(1,2)>Y(1)))
+if ~get(handles.counterspect,'Value') && and(and(Mouse2(1,1)<X(end),Mouse2(1,1)>X(1)),and(Mouse2(1,2)<Y(end),Mouse2(1,2)>Y(1)))
     if isfield(handles,'namesc') 
         C = Mouse2(1,1);
         E = [handles.evt(:).time];
         [ve handles.move]=min(abs(E-C)); 
         if and(any(abs(C-E) < 1),any(strcmpi(handles.evt(handles.move).value,handles.namesc)))
-           'beep'
-           fprintf(['You are going to move the event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) '\n']) 
+            fprintf(['You are going to move the event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) '\n']) 
         else 
             handles.move = 0; 
         end
@@ -4559,7 +4636,7 @@ if and(and(Mouse2(1,1)<X(end),Mouse2(1,1)>X(1)),and(Mouse2(1,2)<Y(end),Mouse2(1,
     ylim([0 1])
 
     set(handles.fftchan,'visible','off');
-end 
+end
 
 set(handles.figure1,'CurrentAxes',handles.axes5); 
 
@@ -4595,127 +4672,120 @@ crcdef  =   crc_get_defaults('score');
 key     =   str2double(get(handles.figure1,'CurrentCharacter'));
 currentwindow   =	floor(str2double(get(handles.currenttime,'String')) ...
                                 /handles.winsize)+1;
-winsize_select  =   str2double(get(handles.edit1,'String'));
-winsize_score   =   handles.Dmeg{1}.CRC.score{3,handles.currentscore};
-H   =   gcf;
-if winsize_select ~= handles.Dmeg{1}.CRC.score{3,handles.currentscore}
-    h = msgbox(['Caution : the size of the window can''t be changed!!! You have to choose the same along all the scorage...This one is for the scorer selected equal to ', num2str(winsize_score),'sec']);
-    set(0,'CurrentFigure',H);
-else 
-    if handles.scoring && (key>-1 && key<crcdef.nrStage)
-        handles.move = 0;
-        % Update Score
-        maxwindow   =   ceil(nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})/...
-                                handles.score{3,handles.currentscore});
-        if currentwindow>maxwindow
-           currentwindow    =   maxwindow;
-        end
-        handles.score{1,handles.currentscore}(currentwindow)    =   key;
+%winsize_select  =   str2double(get(handles.edit1,'String'));
+%winsize_score   =   handles.Dmeg{1}.CRC.score{3,handles.currentscore};
 
-        % Save Score
-        handles.Dmeg{1}.CRC.score = handles.score;
-        save(handles.Dmeg{1});
-
-        hypjustplot = 0;
-
-        set(handles.figure1,'CurrentAxes',handles.axes1);
-        % Goes to next window
-        slidval     =   str2double(get(handles.currenttime,'String'));
-        slidval     =   (floor(slidval/handles.winsize)+1)*(handles.winsize);
-        slidval     =   max(slidval,1/fsample(handles.Dmeg{1}));
-        if slidval>=nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2
-            slidval     =   currentwindow*handles.winsize;
-        else
-            slidval     =	min(slidval, currentwindow*handles.winsize);
-            %         nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2);
-        end
-        set(handles.slider1,'Value',slidval);
-        set(handles.figure1,'CurrentAxes',handles.axes4);
-        crc_plothypno(handles.axes4,...
-            handles.score{4,handles.currentscore},handles,handles.winsize);
-        %Goes to the previous window
-    elseif or(get(handles.figure1,'CurrentCharacter')=='B',get(handles.figure1,'CurrentCharacter')=='b')
-        handles.move = 0;
-        slidval = str2double(get(handles.currenttime,'String'));
-        slidval = (floor(slidval/handles.winsize)-1)*handles.winsize;
-        slidval = max(slidval,1/fsample(handles.Dmeg{1}));
-        slidval = min(slidval, currentwindow*handles.winsize);
-        %         nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2);
-
-        set(handles.slider1,'Value',slidval);
-        set(handles.figure1,'CurrentAxes',handles.axes4);
-        crc_plothypno(handles.axes4,...
-            handles.score{4,handles.currentscore},handles,handles.winsize);
-        hypjustplot=0;
-        % Goes to next window
-    elseif or(get(handles.figure1,'CurrentCharacter')=='F',get(handles.figure1,'CurrentCharacter')=='f')
-        handles.move = 0;
-        slidval     =   str2double(get(handles.currenttime,'String'));
-        slidval     =   (floor(slidval/handles.winsize)+1)*handles.winsize;
-        slidval     =   max(slidval,1/fsample(handles.Dmeg{1}));
-        if slidval>=nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})
-            slidval     =   currentwindow*handles.winsize;
-        else
-            slidval     =   min(slidval, currentwindow*handles.winsize);
-            %         nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2);
-        end
-
-        set(handles.slider1,'Value',slidval);
-        set(handles.figure1,'CurrentAxes',handles.axes4);
-        crc_plothypno(handles.axes4,...
-            handles.score{4,handles.currentscore},handles,handles.winsize);
-        hypjustplot=0;
-    else
-        touch = int2str(get(handles.figure1,'CurrentCharacter'));
-        if and(handles.move~=0,strcmpi(touch,'28'))
-            ev = events(handles.Dmeg{1});
-            ev(handles.move).time = ev(handles.move).time - 10/fsample(handles.Dmeg{1});
-            handles.evt = ev;
-            handles.Dmeg{1} = events(handles.Dmeg{1},1,ev);
-            save(handles.Dmeg{1});
-            beep
-            [d times]=crc_time_converts(handles.evt(handles.move).time);
-            fprintf(['The event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) ' is moving on the left : ' num2str(times) '\n']) 
-            mainplot(handles)
-        elseif and(handles.move~=0,strcmpi(touch,'29'))
-            ev = events(handles.Dmeg{1});
-            ev(handles.move).time = ev(handles.move).time + 10/fsample(handles.Dmeg{1});
-            handles.evt = ev;
-            handles.Dmeg{1} = events(handles.Dmeg{1},1,ev);
-            save(handles.Dmeg{1});
-            beep
-            [d times]=crc_time_converts(handles.evt(handles.move).time);
-            fprintf(['The event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) ' is moving on the right : ' num2str(times) '\n']) 
-            mainplot(handles)
-        else 
-            beep;
-            fprintf('Wrong key pressed! Please choose press a number between 0 and %d.\n',crcdef.nrStage-1)
-            for ii = 1    :   crcdef.nrStage
-                fprintf('%d : %s\n',ii-1,crcdef.stnames_L{ii})
-            end
-            fprintf('\n')   
-        end
-        hypjustplot     =  1;
-    end 
-
-    if hypjustplot
-        slidval = get(handles.slider1,'Value');
-        set(handles.figure1,'CurrentAxes',handles.axes4);
-        a   =   get(handles.axes4,'Children');
-        for i   =   1   :   size(a,1)
-            if strcmpi(get(a(i),'Type'),'line')
-                delete(a(i));
-            end
-        end
-        hold on
-        handles.cursor  =    plot(slidval+handles.winsize/2,8,'v','Color',[0.6 0.6 0.6],'LineWidth',2.5);
-        hold off
-    else
-        set(handles.figure1,'CurrentAxes',handles.axes1);
-        mainplot(handles)
+if handles.scoring && (key>-1 && key<crcdef.nrStage)
+    handles.move = 0;
+    % Update Score
+    maxwindow   =   ceil(nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})/...
+                            handles.score{3,handles.currentscore});
+    if currentwindow>maxwindow
+       currentwindow    =   maxwindow;
     end
+    handles.score{1,handles.currentscore}(currentwindow)    =   key;
+
+    % Save Score
+    handles.Dmeg{1}.CRC.score = handles.score;
+    save(handles.Dmeg{1});
+
+    hypjustplot = 0;
+
     set(handles.figure1,'CurrentAxes',handles.axes1);
+    % Goes to next window
+    slidval     =   str2double(get(handles.currenttime,'String'));
+    slidval     =   (floor(slidval/handles.winsize)+1)*(handles.winsize);
+    slidval     =   max(slidval,1/fsample(handles.Dmeg{1}));
+
+    if slidval>=nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2
+        slidval     =   currentwindow*handles.winsize;
+    else
+        slidval     =	min(slidval, currentwindow*handles.winsize);
+        %         nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2);
+    end
+    set(handles.slider1,'Value',slidval);
+    set(handles.figure1,'CurrentAxes',handles.axes4);
+    crc_plothypno(handles.axes4,...
+        handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+    %Goes to the previous window
+elseif or(get(handles.figure1,'CurrentCharacter')=='B',get(handles.figure1,'CurrentCharacter')=='b')
+    handles.move = 0;
+    slidval = str2double(get(handles.currenttime,'String'));
+    slidval = (floor(slidval/handles.winsize)-1)*handles.winsize;
+    slidval = max(slidval,1/fsample(handles.Dmeg{1}));
+    slidval = min(slidval, currentwindow*handles.winsize);
+    %         nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2);
+
+    set(handles.slider1,'Value',slidval);
+    set(handles.figure1,'CurrentAxes',handles.axes4);
+    crc_plothypno(handles.axes4,...
+        handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+    hypjustplot=0;
+    % Goes to next window
+elseif or(get(handles.figure1,'CurrentCharacter')=='F',get(handles.figure1,'CurrentCharacter')=='f')
+    handles.move = 0;
+    slidval     =   str2double(get(handles.currenttime,'String'));
+    slidval     =   (floor(slidval/handles.winsize)+1)*handles.winsize;
+    slidval     =   max(slidval,1/fsample(handles.Dmeg{1}));
+
+    if slidval>=nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})
+        slidval     =   currentwindow*handles.winsize;
+    else
+        slidval     =   min(slidval, currentwindow*handles.winsize);
+        %         nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2);
+    end
+    set(handles.slider1,'Value',slidval);
+    set(handles.figure1,'CurrentAxes',handles.axes4);
+    crc_plothypno(handles.axes4,...
+        handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+    hypjustplot=0;
+else
+    touch = int2str(get(handles.figure1,'CurrentCharacter'));
+    if and(handles.move~=0,strcmpi(touch,'28'))
+        ev = events(handles.Dmeg{1});
+        ev(handles.move).time = ev(handles.move).time - 1/fsample(handles.Dmeg{1}); % On avance par échantillon
+        handles.evt = ev;
+        handles.Dmeg{1} = events(handles.Dmeg{1},1,ev);
+        save(handles.Dmeg{1});
+        fprintf(['The event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) ' is moving on the left : ' num2str(handles.evt(handles.move).time) 'sec \n']) 
+        mainplot(handles)
+    elseif and(handles.move~=0,strcmpi(touch,'29'))
+        ev = events(handles.Dmeg{1});
+        ev(handles.move).time + 1/fsample(handles.Dmeg{1});
+        ev(handles.move).time = ev(handles.move).time + 1/fsample(handles.Dmeg{1}); % On avance par échantillon
+        handles.evt = ev;
+        handles.Dmeg{1} = events(handles.Dmeg{1},1,ev);
+        save(handles.Dmeg{1});
+        fprintf(['The event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) ' is moving on the right : ' num2str(handles.evt(handles.move).time) 'sec \n']) 
+        mainplot(handles)
+    else 
+        beep;
+        fprintf('Wrong key pressed! Please choose press a number between 0 and %d.\n',crcdef.nrStage-1)
+        for ii = 1    :   crcdef.nrStage
+            fprintf('%d : %s\n',ii-1,crcdef.stnames_L{ii})
+        end
+        fprintf('\n')   
+    end
+    hypjustplot     =  1;
+end 
+
+if hypjustplot
+    slidval = get(handles.slider1,'Value');
+    set(handles.figure1,'CurrentAxes',handles.axes4);
+    a   =   get(handles.axes4,'Children');
+    for i   =   1   :   size(a,1)
+        if strcmpi(get(a(i),'Type'),'line')
+            delete(a(i));
+        end
+    end
+    hold on
+    handles.cursor  =    plot(slidval+handles.winsize/2,8,'v','Color',[0.6 0.6 0.6],'LineWidth',2.5);
+    hold off
+else
+    set(handles.figure1,'CurrentAxes',handles.axes1);
+    mainplot(handles)
 end
+set(handles.figure1,'CurrentAxes',handles.axes1);
 % Update handles structure
 guidata(hObject, handles);
 
@@ -4768,7 +4838,7 @@ mainplot(handles)
 guidata(c, handles);
 
 % --------------------------------------------------------------------
-function multother_Callback(hObject, eventdata, handles)
+function multother_Callback(hObject, ~, handles)
 % hObject    handle to multother (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -4801,13 +4871,14 @@ end
 function mainplot(handles)
 
 if handles.displevt
+    handles.evt(handles.displevt).time;
     slidval=handles.evt(handles.displevt).time-handles.winsize/2;
     if slidval<=1
         slidval=max(handles.evt(handles.displevt).time-2,1/fsample(handles.Dmeg{1})); %default value if first event is at the boundary of the file
-    elseif slidval>=(nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2)
+    elseif slidval>=(nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2)        
         slidval=min(handles.evt(handles.displevt).time-2,nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2); %default value if last event is at the boundary of the file
     end
-else
+else           
     slidval = floor((get(handles.slider1,'Value')/handles.winsize))*handles.winsize;  
     if slidval<1/fsample(handles.Dmeg{1})
         slidval=1/fsample(handles.Dmeg{1});
@@ -4818,7 +4889,6 @@ else
         set(handles.slider1,'Value',aval);
     end
 end
-
 set(handles.figure1,'CurrentAxes',handles.axes4)
 a=get(handles.axes4,'Children');
 for i=1:size(a,1)
@@ -4849,17 +4919,17 @@ else
 end
 set(handles.currenttime,'String',num2str(round(slidval+handles.winsize/2)));
 set(handles.edit1,'String',num2str(handles.winsize));
-
+set(handles.currentpage,'String',num2str(ceil((slidval+handles.winsize/2)/handles.winsize)));
 for i=1:maxi
     nosign=1;
-   if handles.multcomp
+    if handles.multcomp
         %Write the names of the files
-        if strcmpi(get(handles.multnames,'Checked'),'on')  
+        if strcmpi(get(handles.multnames,'Checked'),'on')
             [dumb name] = fileparts(handles.Dmeg{i}.fname);
             under       =   find(name=='_');
             name(under) =   ' ';
             text(slidval+4*handles.winsize/10,handles.scale*(i+1/4),name, ...
-                'Color',[0.8 0.8 0.8],'FontSize',14);
+                'Color',[0.8 0.8 0.8],'FontSize',14)
         end
         %handles timing problem
         start   =   datevec(handles.date(i,1)-handles.mindate);
@@ -4907,6 +4977,7 @@ for i=1:maxi
             hold on
             [dumb1,dumb2,index2] = ...
                 intersect(upper(chanlabels(handles.Dmeg{i},index(j))),handles.names);
+            %To be checked = old version contained : testcond = chanlabels(handles.Dmeg{i},index(j));
             if handles.multcomp
                 factscale = handles.scale*i; %cycle on files if mult comp
             else
@@ -5051,12 +5122,13 @@ for i=1:maxi
                             else
                                 scal=1;
                             end
+                            
                         end
                     end
                 end
                 filtparam=handles.filter.coeffother;
             end
-            
+           %Plot data   
             switch  selchan
                 case 'MEG'
                     % MEG data
@@ -5099,7 +5171,7 @@ for i=1:maxi
                         index3 = [];
                     end
                     if ~isempty(index3)
-                        bipolar	=   handles.Dmeg{i}(index(j),toshow) - handles.Dmeg{i}(index3,toshow);                                  
+                        bipolar	=   handles.Dmeg{i}(index(j),toshow) - handles.Dmeg{i}(index3,toshow);
                         plt  	=   plot(temps,factscale+(bipolar)/scal,'Color','k');
                     else
                         plt     =   plot(temps,factscale+(handles.Dmeg{i}(index(j),toshow))/scal,'Color','k');       
@@ -5119,49 +5191,22 @@ for i=1:maxi
                 set(plt,'Color',cmap(i,:))
             end    
             
-            % plot the spindles detected
-            if isfield(handles.Dmeg{1}.CRC,'spindles')
-                if size(handles.Dmeg{1}.CRC.spindles,2)>=index(j)
-                    if and(size(handles.Dmeg{1}.CRC.spindles{index(j)},1)>=win,~isempty(handles.Dmeg{1}.CRC.spindles{index(j)}))
-                        spindeb = find(diff(handles.Dmeg{1}.CRC.spindles{index(j)}(win,:))==1);
-                        spinend = find(diff(handles.Dmeg{1}.CRC.spindles{index(j)}(win,:))==-1);
-                        for k = 1 : length(spindeb)
-                            ss = spindeb(k) : spinend(k);
-                            X = get(plt,'YData');
-                           % plot(temps(ss),X(ss),'color','m','tag','spindle')
-                        end
-                    end
-                end
-            end         
+            % plot the spindles detected %NOT READY To be checked
+            %if isfield(handles.Dmeg{1}.CRC,'spindles')
+            %    if size(handles.Dmeg{1}.CRC.spindles,2)>=index(j)
+            %        if and(size(handles.Dmeg{1}.CRC.spindles{index(j)},1)>=win,~isempty(handles.Dmeg{1}.CRC.spindles{index(j)}))
+            %            spindeb = find(diff(handles.Dmeg{1}.CRC.spindles{index(j)}(win,:))==1);
+            %            spinend = find(diff(handles.Dmeg{1}.CRC.spindles{index(j)}(win,:))==-1);
+            %            for k = 1 : length(spindeb)
+            %                ss = spindeb(k) : spinend(k);
+            %                X = get(plt,'YData');
+            %               % plot(temps(ss),X(ss),'color','m','tag','spindle')
+            %            end
+            %        end
+            %    end
+            %end
             
-            % plot the artefacts detected
-            if isfield(handles.Dmeg{1}.CRC,'artefacts')
-                chtyp = chantype(handles.Dmeg{i},index(j));
-                if strcmpi(chtyp,'MEG')
-                    artef = handles.Dmeg{1}.CRC.artefacts.mag;
-                    a = 1;
-                elseif strcmpi(chtyp,'MEGPLANAR')
-                    artef = handles.Dmeg{1}.CRC.artefacts.grad;
-                    a = 1;
-                elseif or(strcmpi(chtyp,'EEG'),strcmpi(chtyp,'LFP'))
-                    artef = handles.Dmeg{1}.CRC.artefacts.eeg;
-                    a = 1;
-                else 
-                    a = 0;
-                end
-                if a~=0
-                    artepo = find(and(artef >= (win-1)*handles.winsize,artef <= win*handles.winsize));
-                    for k = 1 : length(artepo)
-                        tt = [artef(artepo(k)) : 1/fsample(handles.Dmeg{1}) : min(artef(artepo(k)) + 2 - 1/fsample(handles.Dmeg{1}),temps(end))];
-                        ss = [(artef(artepo(k)) - (win-1)*handles.winsize)*fsample(handles.Dmeg{1}) + 1 : ...
-                            min((artef(artepo(k)) - (win-1)*handles.winsize)*fsample(handles.Dmeg{1}) + 2*fsample(handles.Dmeg{1}),handles.winsize*fsample(handles.Dmeg{1}))];
-                        X = get(plt,'YData');
-                        plot(tt,X(ss),'color','r','tag','artefacts')
-                    end
-                end
-            end
-            
-            %artefacts on single channel   
+            %artefacts on single channel  (To be checked) 
             if handles.scoring && ~isempty(handles.score{5,handles.currentscore}) && any(index(j)== handles.score{5,handles.currentscore}(:,3))
                 [dum indice]= intersect(handles.score{5,handles.currentscore}(:,3),index(j)); 
                 l=1;
@@ -5209,12 +5254,46 @@ for i=1:maxi
                     l=l+1;
                 end
             end
+            %artefacts : automatique  
+            if ~isempty(handles.artefacteeg)
+                %deb_epoch   =   find(or(or(and(handles.artefacteeg(:,1)>=temps(1)-1/fsample(handles.Dmeg{i}),handles.artefacteeg(:,1)<=temps(end)),...
+                %and(handles.artefacteeg(:,2)>=temps(1)-1/fsample(handles.Dmeg{i}),handles.artefacteeg(:,2)<=temps(end))),...
+                %    and(handles.artefacteeg(:,1)<=temps(1)-1/fsample(handles.Dmeg{i}),handles.artefacteeg(:,2)>=temps(end))));
+                %for epo     =   1 : length(deb_epoch)                
+                %    time_epo    =  max(handles.artefacteeg(deb_epoch(epo),1),temps(1)) : 1/fsample(handles.Dmeg{1}) : min(handles.artefacteeg(deb_epoch(epo),2),temps(end));   
+                %    deb =  (time_epo(1)-(win-1)*handles.winsize)*fsample(handles.Dmeg{i})+1;
+                %    fin =  (time_epo(end)-(win-1)*handles.winsize)*fsample(handles.Dmeg{i})+1;
+                %    X   =   get(plt,'YData');
+                %    X   =   X(deb:fin);
+                %    if length(X) < length(time_epo) % je ne comprends pas d'où vient l'erreur, je mets donc un gardien supplémentaire pour corriger celle-ci lorsqu'elle apparait!
+                %        fin =  (time_epo(end)-(win-1)*handles.winsize)*fsample(handles.Dmeg{i})+2;
+                %    end
+                %    X   =   get(plt,'YData');
+                %    X   =   X(deb:fin);
+                %    plot(time_epo,X,'-.','color','r');
+                %end  
+                deb_epoch   =   find(and(handles.artefacteeg>=temps(1),handles.artefacteeg<=temps(end)));
+                for epo     =   1 : length(deb_epoch)   
+                    time_epo = handles.artefacteeg(deb_epoch(epo)) : 1/fsample(handles.Dmeg{1}) : min(handles.artefacteeg(deb_epoch(epo))+1, temps(end));   
+                    deb =   max((time_epo(1)-(win-1)*30)*fsample(handles.Dmeg{i}),1);
+                    fin =   deb + length(time_epo)-1;
+                    X   =   get(plt,'YData');
+                    X   =   X(deb:fin);
+                    plot(time_epo,X,'-.','color','r');
+                end  
+            end
+            %artefacts channels: automatic        
+            if isfield(handles.Dmeg{1}.CRC,'badchannels')
+                deb_epoch   =   find(handles.Dmeg{i}.CRC.badchannels(:,1) == win);
+                if any(index(j) == handles.indeeg(handles.Dmeg{i}.CRC.badchannels(deb_epoch,2)))   
+                    X   =   get(plt,'YData');
+                    plot(temps,X,'-.','color','r');
+                end
+            end
             plt = 0;
         end
     end
-end      
-
-
+end
 
 if handles.displevt
     timevt=handles.evt(handles.displevt).time;
@@ -5277,10 +5356,10 @@ if handles.vert_grid
 end
 
 %Update the score of the current window
-if handles.scoring
+if handles.scoring && handles.winsize == handles.score{3,handles.currentscore} % New gardian to check the window size corresponds to those is used to score file
     ll  =   str2double(get(handles.NbreChan,'String'));
     fact    =   min(ll,length(handles.indexMEEG) + length(handles.indnomeeg));
-    currentwindow = floor(str2double(get(handles.currenttime,'String'))/handles.winsize)+1;
+    currentwindow = floor(str2double(get(handles.currenttime,'String'))/handles.winsize)+1;  
     if currentwindow>size(handles.score{1,handles.currentscore},2)
         currentwindow = currentwindow-1;
     end
@@ -5308,7 +5387,7 @@ if handles.scoring
         case    6
             plot(temps,((length(index)+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0.9 0.4 0.4])
-        case 7
+        case    7
             plot(temps,((length(index)+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0.9 0.6 0.3])
     end
@@ -5454,6 +5533,7 @@ grid on
 % Display trigger
 if ~handles.multcomp
     ev = events(handles.Dmeg{1});
+
     if iscell(ev)
         ev=cell2mat(ev);
     end
@@ -5465,28 +5545,35 @@ if ~handles.multcomp
     catch
         [int indextoshow indextrig] = intersect(toshow,round([ev{:}.time]*fsample(handles.Dmeg{1})));
     end
-
-    %Check if some events happens at the same time
-    if ~isempty(indextrig) && indextrig(1)~=1
-        if and(ev(indextrig(1)).time == ev(indextrig(1)-1).time,length(indextrig)~=length(indextrig(1):indextrig(end)))
-            trou=diff(indextrig);
-            trouve=find(trou==2)+1;
-            int = sort([int(1) int int(trouve)]);
-            indextrig = sort([(indextrig(1)-1) indextrig (indextrig(trouve)-1)]);
-        elseif ev(indextrig(1)).time == ev(indextrig(1)-1).time
-            int = sort([int(1) int]);
-            indextrig = sort([(indextrig(1)-1) indextrig]);
+    itrigger=[];
+    if ~isempty(handles.base) && ~isempty(intersect(handles.base(:,1),{ev(indextrig).type}))
+        for tr = 1 : max(size(indextrig))
+            itrigger = [itrigger find([ev(:).time] == ev(indextrig(tr)).time)];
         end
     end
-    if ~isempty(indextrig) && length(indextrig)~=length(indextrig(1):indextrig(end))
-        trou=diff(indextrig);
-        trouve=find(trou==2)+1;
-        int = sort([int int(trouve)]);
-        indextrig = sort([indextrig (indextrig(trouve)-1)]);
-    end
+
+%     %Check if some events happens at the same time (je ne pense pas que
+%     %cette partie de code fonctionne!)
+%     if ~isempty(indextrig) && indextrig(1)~=1
+%         if and(ev(indextrig(1)).time == ev(indextrig(1)-1).time,length(indextrig)~=length(indextrig(1):indextrig(end)))
+%             trou=diff(indextrig);
+%             trouve=find(trou==2)+1;
+%             int = sort([int(1) int int(trouve)]);
+%             indextrig = sort([(indextrig(1)-1) indextrig (indextrig(trouve)-1)]);
+%         elseif ev(indextrig(1)).time == ev(indextrig(1)-1).time
+%             int = sort([int(1) int]);
+%             indextrig = sort([(indextrig(1)-1) indextrig]);
+%         end
+%     end
+%     if ~isempty(indextrig) && length(indextrig)~=length(indextrig(1):indextrig(end))
+%         trou=diff(indextrig);
+%         trouve=find(trou==2)+1;
+%         int = sort([int int(trouve)]);
+%         indextrig = sort([indextrig (indextrig(trouve)-1)]);
+%     end
     int = int/fsample(handles.Dmeg{1});
     Nev_dis = length(int);
-    if Nev_dis % do all this if there are triggers to be displayed !
+    if Nev_dis % do all this if there are several triggers to be displayed !
         try
             tmp_val = ev(indextrig(1)).value;
         catch
@@ -5518,17 +5605,24 @@ if ~handles.multcomp
             inte = find(strcmpi(etpv,manev(me)));
             col = char(handles.type(intm(me),2));
             incol = col(:,1);
-            plot(int(inte),0.5*ones(1,length(int(inte)))*handles.scale/50*(NbreChandisp),'^','Color',incol,'UIContextMenu',handles.DeletEvents,...
-                'LineWidth',2.5)
-            for nse = 1 : length(inte)
-                plot(ones(1,2).*int(inte(nse)),[handles.scale/2 handles.scale*(NbreChandisp)+handles.scale],'Color',incol,'UIContextMenu',handles.DeletEvents,...
-                    'LineWidth',0.5)
-            end
+            if ~handles.export 
+                plot(int(inte),0.5*ones(1,length(int(inte)))*handles.scale/50*(NbreChandisp),'^','Color',incol,'UIContextMenu',handles.DeletEvents,...
+                    'LineWidth',2.5)
+                for nse = 1 : length(inte)
+                    plot(ones(1,2).*int(inte(nse)),[handles.scale/2 handles.scale*(NbreChandisp)+handles.scale],'Color',incol,'UIContextMenu',handles.DeletEvents,...
+                        'LineWidth',0.5)
+                end
+            else 
+                plot(int(inte),0.5*ones(1,length(int(inte)))*handles.scale/50*(NbreChandisp),'^','Color',incol,...
+                    'LineWidth',2.5)
+                for nse = 1 : length(inte)
+                    plot(ones(1,2).*int(inte(nse)),[handles.scale/2 handles.scale*(NbreChandisp)+handles.scale],'Color',incol,'LineWidth',0.5)
+                end
+            end                
         end
-        
         %chose between the display of type or of value
         fmric=0;
-        if ~(size(handles.evt,2)==size(handles.chosevt,2))
+        if ~(max(size(handles.evt))==max(size(handles.chosevt)))
             disc=1;
             evtp=get(handles.popupmenu11,'Value');
             if evtp==1
@@ -5554,36 +5648,46 @@ if ~handles.multcomp
             end
         end
         for jj = 1:Nev_dis
-            %if types or values were chosen by the user, only display their
+            %if types or values are chosen by the user, only display their
             %names
-            if disc && chostype && strcmpi(etpv{jj},typevt) && ~fmric
-                msg = etpv{jj};
-            elseif disc && chostype && strcmpi(etpv{jj},typevt) && fmric
-                msg = etype{jj};                
-            elseif disc && ~(strcmpi(etype{jj},typevt)) %(disc && chostype && strcmpi(etpv{jj},typevt)) || ...
-                msg='';
-            elseif disc && ~chostype && strcmpi(etype{jj},typevt) || fmric
-                msg = etype{jj};
-            elseif ~disc
-                msg = etpv{jj};
+             if isempty(handles.base) || isempty(intersect(handles.base(:,1),{ev(indextrig).type})) % pas de selection faite ou pas de trigger correspondant à la selection faite
+                if disc && chostype && strcmpi(etpv{jj},typevt) && ~fmric
+                    msg = etpv{jj};
+                elseif disc && chostype && strcmpi(etpv{jj},typevt) && fmric
+                    msg = etype{jj};                
+                elseif disc && ~(strcmpi(etype{jj},typevt)) %(disc && chostype && strcmpi(etpv{jj},typevt)) || ...
+                    msg='';
+                elseif disc && ~chostype && strcmpi(etype{jj},typevt) || fmric
+                    msg = etype{jj};
+                elseif ~disc
+                    msg = etpv{jj};
+                end
+             else
+                %msg must contain value in base 10 :
+                m = find([ev(itrigger(:)).time]==ev(indextrig(jj)).time);      
+                [evsel itri ibase]= intersect({ev(itrigger(m)).type},handles.base(:,1));
+                if isempty(evsel)
+                    sumtrig = 0;
+                else
+                    sumtrig = sum(2.^(ibase-1));
+                end
+                msg = num2str(sumtrig);
             end
-            if isempty(msg), msg = ''; end
-            lgmsg = length(msg);
-            if isfield(handles.Dmeg{1},'CRC') && ...
-                    isfield(handles.Dmeg{1}.CRC,'goodevents') && ...
-                        size(handles.Dmeg{1}.CRC.goodevents,2)>=indextrig(jj)&& ...
-                            handles.Dmeg{1}.CRC.goodevents(indextrig(jj))==0
-                b=[0.8 0.2 0.2];
-            else
-                b = 'k';
-            end
-            text(int(jj)-(0.4*lgmsg/(lgmsg+1))*handles.winsize/20, ...
-                2.1*handles.scale/50*(NbreChandisp),msg,'Color',b);
+            %Affichage
+                if isempty(msg), msg = ''; end
+                lgmsg = length(msg);
+                if isfield(handles.Dmeg{1},'CRC') && ...
+                        isfield(handles.Dmeg{1}.CRC,'goodevents') && ...
+                            size(handles.Dmeg{1}.CRC.goodevents,2)>=indextrig(jj)&& ...
+                                handles.Dmeg{1}.CRC.goodevents(indextrig(jj))==0
+                    b=[0.8 0.2 0.2];
+                else
+                    b = 'k';
+                end
+                text(int(jj)-(0.4*lgmsg/(lgmsg+1))*handles.winsize/20, ...
+                    2.1*handles.scale/50*NbreChandisp,msg,'Color',b);
         end
     end
-end
-if handles.scoring
-    fftchan_Callback([],[],handles);
 end
 return
 
@@ -5649,13 +5753,22 @@ A       =   get(figure,'Children');
 idx     =   find(strcmp(get(A,prop),compr)==1);
 delete(get(A(idx),'Children'))
 
+%new function : to calculate FFT in detailed (To be checked)
 function counterspect_Callback(hObject, eventdata, handles)
 
 if get(handles.counterspect,'Value')
+    fprintf('FFT detailed if on \n')
+    set(handles.counterspect,'BackgroundColor',[0.5 0.5 0.5])
+    cla(handles.axes5)
     set(handles.figure1,'CurrentAxes',handles.axes1)
     set(handles.Cmp_Pwr_Sp,'Enable','off','Visible','off')
     set(handles.figure1, 'windowbuttonmotionfcn',@wbdcb)
 else
+    fprintf('FFT detailed if off \n')
+    set(handles.figure1,'CurrentAxes',handles.axes1)
+    delete(findobj('tag','O'))
+    delete(findobj('tag','trc'))
+    set(handles.counterspect,'BackgroundColor',[0.8 0.8 0.8])
     set(handles.figure1, 'windowbuttonmotionfcn', @update_powerspect)
     set(handles.figure1, 'WindowButtonUpFcn','') 
     set(handles.Cmp_Pwr_Sp,'Enable','on','Visible','on')
@@ -5668,7 +5781,7 @@ function wbdcb(hObject, eventdata)
 handles = guidata(hObject);
 set(handles.figure1,'CurrentAxes',handles.axes1)
 if strcmp(get(hObject,'SelectionType'),'open')
-    delete(crc_findobj('tag','O'))
+    delete(findobj('tag','O'))
     set(hObject,'pointer','circle')
     set(handles.figure1,'CurrentAxes',handles.axes1)
     cp = get(handles.axes1,'CurrentPoint');
@@ -5688,7 +5801,7 @@ cp = get(handles.axes1,'CurrentPoint');
 xinit =   handles.xinit;
 yinit =   handles.yinit;  
 
-delete(crc_findobj('tag','trc'))
+delete(findobj('tag','trc'))
 
 xdat1 = [xinit,cp(1,1)];
 xdat2 = [xinit,xinit];
@@ -5738,6 +5851,7 @@ if strcmp(get(hObject,'SelectionType'),'normal')
         
     set(handles.figure1,'CurrentAxes',handles.axes5);
     Xtot = 0;
+    X = 0;
     for ichan = 1 : length(chan)       
         hold on
         [dumb1,dumb2,index2] = ...
@@ -5782,23 +5896,23 @@ if strcmp(get(hObject,'SelectionType'),'normal')
     else
         X       =   filterforspect(handles,X,[0.001 fs/3],1);
         [P,F]   =   pwelch(X,[],[],[],fs);           
-        P       =   log(P); 
+        P       =   log(P);       
         p_fft   =   plot(F,P,'Color','r');
         grid on
         axis auto
-        xlim([0 20])      
+        xd  = str2double(get(handles.pwrblw,'String'));
+        xf = str2double(get(handles.pwrabv,'String'));
+        xlim([xd xf])      %(on zoom sur ce qui nous intéresse)
         set(p_fft,'tag', 'powerspctrm')
     end  
     return;
 
-elseif strcmp(get(hObject,'SelectionType'),'alt')
-    
+elseif strcmp(get(hObject,'SelectionType'),'alt')   
     set(hObject,'Pointer','arrow')
     delete(findobj('tag','trc'))
     delete(findobj('tag','O'))
     set(handles.figure1, 'windowbuttonmotionfcn', @wbdcb)
-    set(hObject,'WindowButtonUpFcn','')
-    
+    set(hObject,'WindowButtonUpFcn','')    
 else
     
   return
@@ -5807,7 +5921,9 @@ end
 
 guidata(hObject,handles)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%New funtion : To be checked %%%%%%%%%%%%%%%%%%%%
 
 % --- Executes on selection change in fftchan.
 function fftchan_Callback(hObject, eventdata, handles)
@@ -5824,10 +5940,11 @@ Chan    =   get(handles.fftchan, 'Value');
 delete(findobj('tag', 'powerspctrm'))   %Effacer le denier power spectrum
 delete(findobj('tag', 'error')) 
 delete(findobj('tag', 'localizer')) 
+
 fs      =   fsample(handles.Dmeg{1});   
 slidval =   get(handles.slider1,'Value');    %Prendre le pos actuelle
 
-if handles.multcomp
+if handles.multcomp % To be checked : I just take this part form old version but never tried to use it
     fil     =   min(max(1,Chan),length(handles.Dmeg));
     Ctodis  =	handles.Chantodis;
     [dumb1,dumb2,Chan]  =   intersect(handles.chanset{Ctodis}, ...
@@ -5851,6 +5968,7 @@ else
     handles.inddis  =   index(slidpos : 1 : slidpos + NbreChandisp -1);
     Chan            =   handles.inddis(Chan);
     chandis         =   chanlabels(handles.Dmeg{fil},Chan);
+    chtype          =   chantype(handles.Dmeg{fil},Chan);
     fs              =   fsample(handles.Dmeg{fil});
     tdeb            =   round(slidval*fs);
     temps           =   tdeb:1:min(tdeb+(fs*handles.winsize), ...
@@ -5928,22 +6046,35 @@ if length(X) == 1
     ylim([0 2])
     grid off
 else
-    set(handles.figure1,'CurrentAxes',handles.axes5);
-    X       =   filterforspect(handles,X,[0.001 fs/3],fil);
-    [P,F]   =   pwelch(X,[],[],[],fs);           
-    P       =   log(P); 
+    set(handles.figure1,'CurrentAxes',handles.axes5)%,'PaperSize',[20.98 29.68]);
+    reset(handles.axes5)
+     X       =   filterforspect(handles,X,[0.001 fs/3],fil);
+    [P,F]   =   pwelch(X,[],[],[],fs);    
+    P       =   log(P);
     p_fft   =   plot(F,P,'Color',cmap(Col,:));
-    grid on
-    titre   =   ['Power on ', chandis];
-    title(titre,'FontSize',8)
-    ylabel('Log of power','FontSize',6)
-    xlabel('Frequency in Hz','FontSize',6)
-    axis auto
-    xlim([0 20])      
     set(p_fft,'tag', 'powerspctrm')
+    titre   =   chandis;
+    title(titre,'FontSize',12,'FontWeight','demi','FontName','Consolas')
+    ylabel('Log of (power/Hz) / ','FontSize',10,'FontName','Consolas')
+    xlabel('Frequency (Hz)','FontSize',10,'FontName','Consolas')
+%     if P<0
+%         set(handles.axes5,'XTick',[0 5 10 15 20],'YTick',[-60 -40 -20 0],'ZTick',[],...
+%             'XTickLabel',{'0' '5' '10' '15' '20'},'YTickLabel',{'-60' '-40' '-20' '0'},'ZTickLabel',{})
+%         axis([0 20 -60 0])
+%     else
+%         set(handles.axes5,'XTick',[0 5 10 15 20],'YTick',[0 2 4 6 8],'ZTick',[],...
+%             'XTickLabel',{'0' '5' '10' '15' '20'},'YTickLabel',{'0' '2' '4' '6' '8'},'ZTickLabel',{})
+%          axis([0 20 0 8])
+%     end
+    xd = str2double(get(handles.pwrblw,'String'));
+    xf = str2double(get(handles.pwrabv,'String'));
+    xlim([xd xf])
+    grid on
 end  
-
 return;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % --- Executes during object creation, after setting all properties.
 function fftchan_CreateFcn(hObject, eventdata, handles)
@@ -5956,7 +6087,9 @@ function fftchan_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%New Function : To be checked %%%%%%%%%%%%%%%%%%%%%%
 function update_powerspect(hObject, eventdata, handles)
 
 handles = guidata(hObject);
@@ -5975,18 +6108,212 @@ if and(and(Mouse(1,1)<x(end),Mouse(1,1)>x(1)),and(Mouse(1,2)<y(end),Mouse(1,2)>y
 end
 guidata(hObject,handles)
 
+% function Detection_Callback(hObject, eventdata, handles)
+% 
+% set(handles.figure1, 'windowbuttonmotionfcn', '')
+% 
+% flags.index	=   handles.index;
+% flags.Dmeg  =   handles.Dmeg;
+% flags.file  =   handles.file;
+% flags.winsize = handles.winsize;
+% flags.user = handles.currentscore;
+% 
+% %faire passer la taille des époques choisies pour l'analyse des artefacts
+% DC_detection(flags);
 
-function Detection_Callback(hObject, eventdata, handles)
+function saveart(handles)
+
+D = handles.Dmeg{1};
+D.CRC.artefacteeg = handles.artefacteeg;
+save(D);
+D.CRC
+
+return
+
+%%%%%%%%%%%%%%% Changement from base 2 to 10 for the triggers  %%%%%%%%%%
+
+% --- Executes on selection Selection in menu bar.
+function selection_trigger_Callback(hObject, eventdata, handles)
+% hObject    handle to Selection (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
 set(handles.figure1, 'windowbuttonmotionfcn', '')
 
 flags.index	=   handles.index;
 flags.Dmeg  =   handles.Dmeg;
 flags.file  =   handles.file;
-flags.winsize = handles.winsize;
-flags.user = handles.currentscore;
+DC_selection(flags)
 
-detection(flags);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% --- power spectrum display
+function pwrabv_Callback(hObject, eventdata, handles)
+% hObject    handle to pwrabv (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if get(handles.counterspect,'Value')
+    set(handles.figure1,'CurrentAxes',handles.axes5);
 
+    delete(findobj('tag', 'powerspctrm'))   %Effacer le denier power spectrum
+    delete(findobj('tag', 'error')) 
+    delete(findobj('tag', 'localizer')) 
 
+    NbreChandisp    =   str2double(get(handles.NbreChan,'String'));
+    Chanslidval     =   get(handles.Chanslider,'Value');
+    slidpos         =   Chanslidval-rem(Chanslidval,1);
+    index           =   [handles.indnomeeg handles.indexMEEG];
+    chan            =   index(slidpos : 1 : slidpos + NbreChandisp -1);
+
+    chandeb = floor(min(handles.coor(2,:))/handles.scale)+1;
+    chanfin = floor(max(handles.coor(2,:))/handles.scale);  
+    chan    =   chan(chandeb : chanfin);
+    fs      =   fsample(handles.Dmeg{1});   
+
+    tt = sort(handles.coor(1,:));
+    temps = tt(1) :1/fs: tt(end);
+    toshow = ceil(temps*fs);
+        
+    set(handles.figure1,'CurrentAxes',handles.axes5);
+    Xtot = 0;
+    X = 0;
+    for ichan = 1 : length(chan)       
+        hold on
+        [dumb1,dumb2,index2] = ...
+            intersect(upper(chanlabels(handles.Dmeg{1},chan(ichan))),handles.names);
+        if abs(handles.crc_types(index2))>1
+            if handles.crc_types(index2)>0
+                [dumb1,index1,dumb2] = ...
+                    intersect(upper(chanlabels(handles.Dmeg{1})), ...
+                    upper(handles.names(handles.crc_types(index2))));
+                try
+                    X   =   handles.Dmeg{1}(chan(ichan),toshow) - ...
+                            handles.Dmeg{1}(index1,toshow);
+                catch
+                    X   = 0;
+                end
+            else
+                range   =   max(handles.Dmeg{1}(chan(ichan),toshow)) - ...
+                            min(handles.Dmeg{1}(chan(ichan),toshow));
+                try
+                    X  = 	(handles.scale)*handles.Dmeg{1}(chan(ichan),toshow)/range;
+                catch
+                    X   =   0;
+                end
+            end
+        else
+            try
+                X   =   handles.Dmeg{1}(chan(ichan),toshow);
+                Col	=   3;
+            catch
+                X   =   0;
+            end
+        end
+        Xtot = Xtot + X;
+    end
+
+    if length(X) == 1
+        set(handles.figure1,'CurrentAxes',handles.axes5);
+        text(0.75,1, 'No Signal here')
+        xlim([0 2])
+        ylim([0 2])
+        grid off
+    else
+        X       =   filterforspect(handles,X,[0.001 fs/3],1);
+        [P,F]   =   pwelch(X,[],[],[],fs);           
+        P       =   log(P);       
+        p_fft   =   plot(F,P,'Color','r');
+        grid on
+        axis auto
+        xd  = str2double(get(handles.pwrblw,'String'));
+        xf = str2double(get(handles.pwrabv,'String'));
+        xlim([xd xf])      %(on zoom sur ce qui nous intéresse)
+        set(p_fft,'tag', 'powerspctrm')
+    end  
+    return;
+end
+
+function pwrblw_Callback(hObject, eventdata, handles)
+% hObject    handle to pwrblw (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if get(handles.counterspect,'Value')
+    set(handles.figure1,'CurrentAxes',handles.axes5);
+
+    delete(findobj('tag', 'powerspctrm'))   %Effacer le denier power spectrum
+    delete(findobj('tag', 'error')) 
+    delete(findobj('tag', 'localizer')) 
+
+    NbreChandisp    =   str2double(get(handles.NbreChan,'String'));
+    Chanslidval     =   get(handles.Chanslider,'Value');
+    slidpos         =   Chanslidval-rem(Chanslidval,1);
+    index           =   [handles.indnomeeg handles.indexMEEG];
+    chan            =   index(slidpos : 1 : slidpos + NbreChandisp -1);
+
+    chandeb = floor(min(handles.coor(2,:))/handles.scale)+1;
+    chanfin = floor(max(handles.coor(2,:))/handles.scale);  
+    chan    =   chan(chandeb : chanfin);
+    fs      =   fsample(handles.Dmeg{1});   
+
+    tt = sort(handles.coor(1,:));
+    temps = tt(1) :1/fs: tt(end);
+    toshow = ceil(temps*fs);
+        
+    set(handles.figure1,'CurrentAxes',handles.axes5);
+    Xtot = 0;
+    X = 0;
+    for ichan = 1 : length(chan)       
+        hold on
+        [dumb1,dumb2,index2] = ...
+            intersect(upper(chanlabels(handles.Dmeg{1},chan(ichan))),handles.names);
+        if abs(handles.crc_types(index2))>1
+            if handles.crc_types(index2)>0
+                [dumb1,index1,dumb2] = ...
+                    intersect(upper(chanlabels(handles.Dmeg{1})), ...
+                    upper(handles.names(handles.crc_types(index2))));
+                try
+                    X   =   handles.Dmeg{1}(chan(ichan),toshow) - ...
+                            handles.Dmeg{1}(index1,toshow);
+                catch
+                    X   = 0;
+                end
+            else
+                range   =   max(handles.Dmeg{1}(chan(ichan),toshow)) - ...
+                            min(handles.Dmeg{1}(chan(ichan),toshow));
+                try
+                    X  = 	(handles.scale)*handles.Dmeg{1}(chan(ichan),toshow)/range;
+                catch
+                    X   =   0;
+                end
+            end
+        else
+            try
+                X   =   handles.Dmeg{1}(chan(ichan),toshow);
+                Col	=   3;
+            catch
+                X   =   0;
+            end
+        end
+        Xtot = Xtot + X;
+    end
+
+    if length(X) == 1
+        set(handles.figure1,'CurrentAxes',handles.axes5);
+        text(0.75,1, 'No Signal here')
+        xlim([0 2])
+        ylim([0 2])
+        grid off
+    else
+        X       =   filterforspect(handles,X,[0.001 fs/3],1);
+        [P,F]   =   pwelch(X,[],[],[],fs);           
+        P       =   log(P);       
+        p_fft   =   plot(F,P,'Color','r');
+        grid on
+        axis auto
+        xd  = str2double(get(handles.pwrblw,'String'));
+        xf = str2double(get(handles.pwrabv,'String'));
+        xlim([xd xf])      %(on zoom sur ce qui nous intéresse)
+        set(p_fft,'tag', 'powerspctrm')
+    end  
+    return;
+end

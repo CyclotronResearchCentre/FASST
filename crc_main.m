@@ -62,6 +62,12 @@ if ~ok
     return
 end
 
+% Add the fieldtrip toolbox from SPM, if necessary
+if ~exist('ft_defaults','file')
+    addpath(fullfile(spm('Dir'),'external','fieldtrip'));
+end
+ft_defaults;
+
 % Check for Signal Processing Toolbox
 persistent flag_TBX
 if isempty(flag_TBX)
@@ -281,10 +287,11 @@ ok = true;
 % Check SPM installation
 if exist('spm.m','file')
     [SPMver, SPMrel] = spm('Ver');
-    if ~(strcmpi(SPMver,'spm8') && str2double(SPMrel)>8.5)
+    if ~(strcmpi(SPMver,'spm8') && str2double(SPMrel)>8.5) && ...
+            ~strcmpi(SPMver,'spm12b')
         beep
         fprintf('\nERROR:\n')
-        fprintf('\tThe *latest* version of SPM8 should be installed on your computer,\n')
+        fprintf('\tThe *latest* version of SPM8 or SPM12b should be installed on your computer,\n')
         fprintf('\tand be available on MATLABPATH!\n\n')
         ok = false;
     end

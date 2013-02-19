@@ -359,7 +359,7 @@ The `Score Sleep' button (Fig.~\ref{fig:TB_dismain}-G) allows you to launch the 
 
 The box below the time-slider shows the current time~(Fig.~\ref{fig:TB_dismain}-J), in the middle of the display window, expressed in seconds, from the beginning of the recording; the other number is the overall length of the recording also expressed in seconds. You can type in a value to jump directly to any moment of interest in the recording.
 
-Events comprised in the data set are displayed as small triangles on the display. The `events' panel  (Fig.~\ref{fig:TB_dismain}-E) allows to scroll through these events, by first choosing which events type and value to display (respectively the left and right pull-down menus) and then using the `previous’ and `next' buttons to move to the nearest previous and next event. The events types and values are those saved in the {\tt events} field of the data.
+Events comprised in the data set are displayed as small triangles on the display. The `events' panel  (Fig.~\ref{fig:TB_dismain}-E) allows to scroll through these events, by first choosing which events type and value to display (respectively the left and right pull-down menus) and then using the `previousï¿½ and `next' buttons to move to the nearest previous and next event. The events types and values are those saved in the {\tt events} field of the data.
 
 For the case where waves (e.g. slow waves or sleep spindles) were automatically detected (see section \ref{sec:WaveDetect}), some specific codes are used:
 \bi
@@ -818,10 +818,10 @@ When a file has been scored at least one time, a cell array {\tt D.CRC.score} of
 \item the name of the scorer;
 \item the length of a scoring window (in seconds);
 \item two numbers indicating the time when the light was shut off and door was closed (FPL, first number), and when the light was turned on and the door was opened (OPL, second number). These measures are given in seconds relative to the beginning of the file;
-\item a $2\times T$ array, where $T$ is the number of artefacts scored. The first column is the beginning of each artefactual episode and the second, the end of it. All the times expressed in seconds relative to the beginning of the file;
-\item same as artefacts but for arousals;
-\item same as artefacts but for events of interest;
-\item a $1\times T$ cell array, containing the label of each artefact. The labels for 'unspecified' artefacts are left empty.
+\item a $T\times 2$ array, where $T$ is the number of artefact episodes marked. The first column is the beginning of each artefactual episode and the second, the end of it. All the times expressed in seconds relative to the beginning of the file;
+\item same as artefact episodes but for arousals;
+\item same as artefact episodes but for events/episodes of interest;
+\item a $T\times 1$ cell array, containing the label of each artefact. The labels for 'unspecified' artefacts are left empty.
 \ei
 
 \paragraph{SW detection information}
