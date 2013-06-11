@@ -1,8 +1,12 @@
-function [scale]=crc_scales(D,indchan)
-%get the scale(j)e of one channel depending on its units or its type. Set the
-%channels units or types before hand using SPM8 to use it.
-%--------------------------------------------------------------------------
-%written by J.Schrouff, CRC, 05/31/2011
+function [scale] = crc_scales(D,indchan)
+% Get the scale of one channel depending on its units or its type. Set the
+% channels units or types before hand using SPM8 to use it.
+%_______________________________________________________________________
+% Copyright (C) 2011 Cyclotron Research Centre
+
+% Written by J. Schrouff, 2011.
+% Cyclotron Research Centre, University of Liege, Belgium
+% $Id$
 
 if nargin<1
     D = crc_eeg_load;

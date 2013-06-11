@@ -23,9 +23,10 @@ function varargout = crc_dis_main(varargin)
 % Copyright (C) 2009 Cyclotron Research Centre
 
 % Written by Y. Leclercq & C. Phillips, 2008.
-% Modified by J. Schrouff, 2010.
+% Modified by J. Schrouff, 2010-...
+% And further updated by D. Coppieters, 2012-...
 % Cyclotron Research Centre, University of Liege, Belgium
-% $Id$
+% $Id:$
 
 % Edit the frqabv text to modify the response to help crc_dis_main
 
@@ -476,10 +477,10 @@ if ~handles.multcomp
             handles.currentscore    =   1;
         end 
  
-        crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.winsize)
-        
+        crc_hypnoplot(handles.axes4, ...
+            handles,handles.winsize)
 
-		set(handles.figure1,'CurrentAxes',handles.axes1)
+        set(handles.figure1,'CurrentAxes',handles.axes1)
         set(handles.addundefart,'visible','off')        
 		set(handles.addonlyone,'visible','off')
         set(handles.addspecart,'visible','off')
@@ -583,7 +584,8 @@ handles.displevt=0;
 %removed and then readd%%%%%%%%
 if isfield(handles,'scoring') & handles.scoring
     set(handles.figure1,'CurrentAxes',handles.axes4)
-    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+    crc_hypnoplot(handles.axes4, ...
+        handles,handles.score{3,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1)
 end
 %%%%%%%%%%%%%%%%%
@@ -739,7 +741,8 @@ set(handles.slider1,'Value',slidval)
 %Remove and then readd...to be checked
 if handles.scoring
     set(handles.figure1,'CurrentAxes',handles.axes4)
-    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+    crc_hypnoplot(handles.axes4, ...
+        handles,handles.score{3,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -780,7 +783,8 @@ slidval = max((pageval-1)*handles.winsize,handles.winsize/2);
 set(handles.slider1,'Value',slidval)
 if handles.scoring
     set(handles.figure1,'CurrentAxes',handles.axes4)
-    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+    crc_hypnoplot(handles.axes4, ...
+        handles,handles.score{3,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1)
 end
 mainplot(handles)
@@ -1960,7 +1964,8 @@ end
 set(handles.slider1,'Value',slidval)
 if handles.scoring
     set(handles.figure1,'CurrentAxes',handles.axes4)
-    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+    crc_hypnoplot(handles.axes4, ...
+        handles,handles.score{3,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1)
 end
 a=events(handles.Dmeg{1});
@@ -2023,7 +2028,8 @@ end
 set(handles.slider1,'Value',slidval)
 if handles.scoring
     set(handles.figure1,'CurrentAxes',handles.axes4)
-    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+    crc_hypnoplot(handles.axes4, ...
+        handles,handles.score{3,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1)
 end
 a=events(handles.Dmeg{1});
@@ -2372,7 +2378,8 @@ end
 
 delete(get(handles.axes4,'Children'));
 set(handles.figure1,'CurrentAxes',handles.axes4);
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
 delete(get(handles.addonlyone,'Children'));
 uimenu(handles.addonlyone,'Label', ...
@@ -2601,7 +2608,7 @@ function score_import_Callback(hObject, eventdata, handles)
 impfile = spm_select(1, 'any', 'Select mat file with other score','' ...
     ,pwd,'\.[mM][aA][Tt]');
 
-D=crc_eeg_load(impfile);
+D = crc_eeg_load(impfile);
 
 try
     D.CRC.score;
@@ -2616,25 +2623,25 @@ okchannels = length(chanlabels(D))==length(chanlabels(handles.Dmeg{1}));
 dlg={};
 if ~okscore
     if isempty(dlg);
-        dlg={'No score found in the selected file'};
+        dlg = {'No score found in the selected file'};
     else
-        dlg={dlg{:} 'No score found in the selected file'};
+        dlg = {dlg{:} 'No score found in the selected file'};
     end
 end
 
 if ~oksamples
     if isempty(dlg)
-        dlg={'The selected file does not have the same amount of samples than the viewed one'};
+        dlg = {'The selected file does not have the same amount of samples than the viewed one'};
     else
-        dlg={dlg{:} 'The selected file does not have the same amount of samples than the viewed one'};
+        dlg ={ dlg{:} 'The selected file does not have the same amount of samples than the viewed one'};
     end
 end
 
 if ~okchannels
     if isempty(dlg)
-        dlg={'The selected file does not have the same amount of channels than the viewed one'};
+        dlg = {'The selected file does not have the same amount of channels than the viewed one'};
     else
-        dlg={dlg{:} 'The selected file does not have the same amount of channels than the viewed one'};
+        dlg = {dlg{:} 'The selected file does not have the same amount of channels than the viewed one'};
     end
 end
 
@@ -2648,15 +2655,13 @@ if oksamples && okchannels && okscore
     % Create new menu without Guide
 
     if handles.figz~=0
-        z=handles.figz;
+        z = handles.figz;
     else
-        z=figure;
+        z = figure;
     end
 
     figure(z)
-    close(z)
-    figure(z)
-    handles.figz=z;
+    handles.figz = z;
     clf(z);
 
     set(z,...% The main GUI figure
@@ -2698,7 +2703,8 @@ if oksamples && okchannels && okscore
         'String','Import score',...
         'Callback', {@saveimportscore,handles,Mainhandle});
 
-    crc_plothypno(hPlotAxes,D.CRC.score{4,1},handles,D.CRC.score{3,1},D.CRC.score{1,1})
+    crc_hypnoplot(hPlotAxes,handles,D.CRC.score{3,1}, ...
+        D.CRC.score{1,1})
 
 else
     errordlg(dlg, 'Error');
@@ -2707,6 +2713,7 @@ end
 % Update handles structure
 guidata(hObject, handles);
 
+% --------------------------------------------------------------------
 function saveimportscore(hObject, eventdata, handles, gcbo)
 
 handles = guidata(gcbo);
@@ -2761,7 +2768,7 @@ close(fig)
 
 guidata(gcbo, handles);
 
-
+% --------------------------------------------------------------------
 function plothypnoimport(hObject, eventdata, handles, gcbo)
 
 handles = guidata(gcbo);
@@ -2780,11 +2787,11 @@ D=crc_eeg_load(impfile);
 Valpop=get(hObject,'Value');
 
 if size(D.CRC.score,2)>=Valpop
-    crc_plothypno(axesidx,D.CRC.score{4,Valpop},handles,D.CRC.score{3,Valpop},D.CRC.score{1,Valpop},D.CRC.score{2,Valpop})
+    crc_hypnoplot(axesidx, handles,...
+        D.CRC.score{3,Valpop},D.CRC.score{1,Valpop},D.CRC.score{2,Valpop})
 end
 
 guidata(gcbo, handles);
-
 
 % --------------------------------------------------------------------
 function score_compare_Callback(hObject, eventdata, handles)
@@ -2792,20 +2799,21 @@ function score_compare_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if handles.figz~=0
-    z=handles.figz;
+    z = handles.figz;
 else
-    z=figure;
+    z = figure;
 end
 
 if size(handles.Dmeg{1}.CRC.score,2)<2
     disp('Only one score in the file, can not be compared')
+    close(z)
     return
 end
 
+% figure(z)
+% close(z)
 figure(z)
-close(z)
-figure(z)
-handles.figz=z;
+handles.figz = z;
 clf(z);
 
 set(z,...% The main GUI figure
@@ -2824,7 +2832,7 @@ handles.popcmp(1) = uicontrol(... % List of available types of plot
     'Position',[0.125 0.485 0.2 0.5],...
     'HandleVisibility','callback', ...
     'String',handles.score(2,:),...
-    'Callback', {@plothypnocompare,handles,Mainhandle},...
+    'Callback', {@update_hypnocomp,handles,Mainhandle},...
     'Style','popupmenu');
 
 handles.popcmp(2) = uicontrol(... % List of available types of plot
@@ -2833,7 +2841,7 @@ handles.popcmp(2) = uicontrol(... % List of available types of plot
     'Position',[0.675 0.485 0.2 0.5],...
     'HandleVisibility','callback', ...
     'String',handles.score(2,:),...
-    'Callback', {@plothypnocompare,handles,Mainhandle},...
+    'Callback', {@update_hypnocomp,handles,Mainhandle},...
     'Style','popupmenu');
 set(handles.popcmp(2),'Value',2);
 
@@ -2843,136 +2851,89 @@ hUpdateButton = uicontrol(... % Button for updating selected plot
     'HandleVisibility','callback', ...
     'Position',[0.35 0.025 0.3 0.05],...
     'String','Merge Score',...
-    'Callback', {@merge,handles,Mainhandle});
+    'Callback', {@crc_hypnomerge,handles,Mainhandle});
+%     'Callback', {@merge,handles,Mainhandle});
 
 
-handles.subcmp(1)=subplot(311);
-handles.subcmp(2)=subplot(312);
-handles.subcmp(3)=subplot(313);
+handles.subcmp(1) = subplot(311);
+handles.subcmp(2) = subplot(312);
+handles.subcmp(3) = subplot(313);
 
-%Plot subaxes
+% Plot subaxes
 set(z,'CurrentAxes',handles.subcmp(1))
-crc_plothypno(handles.subcmp(1),...
-    handles.Dmeg{1}.CRC.score{4,1},...
+crc_hypnoplot(handles.subcmp(1),...
     handles,...
-    handles.Dmeg{1}.CRC.score{3,1},handles.Dmeg{1}.CRC.score{2,1})
+    handles.Dmeg{1}.CRC.score{3,1},...
+    handles.Dmeg{1}.CRC.score{1,1},handles.Dmeg{1}.CRC.score{2,1})
 
 set(z,'CurrentAxes',handles.subcmp(2))
-crc_plothypno(handles.subcmp(2),...
-    handles.Dmeg{1}.CRC.score{4,2},...
+crc_hypnoplot(handles.subcmp(2),...
     handles,...
     handles.Dmeg{1}.CRC.score{3,2},...
     handles.Dmeg{1}.CRC.score{1,2},handles.Dmeg{1}.CRC.score{2,2})
 
-if size(handles.Dmeg{1}.CRC.score{1,1})==size(handles.Dmeg{1}.CRC.score{1,2})
-    handles.match = handles.Dmeg{1}.CRC.score{1,1}-handles.Dmeg{1}.CRC.score{1,2};
-    matchvect=handles.match;
-    matchvect(find(handles.match ~= 0))=7;
-else
-    matchvect = zeros*handles.Dmeg{1}.CRC.score{1,1};
-end
-
-set(z,'CurrentAxes',handles.subcmp(3))
-crc_plothypno(handles.subcmp(3),...
-    handles.Dmeg{1}.CRC.score{4,1},...
-    handles,...
-    handles.Dmeg{1}.CRC.score{3,1},matchvect)
-
-labl{2}='Unmatch';
-labl{4}=' ';
-labl{3}=' ';
-labl{1}=' ';
-labl{7}=' ';
-labl{5}=' ';
-labl{8}='Match';
-labl{6}=' ';
-
-% Display Wake state (st0 => 7)
-set(handles.subcmp(3),'YTickLabel',labl);
+[mtch,perc_match] = crc_hypnocompare([handles.subcmp(3) z], [1 2], ...
+                                handles.Dmeg{1}.CRC.score, handles);
+handles.match = mtch;
 
 % Update handles structure
 guidata(hObject, handles);
 
 %% Visual comparison of hypnograms
-function plothypnocompare(hObject, eventdata, handles, gcbo)
+function update_hypnocomp(hObject, kk1, kk2, gcbo)
 
 handles = guidata(gcbo);
 
-fig=get(hObject,'Parent');
+fig = get(hObject,'Parent');
 
 Valpop=get(hObject,'Value');
 
 if handles.popcmp(1)==hObject
     cla(handles.subcmp(1))
     set(fig,'CurrentAxes',handles.subcmp(1))
-    crc_plothypno(handles.subcmp(1),...
-        handles.Dmeg{1}.CRC.score{4,Valpop},...
+    crc_hypnoplot(handles.subcmp(1),...
         handles,...
         handles.Dmeg{1}.CRC.score{3,Valpop},...
-        handles.Dmeg{1}.CRC.score{1,Valpop},handles.Dmeg{1}.CRC.score{2,Valpop})
+        handles.Dmeg{1}.CRC.score{1,Valpop},...
+        handles.Dmeg{1}.CRC.score{2,Valpop})
 
 elseif handles.popcmp(2)==hObject
     cla(handles.subcmp(2))
     set(fig,'CurrentAxes',handles.subcmp(2))
-    crc_plothypno(handles.subcmp(2),...
-        handles.Dmeg{1}.CRC.score{4,Valpop},...
+    crc_hypnoplot(handles.subcmp(2),...
         handles,...
         handles.Dmeg{1}.CRC.score{3,Valpop},...
-        handles.Dmeg{1}.CRC.score{1,Valpop},handles.Dmeg{1}.CRC.score{2,Valpop})
+        handles.Dmeg{1}.CRC.score{1,Valpop},...
+        handles.Dmeg{1}.CRC.score{2,Valpop})
 end
 
+Val1 = get(handles.popcmp(1),'Value');
+Val2 = get(handles.popcmp(2),'Value');
 
-Val1=get(handles.popcmp(1),'Value');
-Val2=get(handles.popcmp(2),'Value');
-
-
-if size(handles.Dmeg{1}.CRC.score{1,Val1})==size(handles.Dmeg{1}.CRC.score{1,Val2})
-
-    handles.match = handles.Dmeg{1}.CRC.score{1,Val1}-handles.Dmeg{1}.CRC.score{1,Val2};
-    matchvect=handles.match;
-    matchvect(find(handles.match ~= 0))=7;
-
-    cla(handles.subcmp(3))
-    set(fig,'CurrentAxes',handles.subcmp(3))
-    crc_plothypno(handles.subcmp(3),...
-        handles.Dmeg{1}.CRC.score{4,1},...
-        handles,...
-        handles.Dmeg{1}.CRC.score{3,1},...
-        matchvect,'Merge')
-
-    labl{2}='Unmatch';
-    labl{4}=' ';
-    labl{3}=' ';
-    labl{7}=' ';
-    labl{1}=' ';
-    labl{5}=' ';
-    labl{8}='Match';
-    labl{6}=' ';
-
-    % Display Wake state (st0 => 7)
-    set(handles.subcmp(3),'YTickLabel',labl);
-else
-    cla(handles.subcmp(3))
-    errordlg({'The window size of the score are not the same. They cannot be compared'},'Error')
-
-end
+[mtch,perc_match] = crc_hypnocompare([handles.subcmp(3) fig], ...
+                                [Val1 Val2], ...
+                                handles.Dmeg{1}.CRC.score, handles);
+handles.match = mtch;
+handles.perc_match = perc_match;
 
 guidata(gcbo, handles);
 
 %% Merging of hypnograms
-function merge(hObject, eventdata, handles, gcbo)
+function crc_hypnomerge(hObject, kk1, handles, gcbo)
+% FORMAT crc_mergehypno(hand,pl,handles,windowsize,score,scorer)
+% Merging 2 hypnograms into 1.
 
 handles = guidata(gcbo);
 
-fig=get(hObject,'Parent');
+fig = get(hObject,'Parent');
 
-notmatchidx=find(handles.match~=0);
+notmatchidx = find(handles.match~=0);
 
-Val1=get(handles.popcmp(1),'Value');
-Val2=get(handles.popcmp(2),'Value');
+Val1 = get(handles.popcmp(1),'Value');
+Val2 = get(handles.popcmp(2),'Value');
 
-%create a third column for artefact on single channel if there are only
-%column
+% create a third column for artefact on single channel if there are only
+% column
 if size(handles.Dmeg{1}.CRC.score{5,Val1},2)<3
     handles.Dmeg{1}.CRC.score{5,Val1}(:,3) = 0;
 end
@@ -2983,41 +2944,54 @@ end
 if handles.Dmeg{1}.CRC.score{3,Val1}==handles.Dmeg{1}.CRC.score{3,Val2}
 
     tmpscore = handles.Dmeg{1}.CRC.score{1,Val1};
-    tmpscore(notmatchidx)=0/0; % put a NaN where there are mismatch
+    tmpscore(notmatchidx) = NaN; %#ok<*FNDSB> % put a NaN where there are mismatch
 
     handles.Dmeg{1}.CRC.score=...
         [handles.Dmeg{1}.CRC.score handles.Dmeg{1}.CRC.score(:,Val1)];
 
-    handles.Dmeg{1}.CRC.score{1,end}=tmpscore;
-    handles.Dmeg{1}.CRC.score{2,end}=['Merge ' handles.Dmeg{1}.CRC.score{2,Val1} '-' handles.Dmeg{1}.CRC.score{2,Val2} ];
-    handles.Dmeg{1}.CRC.score{4,end}(1)=min(handles.Dmeg{1}.CRC.score{4,Val1}(1),handles.Dmeg{1}.CRC.score{4,Val2}(1));
-    handles.Dmeg{1}.CRC.score{4,end}(2)=max(handles.Dmeg{1}.CRC.score{4,Val1}(2),handles.Dmeg{1}.CRC.score{4,Val2}(2));
-    handles.Dmeg{1}.CRC.score{5,end}=[handles.Dmeg{1}.CRC.score{5,Val1};handles.Dmeg{1}.CRC.score{5,Val2}];
-    handles.Dmeg{1}.CRC.score{6,end}=[handles.Dmeg{1}.CRC.score{6,Val1};handles.Dmeg{1}.CRC.score{6,Val2}];
-    handles.Dmeg{1}.CRC.score{7,end}=[handles.Dmeg{1}.CRC.score{7,Val1};handles.Dmeg{1}.CRC.score{7,Val2}];
+    handles.Dmeg{1}.CRC.score{1,end} = tmpscore;
+    handles.Dmeg{1}.CRC.score{2,end} = ...
+        ['Merge ' handles.Dmeg{1}.CRC.score{2,Val1} '-', ...
+            handles.Dmeg{1}.CRC.score{2,Val2} ];
+    handles.Dmeg{1}.CRC.score{4,end}(1) = ...
+        min(handles.Dmeg{1}.CRC.score{4,Val1}(1), ...
+            handles.Dmeg{1}.CRC.score{4,Val2}(1));
+    handles.Dmeg{1}.CRC.score{4,end}(2) = ...
+        max(handles.Dmeg{1}.CRC.score{4,Val1}(2), ...
+            handles.Dmeg{1}.CRC.score{4,Val2}(2));
+    handles.Dmeg{1}.CRC.score{5,end} = ...
+        [handles.Dmeg{1}.CRC.score{5,Val1}; ...
+         handles.Dmeg{1}.CRC.score{5,Val2}];
+    handles.Dmeg{1}.CRC.score{6,end} = ...
+        [handles.Dmeg{1}.CRC.score{6,Val1} ; ...
+         handles.Dmeg{1}.CRC.score{6,Val2}];
+    handles.Dmeg{1}.CRC.score{7,end} = ...
+        [handles.Dmeg{1}.CRC.score{7,Val1} ; ...
+         handles.Dmeg{1}.CRC.score{7,Val2}];
 
-    handles.addardeb=[handles.addardeb 1];
-    handles.adddeb = [handles.adddeb 1];
-    handles.add_eoi = [handles.add_eoi 1];
+    handles.addardeb = [handles.addardeb 1];
+    handles.adddeb   = [handles.adddeb 1];
+    handles.add_eoi  = [handles.add_eoi 1];
 
-    handles.score=handles.Dmeg{1}.CRC.score;
-    D=handles.Dmeg{1};
+    handles.score = handles.Dmeg{1}.CRC.score;
+    D = handles.Dmeg{1};
     save(D);
 
     delete(get(handles.score_user,'Children'));
     for isc=1:size(handles.score,2)
         handles.scorers{isc} = uimenu(handles.score_user,'Label', ...
             char(handles.score(2,isc)),'Callback',@defined_scorer) ;
-        handles.namesc{isc}=char(handles.score(2,isc));
+        handles.namesc{isc} = char(handles.score(2,isc));
     end
-    handles.num_scorers=isc;
-    handles.scorers{isc+1}=uimenu(handles.score_user,'Label', ...
+    handles.num_scorers = isc;
+    handles.scorers{isc+1} = uimenu(handles.score_user,'Label', ...
         'New scorer','Callback',@new_scorer,...
         'Separator', 'on') ;
     set(handles.scorers{handles.currentscore},'Checked','on');
     delete(get(handles.axes4,'Children'));
     set(handles.figure1,'CurrentAxes',handles.axes4);
-    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore}, ...
+        handles,handles.score{3,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1);
     close(fig);
 else
@@ -3027,7 +3001,7 @@ end
 guidata(gcbo, handles);
 
 %--------------------------------------------------------------------------
-%menu on right click
+% menu on right click
 %--------------------------------------------------------------------------
 % --------------------------------------------------------------------
 function ArtefactMenu_Callback(hObject, eventdata, handles)
@@ -3082,7 +3056,8 @@ D=handles.Dmeg{1};
 save(D);
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
 mainplot(handles)
@@ -3114,7 +3089,8 @@ D=handles.Dmeg{1};
 save(D);
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
 mainplot(handles)
@@ -3147,7 +3123,8 @@ D=handles.Dmeg{1};
 save(D);
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
 mainplot(handles)
@@ -3183,13 +3160,13 @@ D   =   handles.Dmeg{1};
 save(D);
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
 mainplot(handles)
 % Update handles structure
 guidata(hObject, handles);
-
 
 % --------------------------------------------------------------------
 function addundefart_Callback(hObject, eventdata, handles)
@@ -3310,7 +3287,6 @@ function addonlyone_Callback(hObject,eventdata,handles)
 
  
 function addstart(hObject,eventdata,handles)
-
 
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
@@ -3674,7 +3650,8 @@ if ~isempty(handles.chan)
 end
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore})
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
 
 % Update handles structure
@@ -4048,9 +4025,8 @@ mainplot(handles);
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
 
-crc_plothypno(handles.axes4,...
-    handles.score{4,handles.currentscore},handles,...
-    handles.score{3,handles.currentscore});
+crc_hypnoplot(handles.axes4,...
+    handles,handles.score{3,handles.currentscore});
 
 set(handles.figure1,'CurrentAxes',handles.axes1);
 
@@ -4076,8 +4052,7 @@ mainplot(handles)
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
 
-crc_plothypno(handles.axes4,...
-    handles.score{4,handles.currentscore},...
+crc_hypnoplot(handles.axes4,...
     handles,handles.score{3,handles.currentscore})
 
 set(handles.figure1,'CurrentAxes',handles.axes1);
@@ -4146,7 +4121,6 @@ set(handles.figure1, 'windowbuttonmotionfcn', @update_powerspect)
 guidata(b, handles);
 % Update handles structure
 mainplot(handles)
-
 
 function Define_event(hObject, eventdata)
 
@@ -4243,7 +4217,8 @@ set(handles.popupmenu11,...
 
 %Add an landmark on the top axes
 set(handles.figure1,'CurrentAxes',handles.axes4);
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
 
 %Store data in the figure's application 
@@ -4329,7 +4304,8 @@ set(handles.popupmenu11,...
     'Value',length(pmstring))
 
 set(handles.figure1,'CurrentAxes',handles.axes4);
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
 
 %update and save
@@ -4417,22 +4393,22 @@ function new_scorer(hObject, eventdata)
 % hObject    handle to score_user (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 %get handles of the main parent
-a=get(gcbo,'Parent');
-b=get(a,'Parent');
-c=get(b,'Parent');
+a = get(gcbo,'Parent');
+b = get(a,'Parent');
+c = get(b,'Parent');
 %to be checked = old version contained : get(c); What does it means?
 handles=guidata(gcbo);
 
 %create new scoring structure
 prompt = {'Please enter your name'};
-def= {'Newuser'};
+def = {'Newuser'};
 num_lines = 1;
 dlg_title = 'Name of the new scorer';
 handles.score(2,handles.num_scorers +1) = inputdlg(prompt,dlg_title,num_lines,def);
 
 %Choosing size of window to score
 prompt = {'Please choose the size of the scoring windows'};
-def= {'20'};
+def = {crc_get_defaults('score.winsize')};
 num_lines = 1;
 dlg_title = 'Size of the scoring windows (in sec)';
 handles.score{3,handles.num_scorers +1} = inputdlg(prompt,dlg_title,num_lines,def);
@@ -4479,7 +4455,8 @@ handles.scorers{isc+1}=uimenu(handles.score_user,'Label', ...
     'Separator','on') ;
 set(handles.scorers{handles.currentscore},'Checked','on');
 set(handles.figure1,'CurrentAxes',handles.axes4);
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
 % Setting up the add artefact/arousal/event of interest.
 handles.adddeb = ones(1,size(handles.score,2));
@@ -4495,9 +4472,9 @@ function defined_scorer(hObject, eventdata)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-a=get(gcbo,'Parent');
-b=get(a,'Parent');
-c=get(b,'Parent');
+a = get(gcbo,'Parent');
+b = get(a,'Parent');
+c = get(b,'Parent');
 %To be checked = old version contained : get(c);
 
 handles = guidata(gcbo);
@@ -4513,7 +4490,8 @@ for isc=1:size(handles.namesc,2)
 end
 
 set(handles.figure1,'CurrentAxes',handles.axes4);
-crc_plothypno(handles.axes4,handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
 mainplot(handles)
 % Update handles structure
@@ -4705,8 +4683,8 @@ if handles.scoring && (key>-1 && key<crcdef.nrStage)
     end
     set(handles.slider1,'Value',slidval);
     set(handles.figure1,'CurrentAxes',handles.axes4);
-    crc_plothypno(handles.axes4,...
-        handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+    crc_hypnoplot(handles.axes4,...
+        handles,handles.score{3,handles.currentscore});
     %Goes to the previous window
 elseif or(get(handles.figure1,'CurrentCharacter')=='B',get(handles.figure1,'CurrentCharacter')=='b')
     handles.move = 0;
@@ -4718,8 +4696,8 @@ elseif or(get(handles.figure1,'CurrentCharacter')=='B',get(handles.figure1,'Curr
 
     set(handles.slider1,'Value',slidval);
     set(handles.figure1,'CurrentAxes',handles.axes4);
-    crc_plothypno(handles.axes4,...
-        handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+    crc_hypnoplot(handles.axes4,...
+        handles,handles.score{3,handles.currentscore});
     hypjustplot=0;
     % Goes to next window
 elseif or(get(handles.figure1,'CurrentCharacter')=='F',get(handles.figure1,'CurrentCharacter')=='f')
@@ -4736,8 +4714,8 @@ elseif or(get(handles.figure1,'CurrentCharacter')=='F',get(handles.figure1,'Curr
     end
     set(handles.slider1,'Value',slidval);
     set(handles.figure1,'CurrentAxes',handles.axes4);
-    crc_plothypno(handles.axes4,...
-        handles.score{4,handles.currentscore},handles,handles.score{3,handles.currentscore});
+    crc_hypnoplot(handles.axes4,...
+        handles,handles.score{3,handles.currentscore});
     hypjustplot=0;
 else
     touch = int2str(get(handles.figure1,'CurrentCharacter'));

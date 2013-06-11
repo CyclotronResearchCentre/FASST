@@ -1,6 +1,6 @@
 function [D, S] = crc_cont2epoch(S)
 %
-% Converts continous M/EEG-files files scored in FAST into epoched files
+% Converts continous M/EEG-files files scored in FASST into epoched files
 % for use with SPM -- Continous files are first filtered then downsampled
 % before subsequent epoching
 % FORMAT [D, S] = crc_cont2epoch(S)

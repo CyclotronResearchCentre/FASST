@@ -1,6 +1,6 @@
 function crc_defaults
-% Sets the defaults which are used by FASST, fMRI Artefact removal and Sleep
-% Scoring Toolbox.
+% Sets the defaults which are used by FASST, fMRI Artefact removal and 
+% Sleep Scoring Toolbox.
 %
 % FORMAT crc_defaults
 %_______________________________________________________________________

@@ -110,7 +110,7 @@ if isempty(varargin) || ~isfield(varargin{1},'file')
             D{i}.info = struct('date',[1 1 1],'hour',[0 0 0]);
         end
         handles.Dmeg{i} = D{i};
-        handles.Struct(i) = struct(D{i});
+%         handles.Struct(i) = struct(D{i});
         handles.date{i} = zeros(1,2);
         handles.date{i}(1) = datenum([D{i}.info.date D{i}.info.hour]);
         handles.date{i}(2) = handles.date{i}(1) + ...
@@ -128,21 +128,21 @@ else
         handles.Dmeg{i} = varargin{1}.Dmeg{i};
     end
     if isempty(index)
-        index=1:nchannels(handles.Dmeg{1});
+        index = 1:nchannels(handles.Dmeg{1});
     end
     set(handles.Select,'String',upper(chanlabels(handles.Dmeg{1},varargin{1}.index)));
     diff = setdiff(upper(chanlabels(handles.Dmeg{1})),upper(chanlabels(handles.Dmeg{1},varargin{1}.index)));
     set(handles.Deselect,'String',diff);
     [dumb1,dumb2,index2]=intersect(upper(chanlabels(handles.Dmeg{1},varargin{1}.index)),upper(handles.names));
 
-    idxred=index2(find(handles.crc_types(index2)<-1));
-    idxblue=index2(find(handles.crc_types(index2)>-2));
+    idxred  = index2(handles.crc_types(index2)<-1);
+    idxblue = index2(handles.crc_types(index2)>-2);
 
-    xred=handles.pos(1,idxred);
-    yred=handles.pos(2,idxred);
+    xred = handles.pos(1,idxred);
+    yred = handles.pos(2,idxred);
 
-    xblu=handles.pos(1,idxblue);
-    yblu=handles.pos(2,idxblue);
+    xblu = handles.pos(1,idxblue);
+    yblu = handles.pos(2,idxblue);
 
     cleargraph(handles)
     hold on
@@ -225,7 +225,7 @@ function Select_Callback(hObject, eventdata, handles)
 contents = get(hObject,'String');
 if isempty(contents)
 else
-    %Remove the "activated" item from the list "Available Channels"
+    % Remove the "activated" item from the list "Available Channels"
     [dumb1,dumb2,index]=intersect(contents{get(hObject,'Value')},contents);
     temp=[contents(1:index-1) ; contents(index+1:length(contents))];
     set(handles.Select,'String',temp);
@@ -263,11 +263,11 @@ else
     end
     set(handles.Deselect,'String',temp);
 
-    %Prevent crashing if the first/last item of the list is selected.
+    % Prevent crashing if the first/last item of the list is selected.
     set(handles.Select,'Value',max(index-1,1));
     set(handles.Deselect,'Value',1);
 
-    %if multiple comparison, no more than one channel
+    % if multiple comparison, no more than one channel
     contents=get(handles.Select,'String');
     if isfield(handles,'multcomp') && (handles.multcomp && length(contents)>1 || isempty(contents))
         set(handles.PLOT,'enable','off');
@@ -306,12 +306,12 @@ function Deselect_Callback(hObject, eventdata, handles)
 contents = get(hObject,'String');
 if length(contents)==0
 else
-    %Remove the "activated" item from the list "Available Channels"
+    % Remove the "activated" item from the list "Available Channels"
     [dumb1,dumb2,index]=intersect(contents{get(hObject,'Value')},contents);
     temp=[contents(1:index-1) ; contents(index+1:length(contents))];
     set(handles.Deselect,'String',temp);
 
-    %Add the "activated" in the list "Selected Channels"
+    % Add the "activated" in the list "Selected Channels"
     if length(get(handles.Select,'String'))==0
         temp={contents{get(hObject,'Value')}};
     else
@@ -319,7 +319,7 @@ else
     end
     set(handles.Select,'String',temp);
 
-    %Prevent crashing if the first/last item of the list is selected.
+    % Prevent crashing if the first/last item of the list is selected.
     set(handles.Deselect,'Value',max(index-1,1));
     set(handles.Select,'Value',1);
 
@@ -763,18 +763,19 @@ function PLOT_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents=get(handles.Select,'String');
+contents = get(handles.Select,'String');
    
 if isfield(handles,'multcomp') && (handles.multcomp && length(contents)>1 || isempty(contents))%no more than one channel if multiple file comparison
     beep
     disp('Select only one channel for multiple files comparison')
     return
 elseif ~isfield(handles,'multcomp') || ~handles.multcomp
-    [dumb1,index]=intersect(upper(chanlabels(handles.Dmeg{1})),upper(get(handles.Select,'String')));
+    [dumb1,index] = intersect( upper(chanlabels(handles.Dmeg{1})), ...
+        upper(get(handles.Select,'String')));
     try
-        flags.index=sortch(handles.Dmeg{1},index);
+        flags.index = sortch(handles.Dmeg{1},index);
     catch
-        flags.index=fliplr(sort(index));
+        flags.index = fliplr(sort(index));
     end
 else
     flags.dates=handles.dates;
@@ -835,49 +836,30 @@ delete(handles.figure1)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % SORT CHANNEL FX
-function idx=sortch(d,index)
+function idx = sortch(d,index)
 
 % Find the EOG channels
+EOGchan = eogchannels(d);
+EOGchan = intersect(EOGchan,index);
 
-A=strfind(upper(chanlabels(d,index)),'EOG');
-EOGchan=[];
-for i=1:length(A);
-    if A{i}>0
-        EOGchan=[EOGchan index(i)];
-    end
-end
 % Find the ECG channels
+ECGchan = ecgchannels(d);
+ECGchan = intersect(ECGchan,index);
 
-A=strfind(upper(chanlabels(d,index)),'ECG');
-ECGchan=[];
-for i=1:length(A);
-    if A{i}>0
-        ECGchan=[ECGchan index(i)];
-    end
-end
+% Find the EMG channels
+EMGchan = emgchannels(d);
+EMGchan = intersect(EMGchan,index);
 
-A=strfind(upper(chanlabels(d,index)),'EMG');
-EMGchan=[];
-for i=1:length(A);
-    if A{i}>0
-        EMGchan=[EMGchan index(i)];
-    end
-end
+% Find the M/EEG channels
+EEGchan = meegchannels(d);
+EEGchan = intersect(EEGchan,index);
 
-A=strfind(upper(chantype(d,index)),'EEG');
-EEGchan=[];
-for i=1:length(A);
-    if A{i}>0
-        EEGchan=[EEGchan index(i)];
-    end
-end
+allbad = [EOGchan ECGchan EMGchan EEGchan];
+other  = setdiff(index,allbad);
 
-allbad=[EOGchan ECGchan EMGchan EEGchan];
-other=setdiff(index,allbad);
-
-otherknown=[];
-othernotknown=[];
-chanstr=chantype(d);
+otherknown    = [];
+othernotknown = [];
+chanstr = chantype(d);
 for ff = other
     if ~strcmpi(chanstr,'Other')
         othernotknown = [othernotknown ff];
@@ -887,23 +869,23 @@ for ff = other
 end
 other = [otherknown othernotknown];
 
+allbad = [EOGchan ECGchan EMGchan other];
+eeg = setdiff(index,allbad);
 
-allbad=[EOGchan ECGchan EMGchan other];
-eeg=setdiff(index,allbad);
-
-AFrontal = intersect(find(strncmp(chanlabels(d),'AF',2) ==1),eeg);
-Frontal = intersect(find(strncmp(chanlabels(d),'F',1) ==1),eeg);
-Coronal = intersect(find(strncmp(chanlabels(d),'C',1) ==1),eeg);
-Temporal = intersect(find(strncmp(chanlabels(d),'T',1) ==1),eeg);
-Parietal= intersect(find(strncmp(chanlabels(d),'P',1) ==1),eeg);
-Occipital= intersect(find(strncmp(chanlabels(d),'O',1) ==1),eeg);
+AFrontal  = intersect(find(strncmp(chanlabels(d),'AF',2) ==1),eeg);
+Frontal   = intersect(find(strncmp(chanlabels(d),'F',1) ==1),eeg);
+Coronal   = intersect(find(strncmp(chanlabels(d),'C',1) ==1),eeg);
+Temporal  = intersect(find(strncmp(chanlabels(d),'T',1) ==1),eeg);
+Parietal  = intersect(find(strncmp(chanlabels(d),'P',1) ==1),eeg);
+Occipital = intersect(find(strncmp(chanlabels(d),'O',1) ==1),eeg);
 
 neweeg = [Occipital Parietal Temporal Coronal Frontal AFrontal];
-eeg2=setdiff(eeg,neweeg);
+eeg2 = setdiff(eeg,neweeg);
 
 eeg = [eeg2 neweeg];
 
-idx=[otherknown othernotknown ECGchan EMGchan EOGchan eeg];
+idx = [otherknown othernotknown ECGchan EMGchan EOGchan eeg];
+
 %%%%%%%%%%%%%%%
 function cleargraph(handles)
 
@@ -990,27 +972,27 @@ if ~isempty(YET)
     end
 end
 set(handles.Select,'String',Selection);
-%Select all the channels there are in the file
+% Select all the channels there are in the file
 contents = upper(chanlabels(handles.Dmeg{1}));
-[dumb1,index,dumb2]=intersect(contents,Selection);
+[dumb1,index,dumb2] = intersect(contents,Selection);
 
-%Remove channels concerned by the Selection
+% Remove channels concerned by the Selection
 DES = get(handles.Deselect,'String');
 temp = setdiff(DES,Selection);
 set(handles.Deselect,'String',temp);
-%To avoid warning
+% To avoid warning
 set(handles.Select,'Value',1);
 set(handles.Deselect,'Value',1);
 [dumb1,dumb2,index2]=intersect(upper(Selection),upper(handles.names));
-%Indicate the placement of the electrodes selected
-idxred=index2(find(handles.crc_types(index2)<-1));
-idxblue=index2(find(handles.crc_types(index2)>-2));
+% Indicate the placement of the electrodes selected
+idxred  = index2(find(handles.crc_types(index2)<-1));
+idxblue = index2(find(handles.crc_types(index2)>-2));
 
-xred=handles.pos(1,idxred);
-yred=handles.pos(2,idxred);
+xred = handles.pos(1,idxred);
+yred = handles.pos(2,idxred);
 
-xblu=handles.pos(1,idxblue);
-yblu=handles.pos(2,idxblue);
+xblu = handles.pos(1,idxblue);
+yblu = handles.pos(2,idxblue);
 
 cleargraph(handles)
 hold on
