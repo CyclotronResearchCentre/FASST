@@ -69,29 +69,40 @@ handles.file    =   varargin{1}.file;
 handles.figz    =   0;
 handles.Dmeg    =   varargin{1}.Dmeg;
 
+if isfield(varargin{1},'scoresleep')
+    handles.scoring     =   1;
+else
+    handles.scoring     =   0;
+end
+
 for i=1:numel(handles.Dmeg)
     handles.Dmeg{i} =   meeg(handles.Dmeg{i});
 end
 D = handles.Dmeg{1};
 % distinct index to make easier to select data by type
 handles.index   =   varargin{1}.index;
-handles.indexMEEG   =   fliplr(sort(intersect(meegchannels(handles.Dmeg{1}),handles.index)));
+handles.indexMEEG   =   fliplr(intersect(meegchannels(handles.Dmeg{1}),handles.index));
 handles.indnomeeg   =   setdiff(handles.index, handles.indexMEEG);
-handles.inddis      =   [handles.indnomeeg handles.indexMEEG];
+% handles.inddis      =   [handles.indnomeeg handles.indexMEEG];
+handles.inddis      =   [handles.index];
 handles.indeeg = [meegchannels(D,'EEG') meegchannels(D,'LFP')];
 % Default values
 set(handles.normalize,'Value',0);
 
 % Take the window size used to score
-if isfield (handles.Dmeg{1},'CRC')
-  if isfield (handles.Dmeg{1}.CRC,'score')
-      handles.winsize   =   handles.Dmeg{1}.CRC.score{3,1};
-  else 
-      handles.winsize   =   crcdef.winsize;
-  end 
-else 
+if handles.scoring % scoring sleep data
+    if isfield (handles.Dmeg{1},'CRC')
+        if isfield (handles.Dmeg{1}.CRC,'score')
+            handles.winsize   =   handles.Dmeg{1}.CRC.score{3,1};
+        else 
+            handles.winsize   =   crc_get_defaults('score.winsize');
+        end
+    else 
+        handles.winsize     =   crc_get_defaults('score.winsize');
+    end 
+else % no scoring
     handles.winsize     =   crcdef.winsize;
-end 
+end
 
 handles.scale       =   crcdef.scale;
 handles.eegscale    =   [];
@@ -174,14 +185,6 @@ uimenu(handles.manevent,'Label', ...
 %--------------------------------------------
 %coming back from "detection" or "Event_menu"
 
-if isfield(varargin{1},'scoresleep')
-    handles.scoring     =   1;
-else
-    handles.scoring     =   0;
-end
-
-%---------------------------------------------
-
 %-------------------------------------------
 
 if isfield(varargin{1},'base')
@@ -192,7 +195,6 @@ else
 end
 
 %---------------------------------------------
-
 
 if isfield(varargin{1},'delmap')
     set(handles.delaymap,'visible','on');
@@ -2339,6 +2341,7 @@ set(handles.score_menu,'enable','on')
 set(handles.score_stats,'enable','on')
 set(handles.score_import,'enable','on')
 set(handles.score_compare,'enable','on')
+set(handles.score_check,'enable','on')
 set(handles.score_user,'enable','on')
 set(handles.vertgrid,'enable','on')
 set(handles.horgrid,'enable','on')
@@ -2852,8 +2855,6 @@ hUpdateButton = uicontrol(... % Button for updating selected plot
     'Position',[0.35 0.025 0.3 0.05],...
     'String','Merge Score',...
     'Callback', {@crc_hypnomerge,handles,Mainhandle});
-%     'Callback', {@merge,handles,Mainhandle});
-
 
 handles.subcmp(1) = subplot(311);
 handles.subcmp(2) = subplot(312);
@@ -2875,6 +2876,7 @@ crc_hypnoplot(handles.subcmp(2),...
 [mtch,perc_match] = crc_hypnocompare([handles.subcmp(3) z], [1 2], ...
                                 handles.Dmeg{1}.CRC.score, handles);
 handles.match = mtch;
+handles.perc_match = perc_match;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -2969,6 +2971,15 @@ if handles.Dmeg{1}.CRC.score{3,Val1}==handles.Dmeg{1}.CRC.score{3,Val2}
         [handles.Dmeg{1}.CRC.score{7,Val1} ; ...
          handles.Dmeg{1}.CRC.score{7,Val2}];
 
+     if isfield(handles.Dmeg{1}.CRC,'sc_merge')
+         Nmerge = size(handles.Dmeg{1}.CRC.sc_merge,1);
+         handles.Dmeg{1}.CRC.sc_merge{Nmerge+1,1} = handles.Dmeg{1}.CRC.score{2,end};
+         handles.Dmeg{1}.CRC.sc_merge{Nmerge+1,2} = handles.perc_match;
+     else
+         handles.Dmeg{1}.CRC.sc_merge{1,1} = handles.Dmeg{1}.CRC.score{2,end};
+         handles.Dmeg{1}.CRC.sc_merge{1,2} = handles.perc_match;
+     end
+     
     handles.addardeb = [handles.addardeb 1];
     handles.adddeb   = [handles.adddeb 1];
     handles.add_eoi  = [handles.add_eoi 1];
@@ -2990,8 +3001,10 @@ if handles.Dmeg{1}.CRC.score{3,Val1}==handles.Dmeg{1}.CRC.score{3,Val2}
     set(handles.scorers{handles.currentscore},'Checked','on');
     delete(get(handles.axes4,'Children'));
     set(handles.figure1,'CurrentAxes',handles.axes4);
-    crc_plothypno(handles.axes4,handles.score{4,handles.currentscore}, ...
-        handles,handles.score{3,handles.currentscore})
+    crc_hypnoplot(handles.axes4, handles, ...
+        handles.score{3,handles.currentscore}, ...
+        handles.score{1,handles.currentscore}, ...
+        handles.score{2,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1);
     close(fig);
 else
@@ -2999,6 +3012,30 @@ else
 end
 
 guidata(gcbo, handles);
+
+% --------------------------------------------------------------------
+function score_check_Callback(hObject, eventdata, handles)
+% hObject    handle to score_import (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get stuff out
+score  = handles.score;
+scorer = handles.currentscore;
+i_win  = str2double(get(handles.currentpage,'string'));
+n_disp = crc_get_defaults('score.check_disnum');
+
+% Do the check
+[n_empty,l_empty] = crc_check_hypno(score, scorer, i_win, n_disp);
+
+% jumpt to next empty window or not
+if crc_get_defaults('score.check_jump') && ~isempty(n_empty)
+    set(handles.slider1,'val',(n_empty-1)*handles.winsize)
+    mainplot(handles)
+end
+
+% % Update handles structure
+% guidata(hObject, handles);
 
 %--------------------------------------------------------------------------
 % menu on right click
@@ -4408,7 +4445,7 @@ handles.score(2,handles.num_scorers +1) = inputdlg(prompt,dlg_title,num_lines,de
 
 %Choosing size of window to score
 prompt = {'Please choose the size of the scoring windows'};
-def = {crc_get_defaults('score.winsize')};
+def = {num2str(crc_get_defaults('score.winsize'))};
 num_lines = 1;
 dlg_title = 'Size of the scoring windows (in sec)';
 handles.score{3,handles.num_scorers +1} = inputdlg(prompt,dlg_title,num_lines,def);
@@ -5638,7 +5675,7 @@ if ~handles.multcomp
                 elseif disc && ~chostype && strcmpi(etype{jj},typevt) || fmric
                     msg = etype{jj};
                 elseif ~disc
-                    msg = etpv{jj};
+                    msg = num2str(etpv{jj});
                 end
              else
                 %msg must contain value in base 10 :

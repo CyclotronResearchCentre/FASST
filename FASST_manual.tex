@@ -120,9 +120,9 @@ University of Li\`ege, B30\\
 On Dr. Pierre Maquet's impulse we started writing these tools to analyze our sleep EEG-fMRI data and tackle four crucial issues:
 \begin{description}
 	\item[Continuous M/EEG.]Long multi-channel recording of M/EEG data can be enormous. These data are cumbersome to handle as it usually involves displaying, exploring, comparing, chunking, appending data~sets, etc.
-    \item[EEG-fMRI.]When recording EEG and fMRI data simultaneously, the EEG signal acquired contains, on top of the usual neural and ocular activity, artefacts induced by the gradient switching and high static field of an MR scanner. The rejection of theses artafacts is not easy especially when dealing with brain spontaneous activity.
-    \item[Scoring M/EEG.]Reviewing and scoring continuous M/EEG recodings, such as is common with sleep recordings, is a tedious task as the scorer has to manually browse through the entire data set and give a ``score'' to each time-window displayed.
-    \item[Waves detection.] Continuous and triggerless recordings of M/EEG data show specific wave patterns, characteristic of the subject's state (e.g., sleep spindles or slow waves). Their auomatic detection is thus important to assess those states.
+    \item[EEG-fMRI.]When recording EEG and fMRI data simultaneously, the EEG signal acquired contains, on top of the usual neural and ocular activity, artefacts induced by the gradient switching and high static field of an MR scanner. The rejection of theses artefacts is not easy especially when dealing with brain spontaneous activity.
+    \item[Scoring M/EEG.]Reviewing and scoring continuous M/EEG recordings, such as is common with sleep recordings, is a tedious task as the scorer has to manually browse through the entire data set and give a ``score'' to each time-window displayed.
+    \item[Waves detection.] Continuous and triggerless recordings of M/EEG data show specific wave patterns, characteristic of the subject's state (e.g., sleep spindles or slow waves). Their automatic detection is thus important to assess those states.
 \end{description}
 Currently the toolbox can efficiently deal with these issues, as described in section \ref{sec:functions}. Eventhough the toolbox was originally divised for EEG data, it also handles MEG and LFP data without any problem, if in the right format (see section \ref{sec:datachan}). 
 \fasst is in effect an add-on toolbox for SPM8\cite{SPM8,Litvak2011} and relies on SPM8 data format and functions to perform some operations.

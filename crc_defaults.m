@@ -162,6 +162,8 @@ crc_def.score.stnames_sS          = {...
     'MT', ...
     'Unsc'};
 % NOTE: the hypnogram plotting is hardcoded with 8 levels!!!
+crc_def.score.check_disnum = 10; % #empty windows printed out at prompt
+crc_def.score.check_jump   = true; % jumping (or not) to next empty window
 
 %% %%%%%%%%%%%%%%%%% Processing parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
