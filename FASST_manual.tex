@@ -812,16 +812,16 @@ When the spectrogram of a file is computed, several bits of information are adde
 \ei
 
 \paragraph{Scoring information}
-When a file has been scored at least one time, a cell array {\tt D.CRC.score} of dimension $8\times N$ is added to the structure, where $N$ is the number of scorer(s). Each column contains the details of one score, from row one to seven:
+When a file has been scored at least one time, a cell array {\tt D.CRC.score} of dimension $8\times N$ is added to the structure, where $N$ is the number of scorer(s). Each column contains the details of one score, from row one to eight:
 \bi
-\item a $1\times R$ vector containing numbers representing the score, where $R$ is the number of scoring windows. ``Stage'' labels  are defined in the {\tt crc\_defaults.m} file. By default they are set as: 0 correspond to ``Wakefulness'', 1-4 to ``Sleep stage 1-4'' respectively, 5 to ``REM sleep'', 6 to ``Movement Time'', and 7 to ``Unscorable'';
-\item the name of the scorer;
-\item the length of a scoring window (in seconds);
-\item two numbers indicating the time when the light was shut off and door was closed (FPL, first number), and when the light was turned on and the door was opened (OPL, second number). These measures are given in seconds relative to the beginning of the file;
-\item a $T\times 2$ array, where $T$ is the number of artefact episodes marked. The first column is the beginning of each artefactual episode and the second, the end of it. All the times expressed in seconds relative to the beginning of the file;
-\item same as artefact episodes but for arousals;
-\item same as artefact episodes but for events/episodes of interest;
-\item a $T\times 1$ cell array, containing the label of each artefact. The labels for 'unspecified' artefacts are left empty.
+\item{{\tt score\{1,:\}},} a $1\times R$ vector containing numbers representing the score, where $R$ is the number of scoring windows. ``Stage'' labels  are defined in the {\tt crc\_defaults.m} file. By default they are set as: 0 correspond to ``Wakefulness'', 1-4 to ``Sleep stage 1-4'' respectively, 5 to ``REM sleep'', 6 to ``Movement Time'', and 7 to ``Unscorable'';
+\item{{\tt score\{2,:\}},} the name of the scorer;
+\item{{\tt score\{3,:\}},} the length of a scoring window (in seconds);
+\item{{\tt score\{4,:\}},} two numbers indicating the time when the light was shut off and door was closed (FPL, first number), and when the light was turned on and the door was opened (OPL, second number). These measures are given in seconds relative to the beginning of the file;
+\item{{\tt score\{5,:\}},} a $T\times 3$ array, where $T$ is the number of artefact episodes marked. The first and the second columns is the beginning and end of each artefactual episode respectively, with all the times expressed in seconds relative to the beginning of the file. The third column indicates the channel index if the artefact is channel specific or 0 if it applies to all channels;
+\item{{\tt score\{6,:\}},} same as artefact episodes but for arousals;
+\item{{\tt score\{7,:\}},} same as artefact episodes but for events/episodes of interest;
+\item{{\tt score\{8,:\}},} a $T\times 1$ cell array, containing the label of each artefact. The labels for 'unspecified' artefacts are left empty.
 \ei
 
 \paragraph{SW detection information}

@@ -83,8 +83,8 @@ D = handles.Dmeg{1};
 handles.index   =   varargin{1}.index;
 handles.indexMEEG   =   fliplr(intersect(meegchannels(handles.Dmeg{1}),handles.index));
 handles.indnomeeg   =   setdiff(handles.index, handles.indexMEEG);
-% handles.inddis      =   [handles.indnomeeg handles.indexMEEG];
-handles.inddis      =   [handles.index];
+handles.inddis      =   [handles.indnomeeg handles.indexMEEG];
+% handles.inddis      =   [handles.index];
 handles.indeeg = [meegchannels(D,'EEG') meegchannels(D,'LFP')];
 % Default values
 set(handles.normalize,'Value',0);
@@ -2212,7 +2212,7 @@ try
         handles.score = cell(8,size(handles.Dmeg{1}.CRC.score,2));
 
         %Taking the score & username from the old cell array
-        handles.score(1:2,:)=handles.Dmeg{1}.CRC.score;
+        handles.score(1:2,:)=handles.Dmeg{1}.CRC.score(1:2,:);
 
         for ii=1:size(handles.Dmeg{1}.CRC.score,2)
             % Old cell array had a 20 seconds windows size
@@ -2243,16 +2243,16 @@ try
             handles.score{8,ii}=[];
         end
     else
-        handles.score=handles.Dmeg{1}.CRC.score;
-        for ii=1:size(handles.Dmeg{1}.CRC.score,2)
-            if size(handles.Dmeg{1}.CRC.score,1)==7
-                handles.score{8,ii}=[];
+        handles.score = handles.Dmeg{1}.CRC.score;
+        if size(handles.score,1)==7
+            for isc=1:size(handles.score,2)
+                handles.score{8,isc}=cell(size(handles.score{5,isc},1),1);
             end
         end
             
     end
-    handles.Dmeg{1}.CRC.score=handles.score;
-    handles.currentscore=1;
+    handles.Dmeg{1}.CRC.score = handles.score;
+    handles.currentscore = 1;
     if ~isempty (handles.score{5,handles.currentscore})&&size(handles.score{5,handles.currentscore},2)<3
         handles.score{5,1}(:,3)=0;
     end
@@ -3087,9 +3087,9 @@ handles.score{8,handles.currentscore} = ...
     handles.score{8,handles.currentscore}(row+1:size(handles.score{8,handles.currentscore},1))];
 
 set(handles.axes1,'Color',[1 1 1]);
-%Save the changes
-handles.Dmeg{1}.CRC.score=handles.score;
-D=handles.Dmeg{1};
+% Save the changes
+handles.Dmeg{1}.CRC.score  =handles.score;
+D = handles.Dmeg{1};
 save(D);
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
@@ -3218,11 +3218,12 @@ handles.unspecart   =   1;
 lab     =   'unspecified';
 
 % add the eighth line
-for isc     =   1:size(handles.score,2)
-    if size(handles.score{isc},1)<8
-        handles.score{8,isc}    =   cell(size(handles.score{5,isc},1),1);
+if size(handles.score,1)<8
+    for isc=1:size(handles.score,2)
+        handles.score{8,isc}=cell(size(handles.score{5,isc},1),1);
     end
 end
+
 % add the zeros on the last column (to adapt with configuration for artifacts on single channel
 if size(handles.score{5,handles.currentscore},2)<3
     for ii = 1 : size(handles.score{5,handles.currentscore},1)
@@ -3333,8 +3334,8 @@ c=get(b,'Parent');
 handles=guidata(c);
 
 % add the eighth line
-for isc=1:size(handles.score,2)
-    if size(handles.score{isc},1)<8
+if size(handles.score,1)<8
+    for isc=1:size(handles.score,2)
         handles.score{8,isc}=cell(size(handles.score{5,isc},1),1);
     end
 end
@@ -3355,7 +3356,7 @@ channel     =   handles.inddis(chan);
 addend      =   intersect(handles.chan, channel);
 
 %label noted in the last line to describe the artefacts  
-lab='unspecified on only one channel';  
+lab = 'unspecified on only one channel';  
 
 if ~isempty(strfind(chantodel,'Start'))
     if ~isempty(handles.score{5,handles.currentscore})
@@ -3380,10 +3381,11 @@ if ~isempty(strfind(chantodel,'Start'))
                 handles.score{5,handles.currentscore}=[handles.score{5,handles.currentscore}; time tfinal channel];
                 handles.score{8,handles.currentscore}=[handles.score{8,handles.currentscore}; {lab}];          
               	handles.chan =[handles.chan channel]; 
+                plot(handles.axes1,ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
+                    'Color',[0 0 0])
+                axes(handles.axes1)
                 text(time,chan*handles.scale + handles.scale/2, ...
                     'Start Bad Chan','UIContextMenu',handles.Deletemenuone,'Color',[0 0 0],'FontSize',12) 
-                plot(ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
-                    'Color',[0 0 0])
             end
          end
     else
@@ -3391,10 +3393,11 @@ if ~isempty(strfind(chantodel,'Start'))
         handles.score{5,handles.currentscore}=[handles.score{5,handles.currentscore}; time tfinal channel];
         handles.score{8,handles.currentscore}=[handles.score{8,handles.currentscore}; {lab}]; 
         handles.chan =[handles.chan channel];  
+        plot(handles.axes1,ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
+            'Color',[0 0 0])
+        axes(handles.axes1)
         text(time,chan*handles.scale + handles.scale/2, ...
         	'Start Bad Chan','UIContextMenu',handles.Deletemenuone,'Color',[0 0 0],'FontSize',12) 
-        plot(ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
-            'Color',[0 0 0])
     end
 else
     if isempty(addend)
@@ -3417,10 +3420,11 @@ else
             else
                 handles.score{5,handles.currentscore}(in(end),2) = time;
                 handles.chan = setdiff(handles.chan, channel);
+                plot(handles.axes1,ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
+                    'Color',[0 0 0])
+                axes(handles.axes1)
                 text(time,chan*handles.scale + handles.scale/2, ...
                     'End Bad Chan','UIContextMenu',handles.Deletemenuone,'Color',[0 0 0],'FontSize',12) 
-                plot(ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
-                    'Color',[0 0 0])
              end 
         else 
             [ch, in, dum] = intersect(handles.score{5,handles.currentscore}(:,3), channel);
@@ -3431,10 +3435,11 @@ else
             else
                 handles.score{5,handles.currentscore}(in(end),2) = time;
                 handles.chan = setdiff(handles.chan, channel);
+                plot(handles.axes1,ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
+                    'Color',[0 0 0])
+                axes(handles.axes1)
                 text(time,chan*handles.scale + handles.scale/2, ...
                     'End Bad Chan','UIContextMenu',handles.Deletemenuone,'Color',[0 0 0],'FontSize',12) 
-                plot(ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
-                    'Color',[0 0 0])
             end
         end
     end
@@ -3578,7 +3583,7 @@ if ~isempty(handles.score{5,handles.currentscore})
                 end
             end      
         end
-        filtparam=handles.filter.coeffother;
+        filtparam = handles.filter.coeffother;
     else
         contents = get(handles.EEGpopmenu,'String');
         selchan=upper(contents{get(handles.EEGpopmenu,'Value')});
@@ -3599,7 +3604,7 @@ if ~isempty(handles.score{5,handles.currentscore})
                 end
             end
         end
-        filtparam=handles.filter.coeffother;
+        filtparam = handles.filter.coeffother;
     end
     switch  selchan
         case 'MEG'
@@ -3607,24 +3612,24 @@ if ~isempty(handles.score{5,handles.currentscore})
             normalize = get(handles.normalize,'Value');
             chtyp=chantype(handles.Dmeg{1},channel);
             if  strcmpi(chtyp,'MEGMAG') 
-                plt=plot(temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall,'Color',[0.25 0.25 0.25]);
+                plt=plot(handles.axes1,temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall,'Color',[0.25 0.25 0.25]);
             elseif  strcmpi(chtyp,'MEGPLANAR')
                 if (~normalize)
-                    plt=plot(temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall,'LineStyle',':','Color',[0 0.5 0]);
+                    plt=plot(handles.axes1,temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall,'LineStyle',':','Color',[0 0.5 0]);
                 else
-                    plt=plot(temps,factscale+(((handles.Dmeg{1}(channel,toshow)).^2+...
+                    plt=plot(handles.axes1,temps,factscale+(((handles.Dmeg{1}(channel,toshow)).^2+...
                         (handles.Dmeg{1}(channel+1,toshow)).^2).^0.5)/scall,'Color',[0 0.5 0]);
                 end
             end
          case    'REF1'
-            plt=plot(temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall);             
+            plt = plot(handles.axes1,temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall);             
          case    'MEAN OF REF'
             basedata = handles.Dmeg{1}(channel,toshow);
             ref2idx = find(strcmp(chanlabels(handles.Dmeg{1}),'REF2'));
             scnddata = handles.Dmeg{1}(channel,toshow) - ...
                 handles.Dmeg{1}(ref2idx,toshow);
             toplotdat = mean([basedata ; scnddata]);
-            plt=plot(temps,factscale+(toplotdat)/scall);
+            plt = plot(handles.axes1,temps,factscale+(toplotdat)/scall);
 
         case    'M1-M2'
             basedata = handles.Dmeg{1}(channel,toshow);
@@ -3633,7 +3638,7 @@ if ~isempty(handles.score{5,handles.currentscore})
             meanM = mean([handles.Dmeg{1}(M1idx,toshow) ; ...
                 handles.Dmeg{1}(M2idx,toshow)]);
             toplotdat = basedata - meanM;
-            plt=plot(temps,factscale+(toplotdat)/scall);
+            plt = plot(handles.axes1,temps,factscale+(toplotdat)/scall);
 
         case    'BIPOLAR'
             if handles.crc_types(index2)>0
@@ -3646,17 +3651,17 @@ if ~isempty(handles.score{5,handles.currentscore})
             if ~isempty(index3)
                 bipolar = handles.Dmeg{1}(channel,toshow) - ...
                     handles.Dmeg{1}(index3,toshow);
-                plt=plot(temps,factscale+(bipolar)/scall,'Color',[0 0 0]);
+                plt = plot(handles.axes1,temps,factscale+(bipolar)/scall,'Color',[0 0 0]);
             else
-                plt=plot(temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall,'Color',[0  0 0]);
+                plt = plot(handles.axes1,temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall,'Color',[0  0 0]);
             end
         otherwise
-        [dumb1,index3] = ...
-            intersect(upper(chanlabels(handles.Dmeg{1})),selchan);
-        basedata = handles.Dmeg{1}(channel,toshow);
-        toplotdat = basedata - ...
-            handles.Dmeg{1}(index3,toshow);
-        plt=plot(temps,factscale+(toplotdat)/scall);
+            [dumb1,index3] = ...
+                intersect(upper(chanlabels(handles.Dmeg{1})),selchan);
+            basedata = handles.Dmeg{1}(channel,toshow);
+            toplotdat = basedata - ...
+                handles.Dmeg{1}(index3,toshow);
+            plt = plot(handles.axes1,temps,factscale+(toplotdat)/scall);
     end
     filterlowhigh(plt,1,handles,filtparam,factscale)
     sart = find(and(or(not(handles.score{5,handles.currentscore}(:,1)>tfins),...
@@ -3667,14 +3672,14 @@ if ~isempty(handles.score{5,handles.currentscore})
         time = sdebut+1 : sfin;               
         time = time/fsample(handles.Dmeg{1});
         X = get(plt,'YData');
-        %Plot
+        % Plot
         X = X(sdebut-tdebs*fsample(handles.Dmeg{1})+1:sfin-tdebs*fsample(handles.Dmeg{1}))+factscale-mean(X);
-        plot(time,X,'UIContextMenu',handles.Deletemenuone,'LineWidth',1,'Color',[0.8 0.8 0.8]);
+        plot(handles.axes1,time,X,'UIContextMenu',handles.Deletemenuone,'LineWidth',1,'Color',[0.8 0.8 0.8]);
     end
 end
 % ---- save data ----  
-handles.Dmeg{1}.CRC.score=handles.score;
-D=handles.Dmeg{1};
+handles.Dmeg{1}.CRC.score = handles.score;
+D = handles.Dmeg{1};
 save(D);
 
 % ---- update menu ----
@@ -3715,8 +3720,8 @@ c   = 	get(b,'Parent');
 handles	=   guidata(c);
 handles.unspecart   =   0;
 
-for isc=1:size(handles.score,2)
-    if size(handles.score{isc},1)<8
+if size(handles.score,1)<8
+    for isc=1:size(handles.score,2)
         handles.score{8,isc}=cell(size(handles.score{5,isc},1),1);
     end
 end
@@ -6063,15 +6068,15 @@ if length(X) == 1
 else
     set(handles.figure1,'CurrentAxes',handles.axes5)%,'PaperSize',[20.98 29.68]);
     reset(handles.axes5)
-     X       =   filterforspect(handles,X,[0.001 fs/3],fil);
+    X       =   filterforspect(handles,X,[0.001 fs/3],fil);
     [P,F]   =   pwelch(X,[],[],[],fs);    
     P       =   log(P);
-    p_fft   =   plot(F,P,'Color',cmap(Col,:));
+    p_fft   =   plot(handles.axes5,F,P,'Color',cmap(Col,:));
     set(p_fft,'tag', 'powerspctrm')
     titre   =   chandis;
-    title(titre,'FontSize',12,'FontWeight','demi','FontName','Consolas')
-    ylabel('Log of (power/Hz) / ','FontSize',10,'FontName','Consolas')
-    xlabel('Frequency (Hz)','FontSize',10,'FontName','Consolas')
+    title(handles.axes5,titre,'FontSize',12,'FontWeight','demi','FontName','Consolas')
+    ylabel(handles.axes5,'Log of (power/Hz) / ','FontSize',10,'FontName','Consolas')
+    xlabel(handles.axes5,'Frequency (Hz)','FontSize',10,'FontName','Consolas')
 %     if P<0
 %         set(handles.axes5,'XTick',[0 5 10 15 20],'YTick',[-60 -40 -20 0],'ZTick',[],...
 %             'XTickLabel',{'0' '5' '10' '15' '20'},'YTickLabel',{'-60' '-40' '-20' '0'},'ZTickLabel',{})
@@ -6083,7 +6088,7 @@ else
 %     end
     xd = str2double(get(handles.pwrblw,'String'));
     xf = str2double(get(handles.pwrabv,'String'));
-    xlim([xd xf])
+    xlim(handles.axes5,[xd xf])
     grid on
 end  
 return;
@@ -6182,8 +6187,8 @@ if get(handles.counterspect,'Value')
 
     chandeb = floor(min(handles.coor(2,:))/handles.scale)+1;
     chanfin = floor(max(handles.coor(2,:))/handles.scale);  
-    chan    =   chan(chandeb : chanfin);
-    fs      =   fsample(handles.Dmeg{1});   
+    chan    = chan(chandeb : chanfin);
+    fs      = fsample(handles.Dmeg{1});   
 
     tt = sort(handles.coor(1,:));
     temps = tt(1) :1/fs: tt(end);

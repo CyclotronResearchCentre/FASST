@@ -458,14 +458,14 @@ function chunk_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-evt=events(handles.Dmeg);
+evt = events(handles.Dmeg);
 
 if get(handles.Begstyle,'Value')==1
     %Time Mode
 
-    Begh=str2double(get(handles.Begh,'String'));
-    Begm=str2double(get(handles.Begm,'String'));
-    Begs=str2double(get(handles.Begs,'String'));
+    Begh = str2double(get(handles.Begh,'String'));
+    Begm = str2double(get(handles.Begm,'String'));
+    Begs = str2double(get(handles.Begs,'String'));
 
     if isnan(Begh) || isnan(Begm) || isnan(Begs) || ...
             (Begm>60) || (Begs>60) || (Begh<0) || (Begm<0) || (Begs<0)
