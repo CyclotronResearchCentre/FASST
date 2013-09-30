@@ -249,9 +249,9 @@ In both cases, before any `advanced processing', i.e. anything more than just ha
 
 When converting data with \fasst, there is a bit more information that can be retrieved than with SPM8/FT. If the recording time of the data, i.e. clock time of the beginning of the recording, is available, then that information is extracted and saved in the {\tt meeg} object. This information can be useful for
 \bi
-\item single file display. For example with night long recording, it's easier to be able to look at the 'real world' recording time instead of the time elapsed since the beginning of the recording
-\item multiple file display. The display of multiple data files (raw vs. chunked and filtered for example) is then synchronized on the 'real worl' recording time.
-\item data handling. When chunking or appending data set(s), the 'real world' recording time is accounted for.
+\item single file display. For example with night long recording, it's easier to be able to look at the `real world' recording time instead of the time elapsed since the beginning of the recording
+\item multiple file display. The display of multiple data files (raw vs. chunked and filtered for example) is then synchronized on the `real world' recording time.
+\item data handling. When chunking or appending data set(s), the `real world' recording time is accounted for.
 \ei
 
 \subsubsection{Brain Products data format conversion}
@@ -359,7 +359,7 @@ The `Score Sleep' button (Fig.~\ref{fig:TB_dismain}-G) allows you to launch the 
 
 The box below the time-slider shows the current time~(Fig.~\ref{fig:TB_dismain}-J), in the middle of the display window, expressed in seconds, from the beginning of the recording; the other number is the overall length of the recording also expressed in seconds. You can type in a value to jump directly to any moment of interest in the recording.
 
-Events comprised in the data set are displayed as small triangles on the display. The `events' panel  (Fig.~\ref{fig:TB_dismain}-E) allows to scroll through these events, by first choosing which events type and value to display (respectively the left and right pull-down menus) and then using the `previous� and `next' buttons to move to the nearest previous and next event. The events types and values are those saved in the {\tt events} field of the data.
+Events comprised in the data set are displayed as small triangles on the display. The `events' panel  (Fig.~\ref{fig:TB_dismain}-E) allows to scroll through these events, by first choosing which events type and value to display (respectively the left and right pull-down menus) and then using the `previous' and `next' buttons to move to the nearest previous and next event. The events types and values are those saved in the {\tt events} field of the data.
 
 For the case where waves (e.g. slow waves or sleep spindles) were automatically detected (see section \ref{sec:WaveDetect}), some specific codes are used:
 \bi
@@ -404,8 +404,8 @@ Sometimes during long recording session, the operator may need to stop the recor
 
 The routine works with two files at a time. So when you have more than two files, you should append the first two files which creates a new file that you append with the third, and so on:
 \bi
-\item If the 'real world' recording time of each file is available, the routine first checks the 'real world' begining time of each file, and automatically determines the file order. Then it fills the gap between the end of the first data set and the beginning of the second by zero's, and eventually appends the second the file.
-\item If no 'real worl' time information is available in the file (after using the SPM8/FT conversion for example), the routine will ask if you want to operate a `blind concatenation'. In this case, the routine supposes that there is no missing samples between the consecutive file and that you entered the files in the correct order.
+\item If the `real world' recording time of each file is available, the routine first checks the `real world' begining time of each file, and automatically determines the file order. Then it fills the gap between the end of the first data set and the beginning of the second by zero's, and eventually appends the second the file.
+\item If no `real world' time information is available in the file (after using the SPM8/FT conversion for example), the routine will ask if you want to operate a `blind concatenation'. In this case, the routine supposes that there is no missing samples between the consecutive file and that you entered the files in the correct order.
 \ei
 In both cases, the resulting file has the same name as the first file selected prefixed with {\tt cc\_}. 
 
@@ -821,7 +821,7 @@ When a file has been scored at least one time, a cell array {\tt D.CRC.score} of
 \item{{\tt score\{5,:\}},} a $T\times 3$ array, where $T$ is the number of artefact episodes marked. The first and the second columns is the beginning and end of each artefactual episode respectively, with all the times expressed in seconds relative to the beginning of the file. The third column indicates the channel index if the artefact is channel specific or 0 if it applies to all channels;
 \item{{\tt score\{6,:\}},} same as artefact episodes but for arousals;
 \item{{\tt score\{7,:\}},} same as artefact episodes but for events/episodes of interest;
-\item{{\tt score\{8,:\}},} a $T\times 1$ cell array, containing the label of each artefact. The labels for 'unspecified' artefacts are left empty.
+\item{{\tt score\{8,:\}},} a $T\times 1$ cell array, containing the label of each artefact. The labels for `unspecified' artefacts are left empty.
 \ei
 
 \paragraph{SW detection information}
@@ -840,7 +840,7 @@ Other fields added to the {\tt D.CRC.spindles} object for the SP detection:
 \paragraph{Other information}
 Other fields added to the {\tt D.CRC} structure for display management:
 \bi
-\item {\tt .lastdisp}, time in seconds saving the position when clicking on the 'save position' button;
+\item {\tt .lastdisp}, time in seconds saving the position when clicking on the `save position' button;
 \item {\tt .goodevents}, a $1\times N\!ev$ vector of binary elements, $N\!ev$ being the number of events in the file, as in the {\tt D.events} field. 1 represents events marked as good (default) while 0 represents events marked as `bad' via the display.
 \ei
 

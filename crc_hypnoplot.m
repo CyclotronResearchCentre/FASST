@@ -27,7 +27,11 @@ elseif nargin<5 && ~isfield(handles,'score')
 end
 
 if nargin < 3
-    windowsize = def.winsize;
+    if isfield(handles,'currentscore')
+        windowsize = handles.score{2,handles.currentscore};
+    else
+        windowsize = def.winsize;
+    end
 end
 
 vect = -.5:1/windowsize:(.5-1/windowsize);
@@ -160,7 +164,11 @@ if ~isempty(eoi)
         'MarkerEdgeColor',[0.75 0.2 0.2],'tag','eoi')
 end
 
-evman = handles.type;
+if isfield(handles,'type')
+    evman = handles.type;
+else
+    evman = {};
+end
 evtot = events(D);
 if ~isempty(evtot)
     type_evtot = cellstr(char(evtot(:).type));

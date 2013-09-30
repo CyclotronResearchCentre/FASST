@@ -45,6 +45,7 @@ end
 if isempty(P), return; end
 
 [pth,name,ext] = fileparts(P);
+ext = deblank(ext);
 
 % conversion
 if strcmpi(ext,'.vhdr') % BrainProducts

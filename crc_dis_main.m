@@ -2421,7 +2421,7 @@ save(D);
 flags.Dmeg  =   handles.Dmeg;
 flags.type  =   handles.type;
 flags.file  =   handles.file;
-flags.index  =   handles.index;
+flags.index =   handles.index;
 flags.user  =   handles.currentscore;
 
 crc_modif_events(flags);
@@ -3351,8 +3351,13 @@ end
 chan = ceil((handles.Mouse(1,2)-handles.scale/2)/handles.scale);
 time = handles.Mouse(1,1);
 
+Chanslidval     =   get(handles.Chanslider,'Value');
+slidpos         =   Chanslidval-rem(Chanslidval,1);
+NbreChandisp    =   str2double(get(handles.NbreChan,'String'));
+tmp = slidpos : 1 : slidpos + NbreChandisp -1;
+
 chantodel   =   get(gcbo,'Label');
-channel     =   handles.inddis(chan);
+channel     =   handles.inddis(tmp(chan));
 addend      =   intersect(handles.chan, channel);
 
 %label noted in the last line to describe the artefacts  
@@ -3688,7 +3693,7 @@ uimenu(handles.addonlyone,'Label', ...
             ('Start artefact on this channel'),'Callback',{@addstart,handles}) ;
 if ~isempty(handles.chan)
     uimenu(handles.addonlyone,'Label', ...
-            'End artefac on this channel ','Callback',{@addstart,handles});
+            'End artefact on this channel ','Callback',{@addstart,handles});
 end
 
 set(handles.figure1,'CurrentAxes',handles.axes4)

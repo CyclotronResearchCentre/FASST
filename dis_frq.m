@@ -73,10 +73,10 @@ catch
     handles.file = fullfile(D.path,D.fname);
 end
 [pth na]= fileparts(handles.file);
-handles.Dmeg=D;
+handles.Dmeg = D;
 namesscorer = D.CRC.score(2,:);
 if length(namesscorer)>1
-    [nscor,v] = listdlg('PromptString','Select a file:',...
+    [nscor,v] = listdlg('PromptString','Select a scorer:',...
                       'SelectionMode','single',...
                       'ListString',namesscorer);   
 else 
@@ -129,8 +129,8 @@ if file<0
     else 
          handles.Dmeg.CRC.pwrspect.frqdata.fname = [pth ,filesep, na '.frq'];
     end
-else
-    handles.Dmeg.CRC.pwrspect.frqdata.fname = [pth ,filesep, name '.frq'];
+% else
+%     handles.Dmeg.CRC.pwrspect.frqdata.fname = [pth ,filesep, name '.frq'];
 end
         
 if isfield(handles.Dmeg,'info')
@@ -168,9 +168,9 @@ set(handles.figure1,'CurrentAxes',handles.axes1)
 cleargraph(handles.figure1)
  
 % Determine which channel is displayed
-cindex=meegchannels(handles.Dmeg);
-handles.spectrochan=cindex(1);
-cindex=cindex(1);
+cindex = meegchannels(handles.Dmeg);
+handles.spectrochan = cindex(1);
+cindex = cindex(1);
  
 %Plot Blue line
 fminblue=0.5;
@@ -306,12 +306,14 @@ if isfield(handles.Dmeg,'CRC')
         def=crc_get_defaults('score');
         strsw=def.stnames_S(1:6);
         handles.score=handles.Dmeg.CRC.score;
+        handles.scoring = true;
         strsw=[strsw,{'Slow Wave Sleep (3-4)'},{'NREM Sleep (2-4)'}];
         set(handles.figure1,'CurrentAxes',handles.Hypnogra)
-        crc_plothypno(handles.Hypnogra,...
-            handles.Dmeg.CRC.score{4,nscor},handles,...
+        crc_hypnoplot(handles.Hypnogra,...
+            handles,...
             handles.Dmeg.CRC.score{3,nscor},...
-            handles.Dmeg.CRC.score{1,nscor}, nscor);
+            handles.Dmeg.CRC.score{1,nscor},...
+            handles.Dmeg.CRC.score{2,nscor});
         set(handles.scorerpopmenu,'String',handles.Dmeg.CRC.score(2,:))
         set(handles.scorerpopmenu,'Value',nscor)
         set(handles.popstage,'String',strsw,'Value',1)
@@ -813,10 +815,11 @@ end
 guidata(hObject, handles);
 set(handles.figure1,'CurrentAxes',handles.Hypnogra)
  
-crc_plothypno(handles.Hypnogra,...
-    handles.Dmeg.CRC.score{4,handles.currentscore},handles,...
+crc_hypnoplot(handles.Hypnogra,...
+    handles,...
     handles.Dmeg.CRC.score{3,handles.currentscore},...
-    handles.Dmeg.CRC.score{1,handles.currentscore});
+    handles.Dmeg.CRC.score{1,handles.currentscore},...
+    handles.Dmeg.CRC.score{2,handles.currentscore});
  
 [pth na]= fileparts(handles.file); 
 name = [na,'_',char(Str(Val))];

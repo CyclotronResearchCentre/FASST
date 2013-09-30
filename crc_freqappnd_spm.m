@@ -23,7 +23,7 @@ if D.CRC.pwrspect.frqNbins ~= frqNbins || size(D.CRC.pwrspect.frqdata,1) ~= Ncha
 end
 
 if isfield(D.CRC.pwrspect,'frqNsamples')
-    D.CRC.pwrspect.frqNsamples = frqNsamples + D.CRC.pwrspect.frqNsamples;
+    D.CRC.pwrspect.frqNsamples = D.CRC.pwrspect.frqNsamples + frqNsamples ;
 else
     D.CRC.pwrspect.frqNsamples = frqNsamples;
 end

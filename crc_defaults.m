@@ -169,13 +169,12 @@ crc_def.score.check_jump   = true; % jumping (or not) to next empty window
 
 % Parameters for computing spectrogram or power spectrum, crc_spectcompute.m
 %-----------------------------------------------
-crc_def.cps.uplimit        = 25 ;  % upper frequency \_ bound (Hz)
-crc_def.cps.downlimit      = .5 ;  % lower frequency /
-crc_def.cps.duration       = 4 ;   % Window size in sec
+crc_def.cps.fmax        = 25 ;  % upper frequency \_ bound (Hz)
+crc_def.cps.fmin      = .5 ;  % lower frequency /
+crc_def.cps.dur       = 4 ;   % Window size in sec
 crc_def.cps.step           = 2 ;   % sliding step
 crc_def.cps.scorer         = 1 ;   % index of scorer
-crc_def.cps.reference      = 1 ;   % index of reference
-crc_def.cps.maxmemload     = 50 * 1024^2; % i.e. 50Mb
+crc_def.cps.ref      = 1 ;   % index of reference
 
 % Parameters for downsampling
 %-----------------------------------------------
