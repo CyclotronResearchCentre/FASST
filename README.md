@@ -12,3 +12,4 @@ A Wiki is also available (though empty at the moment) and problems/bugs can be o
 #### Notes:
 * On *March 2, 2016*, FASST is at last compatible with SPM12!
 Appologies for the delay, code was used internally but never updated on the public repository...
+* The artefact detection tool, published in here http://www.sciencedirect.com/science/article/pii/S0165027015003994, is NOT ready yet to be used by the public. We are working on the remaining issues and hope to make the code available ASAP.
