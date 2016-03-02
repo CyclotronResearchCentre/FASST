@@ -199,7 +199,7 @@ end
 fhc = fqcut(1)/(D.fsample/3);
 flc = fqcut(2)/(D.fsample/3);
 order=4;
-[b1,a1] = butter(order,[fhc, flc],'bandpass');
+[b1,a1] = butter(order,[fhc, flc],'pass');
 
 % out=daqmem;
 % memsz=out.AvailPhys/5;

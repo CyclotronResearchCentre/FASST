@@ -1,10 +1,10 @@
 function varargout = crc_main(varargin)
 %__________________________________________________________________________
-%     ________  _____________ ___ 
+%     ________  _____________ ___
 %    / __ _/  |/ ___/_/_  __/|__ \
 %   / /_ / /| |\__ \ \ / /   __/ /
-%  / __// ___ |__/ / // / _ / __/ 
-% /_/  /_/  |_|___/_//_/ (_)____/ 
+%  / __// ___ |__/ / // / _ / __/
+% /_/  /_/  |_|___/_//_/ (_)____/
 %
 % fMRI Artefact removal and Sleep Scoring Toolbox, FASST.2
 % http://www.montefiore.ulg.ac.be/~phillips/FASST.html
@@ -51,54 +51,72 @@ disp(' /_/  /_/  |_|___/_//_/ (_)____/                            ');
 disp('                                                            ');
 disp(' fMRI Artefact removal and Sleep Scoring Toolbox, FASST.2   ');
 disp(' http://www.montefiore.ulg.ac.be/~phillips/FASST.html       ');
-disp(' An SPM8-compatible toolbox.                                ');
+disp(' An SPM8/12-compatible toolbox.                             ');
 fprintf('\n');
 
-% Check if SPM is available, and maybe more one day...
-ok = check_installation;
-if ~ok
-    beep
-    fprintf('INSTALLATION PROBLEM!');
-    return
+%% Checking the installation and defaults
+persistent flag_filter flag_initialize
+
+if isempty(flag_initialize)
+    % Check if SPM is available
+    [ok,spm_v] = check_installation;
+    if ~ok
+        beep
+        fprintf('INSTALLATION PROBLEM!');
+        return
+    end
+    
+    % Add the fieldtrip toolbox from SPM, if necessary
+    if ~exist('ft_defaults','file')
+        addpath(fullfile(spm('Dir'),'external','fieldtrip'));
+    end
+    ft_defaults;
+    flag_initialize = true;
 end
 
-% Add the fieldtrip toolbox from SPM, if necessary
-if ~exist('ft_defaults','file')
-    addpath(fullfile(spm('Dir'),'external','fieldtrip'));
-end
-ft_defaults;
-
-% Check for Signal Processing Toolbox
-persistent flag_TBX
-if isempty(flag_TBX)
+% Check for Signal Processing Toolbox & SPM12 fixes
+if isempty(flag_filter)
     flag_TBX = license('checkout','signal_toolbox');
-    if ~flag_TBX
+    if ~flag_TBX && spm_v ~= 12
         pth = fullfile(spm_str_manip(mfilename('fullpath'),'h'),'SPTfunctions');
         addpath(pth)
         disp(['warning: using freely distributed equivalent to filtering functions ', ...
-          'as Signal Processing Toolbox is not available.']);
+            'as Signal Processing Toolbox is not available.']);
     end
+    if spm_v == 12 && flag_TBX
+        disp(['warning: using FiledTrip distribution (SPM12) of filtering functions ', ...
+            'instead of Signal Processing Toolbox.']);
+        
+    end
+    if spm_v == 12
+        pth = fullfile(spm_str_manip(mfilename('fullpath'),'h'),'spm12_utils');
+        addpath(pth)
+    end
+    flag_filter = true;
 end
 
-
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-    'gui_Singleton',  gui_Singleton, ...
-    'gui_OpeningFcn', @crc_main_OpeningFcn, ...
-    'gui_OutputFcn',  @crc_main_OutputFcn, ...
-    'gui_LayoutFcn',  [] , ...
-    'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
-end
-
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+if nargin && ischar(varargin{1}) && ~strcmp(varargin{1},'SetDefs')
+    %% Begin initialization code - DO NOT EDIT
+    gui_Singleton = 1;
+    gui_State = struct('gui_Name',       mfilename, ...
+        'gui_Singleton',  gui_Singleton, ...
+        'gui_OpeningFcn', @crc_main_OpeningFcn, ...
+        'gui_OutputFcn',  @crc_main_OutputFcn, ...
+        'gui_LayoutFcn',  [] , ...
+        'gui_Callback',   []);
+    if nargin && ischar(varargin{1})
+        gui_State.gui_Callback = str2func(varargin{1});
+    end
+    
+    if nargout
+        [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+    else
+        gui_mainfcn(gui_State, varargin{:});
+    end
+    % End initialization code - DO NOT EDIT
 else
-    gui_mainfcn(gui_State, varargin{:});
+    varargout{1} = true; % Defaults were set
 end
-% End initialization code - DO NOT EDIT
 
 % --- Executes just before crc_main is made visible.
 function crc_main_OpeningFcn(hObject, eventdata, handles, varargin)
@@ -278,9 +296,13 @@ crc_batch;
 
 %% SUBFUNCTION
 
-function ok = check_installation
+function [ok,spm_v] = check_installation
 % function to check installation state of toolbox,
 % particullarly the SPM path setup
+%
+% OUTPUT
+% ok    : logical flag
+% spm_v : spm version number
 
 ok = true;
 
@@ -288,17 +310,18 @@ ok = true;
 if exist('spm.m','file')
     [SPMver, SPMrel] = spm('Ver');
     if ~(strcmpi(SPMver,'spm8') && str2double(SPMrel)>8.5) && ...
-            ~strcmpi(SPMver,'spm12b')
+            ~strcmpi(SPMver,'spm12')
         beep
         fprintf('\nERROR:\n')
-        fprintf('\tThe *latest* version of SPM8 or SPM12b should be installed on your computer,\n')
+        fprintf('\tThe *latest* version of SPM8 or SPM12 should be installed on your computer,\n')
         fprintf('\tand be available on MATLABPATH!\n\n')
         ok = false;
     end
+    spm_v = str2double(SPMver(4:end));
 else
     beep
     fprintf('\nERROR:\n')
-    fprintf('\tThe *latest* version of SPM8 should be installed on your computer,\n')
+    fprintf('\tThe *latest* version of SPM8/12 should be installed on your computer,\n')
     fprintf('\tand be available on MATLABPATH!\n\n')
     ok = false;
 end

@@ -36,7 +36,7 @@ end
 
 vect = -.5:1/windowsize:(.5-1/windowsize);
 
-if handles.scoring
+if isfield(handles,'scoring') && handles.scoring
     Zero = find(score==0);
     mxZero = ones(length(vect),1)*Zero;
     mxvect = vect'*ones(1,length(Zero));
@@ -95,7 +95,7 @@ end
 
 hold on
 
-if handles.scoring
+if isfield(handles,'scoring') && handles.scoring
     % Display awake state
     if size(Zero,2)>0
         bar((Zero*windowsize-windowsize/2),ones(1,length(Zero))*7,1, ...
@@ -131,7 +131,7 @@ if handles.scoring
         bar(Six*windowsize-windowsize/2,ones(1,length(Six))*1,1, ...
             'LineStyle','none','FaceColor',[0.9 0.4 0.4])
     end
-    %Display Unscorable
+    % Display Unscorable
     if size(Seven,2)>0
         bar(Seven*windowsize-windowsize/2,ones(1,length(Seven))*0.35,1, ...
             'LineStyle','none','FaceColor',[0.9 0.6 0.3])

@@ -188,8 +188,8 @@ for ifile = 1:size(files,1)
     % Keep all EEG channels that have not been specifically marked as bad
     l2cor = intersect(setdiff(1:Di.nchannels,badch),meegchannels(Di,'EEG'));
     badch = setdiff(1:Di.nchannels,l2cor);
-    Di = cache(Di,l2cor); % storing list of channels to correct.
-    Di = cache(Di,badch); % storing bad channel info.
+    Di.cache.l2cor = l2cor; % storing list of channels to correct.
+    Di.cache.badch = badch; % storing bad channel info.
     switch bcgmethod
 
             %% fmrib PCA
@@ -197,7 +197,8 @@ for ifile = 1:size(files,1)
             Dclean = crc_par_pca(Di);
             % save version number of routine
             [v,r] = crc_fasst_utils('Ver','crc_par_pca');
-            Dclean.info.ver_parpca = struct('v_nr',v,'rel',r);        
+            Dclean.info.ver_parpca = struct('v_nr',v,'rel',r);       
+            Dclean.cache = [];
             save(Dclean);
 
             %% fmrib gaussian mean AAS
@@ -206,15 +207,17 @@ for ifile = 1:size(files,1)
             % save version number of routine
             [v,r] = crc_fasst_utils('Ver','crc_par_aas');
             Dclean.info.ver_paraas = struct('v_nr',v,'rel',r);        
+            Dclean.cache = [];
             save(Dclean);
 
             %% iICA
         case 'iica' % iterative ICA
-            Di = cache(Di,nit); % storing number of iterations.
+            Di.cache.nit = nit; % storing number of iterations.
             Dclean = crc_par_iica(Di);
             % save version number of routine
             [v,r] = crc_fasst_utils('Ver','crc_par_iica');
             Dclean.info.ver_pariica = struct('v_nr',v,'rel',r);        
+            Dclean.cache = [];
             save(Dclean);
 
             %% cICA with automatic selection of the correction matrix
@@ -227,6 +230,7 @@ for ifile = 1:size(files,1)
             % save version number of routine
             [v,r] = crc_fasst_utils('Ver','crc_par_cICA');
             Dclean.info.ver_paracica = struct('v_nr',v,'rel',r);        
+            Dclean.cache = [];
             save(Dclean);
 
             %% cICA with manual selection of the correction matrix
@@ -238,6 +242,7 @@ for ifile = 1:size(files,1)
             % save version number of routine
             [v,r] = crc_fasst_utils('Ver','crc_par_cICAmx');
             Dclean.info.ver_parmcica = struct('v_nr',v,'rel',r);        
+            Dclean.cache = [];
             save(Dclean);
 
             %% fmrib PCA & AAS combined
@@ -246,6 +251,7 @@ for ifile = 1:size(files,1)
             % save version number of routine
             [v,r] = crc_fasst_utils('Ver','crc_par_aaspca');
             Dclean.info.ver_paraaspca = struct('v_nr',v,'rel',r);        
+            Dclean.cache = [];
             save(Dclean);
 
         otherwise

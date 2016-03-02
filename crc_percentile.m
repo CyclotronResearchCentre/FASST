@@ -6,7 +6,6 @@ function v = crc_percentile(x,p)
 
 % Written by C. Phillips, 2010.
 % Cyclotron Research Centre, University of Liege, Belgium
-% $Id:$
 
 
 if size(x,1)==1

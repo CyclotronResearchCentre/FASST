@@ -3,7 +3,7 @@ function [D,Fdata] = crc_eeg_rdata_brpr(Fdata)
 % FORMAT D = crc_eeg_rdata_brpr(Fdata)
 %
 % Fdata       - filename of header-file
-% D           - SPM8 compatible matlab structure for an M/EEG object.
+% D           - SPM8/12 compatible matlab structure for an M/EEG object.
 %_______________________________________________________________________
 %
 % spm_eeg_rdata_brpr reads a continuous BrainProducts recording with
@@ -11,7 +11,7 @@ function [D,Fdata] = crc_eeg_rdata_brpr(Fdata)
 % saves a structure D to a mat-file. This structure is used as a @meeg
 % object in SPM8
 % The data are stored separately in a data-file. This file is NOT copied
-% when importing the data into SPM8 !
+% when importing the data into SPM8/12 !
 % Please keep a safe copy of your data...
 %_______________________________________________________________________
 % Copyright (C) 2009 Cyclotron Research Centre
@@ -20,7 +20,6 @@ function [D,Fdata] = crc_eeg_rdata_brpr(Fdata)
 % Cyclotron Research Centre, University of Liege, Belgium
 % But largely inspired from spm_rdata_bdf (from an old version of SPM)
 % which had been written by Stefan Kiebel, thanks mate !
-% $Id$
 
 %% Read in file information
 if nargin<1
@@ -36,11 +35,7 @@ if ~exist(Fchannels,'file'),
 end
 CRC_el = load('CRC_electrodes.mat');
 
-%% Create blank spm8 structure
-% D = struct('type',[],'Nsamples',[],'Fsample',[],'timeOnset',[], ...
-%     'trials',[], 'channels', struct, 'data', [], 'fname', [], 'path', [], ...
-%     'sensors', [], 'fiducials', [], 'artifacts', [], 'transform', [], ...
-%     'other', [], 'history', []);
+%% Create blank spm8/12 structure
 D = meeg;
 D = struct(D);
 
@@ -100,67 +95,32 @@ switch lower(header.binary.BinaryFormat)
 end
 
 l_NewSegment = find(strcmp('New Segment',marker.Type));
-N_NewSegment = length(l_NewSegment);
-% if N_NewSegment==1
-    % only one segment, proceed as originally intended, i.e. no trouble
-    D.Nsamples = Nsamples;
-    
-    % NOTE:
-    % here above, we're thus assuming that the whole binary file contains data
-    % so header size, and offset(s) are NOT accounted for !
-    % If bits had to be left out, it would be necessary to remove them from
-    % file_info.bytes, with something like
-    %   Nbytes = file_info.bytes - header.binary.SegmentHeaderSize - header.binary.TrailerSize;
-    %   D.Nsamples = Nbytes/bin_type/Nchannels;
-    
-    dat = file_array( ...
-        fullfile(D.path, fnamedat), ...     % fname     - filename
-        [Nchannels D.Nsamples],...          % dim       - dimensions
-        spm_type(datatype), ...             % dtype     - datatype
-        0, ...                              % offset    - offset into file (default = 0)
-        scl_slope);                         % scl_slope - scalefactor (default = 1)
-    % NOTE:
-    % Similar note as above. NO offset in the binary file is considered here.
-    % If that was the case, then that information should be put in here above.
-    % Beware also of scaling issues !
-    
-    data = struct(...
-        'fnamedat',fnamedat, ...
-        'datatype',datatype, ... % Not sure if should indicate '-le' at the end
-        'y',dat);
-% else
-%     % Deal with unusual case of multiple data segments because of some
-%     % pause or disconnections (cf. C. Schmidt data)
-%     % Need to rebuild the whole data set with zeros filling the interval.
-%     % Find beg/end of each segment + length of interval, all in tb.
-%     seg_length = diff([marker.Position(l_NewSegment)' Nsamples]);
-%     int_length = zeros(N_NewSegment-1,1);
-%     for ii=l_NewSegment(2:N_NewSegment)
-% %         d_year = str2num(marker.Date{ii}(1:4)) - ...
-% %                     str2num(marker.Date{ii-1}(1:4));
-% %         d_month = str2num(marker.Date{ii}(5:6)) - ...
-% %                     str2num(marker.Date{ii-1}(5:6));
-%         d_day = str2num(marker.Date{ii}(7:8)) - ...
-%                     str2num(marker.Date{ii-1}(7:8));
-%         d_hour = str2num(marker.Date{ii}(9:10)) - ...
-%                     str2num(marker.Date{ii-1}(9:10));
-%         d_min = str2num(marker.Date{ii}(11:12)) - ...
-%                     str2num(marker.Date{ii-1}(11:12));
-%         d_sec = str2num(marker.Date{ii}(13:14)) - ...
-%                     str2num(marker.Date{ii-1}(13:14));
-%         d_rest = (str2num(marker.Date{ii}(15:end)) - ...
-%                     str2num(marker.Date{ii-1}(15:end))) ...
-%                     *10^(-length(marker.Date{ii}(15:end)));
-%         int_length(ii-1) = round((d_day*24*3600 + d_hour*3600 + ...
-%             d_min*60 + d_sec + d_rest)*D.Fsample);
-%         % WARNING:
-%         % - not accounting for a difference longer than 1 month.
-%         % - time is stored in .vmrk corresponds to beginning of new
-%         %   segment, not necessarily an exact time bin interval! So need to
-%         %   round the interval to nearest time bin.
-%     end
-%     
-% end
+D.Nsamples = Nsamples;
+
+% NOTE:
+% here above, we're thus assuming that the whole binary file contains data
+% so header size, and offset(s) are NOT accounted for !
+% If bits had to be left out, it would be necessary to remove them from
+% file_info.bytes, with something like
+%   Nbytes = file_info.bytes - header.binary.SegmentHeaderSize - header.binary.TrailerSize;
+%   D.Nsamples = Nbytes/bin_type/Nchannels;
+
+dat = file_array( ...
+    fullfile(D.path, fnamedat), ...     % fname     - filename
+    [Nchannels D.Nsamples],...          % dim       - dimensions
+    spm_type(datatype), ...             % dtype     - datatype
+    0, ...                              % offset    - offset into file (default = 0)
+    scl_slope);                         % scl_slope - scalefactor (default = 1)
+% NOTE:
+% Similar note as above. NO offset in the binary file is considered here.
+% If that was the case, then that information should be put in here above.
+% Beware also of scaling issues !
+
+data = struct(...
+    'fnamedat',fnamedat, ...
+    'datatype',datatype, ... % Not sure if should indicate '-le' at the end
+    'y',dat);
+
 D.data = data;
 
 %% Deal with channels
@@ -213,7 +173,7 @@ D.channels = channels';
 % Assume we are dealing with continuous recording !
 % Then we need to import the markers from the .vmrk file into SPM8.
 
-% Contrary to SPM8 and for ease of coding, we want to restrict the events'
+% Contrary to SPM8/12 and for ease of coding, we want to restrict the events'
 % value to numbers only.
 % We therefore attribute a 'code value' to each marker description.
 Code = zeros(1,marker.nMrk);
@@ -264,16 +224,28 @@ if length(l_NewSegment)==1
         events(ii+1).time = marker.Position(ii)/D.Fsample;
     end
 else
+    % EITHER
+    %-------
     % Deal with unusual case of multiple data segments because of some
     % pause or disconnections (cf. C. Schmidt data)
-    % Need to rebuild the whome data set with zeros filling the interval.
+    % Need to rebuild the whole data set with zeros filling the interval.
+    % OR
+    %---
+    % Consider only the last bit
+    for ii= (l_NewSegment(end):marker.nMrk)-l_NewSegment(end)+1
+        jj = ii+l_NewSegment(end)-1;
+        events(jj+1) = blankevent;
+        events(jj+1).type = marker.Type{jj};
+        events(jj+1).value = Code(jj);
+        events(jj+1).time = marker.Position(jj)/D.Fsample;
+    end
 end
 
 trials = struct('label','Undefined','onset',1/D.Fsample, ...
     'repl',1,'bad',0,'events',events);
 
 % A priori users of this toolbox use the native continuous recording...
-% Looks like that in SPM8, onset of trials is set at the time of the 1st
+% Looks like that in SPM8/12, onset of trials is set at the time of the 1st
 % event...
 
 D.trials = trials;
@@ -282,7 +254,7 @@ D.trials = trials;
 D.fiducials = struct([]);
 D.sensors   = struct([]);
 D.artifacts = struct([]);
-% These fields can be updated later within SPM8, when doing source
+% These fields can be updated later within SPM8/12, when doing source
 % reconstruction or DCM-EEG
 D.history   = struct('fun','crc_eeg_rdata_brpr', ...
     'args',struct('D',struct('fname',Fdata)));
@@ -322,6 +294,6 @@ D.info.ver = struct('v_nr',v,'rel',r);
 D.info.ver_readH = struct('v_nr',v,'rel',r);
 
 %% Save results
-save(D)
+save(D);
 
 return

@@ -20,10 +20,12 @@ prefiICA = crcdef.iicapref;
 Peaks = Di.CRC.EKGPeaks;
 
 % Recover number of iterations
-nit = cache(Di,'nit');
+nit = Di.cache.nit;
 
 % Initializaing the cleaned EEG datafile
-fn_dat = [ prefiICA, fnamedat(Di)];
+fn_dat = fullfile(spm_str_manip(fnamedat(Di),'H'), ...
+    [ prefiICA, spm_str_manip(fnamedat(Di),'t')]);
+
 if exist(fullfile(path(Di), fn_dat),'file')
     % This check is because I want append data in the new file
     % I have to make sure that it does not exist yet.
@@ -47,7 +49,7 @@ for ipoint = 1:size(Peaks,2)
 end
 
 % Split good EEG channel, to correct, and others
-l_eeg = cache(Di,'l2cor');
+l_eeg = Di.cache.l2cor;
 l_other = 1:Di.nchannels;
 l_other(l_eeg) = [];
 

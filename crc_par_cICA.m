@@ -13,6 +13,7 @@ function Do = crc_par_cICA(Di)
 
 % Determine correction matrices, block by block
 Di = crc_par_cICAmx(Di);
+Di.cache = [];
 save(Di);
 
 % Find optimal correction matrix

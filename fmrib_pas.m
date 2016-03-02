@@ -109,9 +109,9 @@ function [fitted_art, clean] = fmrib_pas(EEG,QRSevents,method,npc)
 
 nargchk(3,4,nargin);
 fs          = EEG.fsample;
-channels    = cache(EEG,'l2cor'); % get list of EEG channels to use
+channels    = EEG.cache.l2cor; % get list of EEG channels to use
 nchannels   = numel(channels);
-t_chunk     = cache(EEG,'chunk_ii'); % get chunk limits
+t_chunk     = EEG.cache.chunk_ii; % get chunk limits
 samples     = diff(t_chunk)+1;
 dat_o       = EEG(channels,t_chunk(1):t_chunk(2)); % data under processing
 
@@ -183,7 +183,7 @@ switch method
             RR = diff(peakI);
             mRR=mean(RR);
             sRR=std(RR);
-            PArange=round(1.25*(mRR+sRR)/2); % half RR
+            PArange=round(1.25*(mRR+sRR)/2);
             %         PArange=round((mRR+sRR)/2); % half RR
             midP=PArange+1;
 
@@ -198,7 +198,7 @@ switch method
             pcamat = zeros(pa-2,2*PArange+1);
 %             dpcamat=pcamat;
             %         for p=2:pa
-            for p=3:pa % sometimes 2 beats are not longer than PArange (pm 130606)
+            for p=3:(pa-1) % sometimes 2 beats are not longer than PArange (pm 130606)
                 pcamat(p-2,:)=eegchan(peakI(p)-PArange:peakI(p)+PArange);
             end
             pcamat=detrend(pcamat','constant')';
@@ -353,7 +353,9 @@ switch method
                 end
             end
         end
-
+        if size(dat_o,2)<size(fitted_art,2)
+            fitted_art(:,(size(dat_o,2)+1):end) = [];
+        end
         clean = dat_o - fitted_art;
 
         %% Using the AAS style correction

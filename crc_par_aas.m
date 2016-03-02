@@ -10,7 +10,8 @@ function Do = crc_par_aas(Di)
 
 crcdef = crc_get_defaults('par');
 prefAAS = crcdef.aaspref;
-fn_dat = [ prefAAS, fnamedat(Di)];
+fn_dat = fullfile(spm_str_manip(fnamedat(Di),'H'), ...
+    [ prefAAS, spm_str_manip(fnamedat(Di),'t')]);
 
 % Recover Peaks
 Peaks = Di.CRC.EKGPeaks;
@@ -44,11 +45,11 @@ if Nchunks>1
 end
 
 % Loop over chunks
-l_eeg = cache(Di,'l2cor');
+l_eeg = Di.cache.l2cor;
 l_other = setdiff(1:Di.nchannels,l_eeg);
 for ii=1:Nchunks
     chunk_ii = t_chunk(:,ii);
-    Di = cache(Di,chunk_ii);
+    Di.cache.chunk_ii = chunk_ii;
     tmpPeaks = intersect(Peaks,t_chunk(1,ii):t_chunk(2,ii));
     tmpPeaks = tmpPeaks-t_chunk(1,ii)+1;
 

@@ -81,8 +81,14 @@ end
 D = handles.Dmeg{1};
 % distinct index to make easier to select data by type
 handles.index   =   varargin{1}.index;
-handles.indexMEEG   =   fliplr(intersect(meegchannels(handles.Dmeg{1}),handles.index));
-handles.indnomeeg   =   setdiff(handles.index, handles.indexMEEG);
+handles.indexMEEG   =   fliplr(intersect(meegchannels(handles.Dmeg{1}),handles.index))';
+handles.indnomeeg   =   setdiff(handles.index, handles.indexMEEG)';
+if size(handles.indnomeeg,1)>1
+    handles.indnomeeg = handles.indnomeeg';
+end 
+if size(handles.indexMEEG,1)>1
+    handles.indexMEEG = handles.indexMEEG';
+end 
 handles.inddis      =   [handles.indnomeeg handles.indexMEEG];
 % handles.inddis      =   [handles.index];
 handles.indeeg = [meegchannels(D,'EEG') meegchannels(D,'LFP')];
@@ -122,7 +128,34 @@ if isfield(handles.Dmeg{1},'CRC')
         handles.artefacteeg = handles.Dmeg{1}.CRC.artefacteeg; 
     end 
 end  
+handles.artefact = [];
+if isfield(D,'CRC')
+    if isfield(D.CRC,'DC')
+        if isfield(D.CRC.DC,'shortartf')
+            if isfield(D.CRC.DC.shortartf,'total')
+                handles.artefact = D.CRC.DC.shortartf.total;
+            end
+        end
+    end
+end
 
+% badchannels
+handles.badchannels = [];
+if isfield(D,'CRC')
+    if isfield(D.CRC,'DC')
+        if isfield(D.CRC.DC,'badchannels')
+            if isfield(D.CRC.DC.badchannels,'chan_defaillant')
+                badchannels_def = D.CRC.DC.badchannels.chan_defaillant;
+                badchannels_incoh = D.CRC.DC.badchannels.chan_incoherent;
+                handles.badchannels = union(badchannels_def',badchannels_incoh','rows')';
+            end
+        end
+    end
+end
+handles.chanlab = meegchannels(D);
+if isempty(handles.chanlab)
+    handles.chanlab = find(or(or(strncmp(chanlabels(D),'F',1),strncmp(chanlabels(D),'C',1)),or(strncmp(chanlabels(D),'O',1),strncmp(chanlabels(D),'P',1))));
+end
 %Spike detection
 %---------------
 handles.move = 0;
@@ -215,7 +248,7 @@ else
     handles.delmap  =   [];
 end
 
-if isfield(varargin{1},'multcomp') %if comparing multiple files
+if isfield(varargin{1},'multcomp') % if comparing multiple files
     handles.multcomp    =   1;
     handles.displevt    =   0;
     handles.export      =   0;
@@ -291,8 +324,8 @@ if isfield(varargin{1},'multcomp') %if comparing multiple files
     set(handles.Delartonlyone,'visible','off')
 	set(handles.Detection,'visible','off')
     set(handles.addonlyone,'visible','off')	
-    set(handles.others,'enable','off','visible','off')
-    set(handles.com,'enable','off','visible','off')
+%     set(handles.others,'enable','off','visible','off')
+%     set(handles.com,'enable','off','visible','off')
 	set(handles.manevent,'enable','off','visible','off')
     set(handles.event_menu,'enable','off')
     set(handles.counterspect,'enable','off','visible','off')	
@@ -375,13 +408,13 @@ handles.filter.EMG  =   [crcdef.filtEMG(1) ...
     min(crcdef.filtEMG(2),filt/2)];
 handles.filter.EOG = crcdef.filtEOG;
 [B,A] = butter(forder,[handles.filter.EOG(1)/(fsample(handles.Dmeg{posf})/2),...
-    handles.filter.EOG(2)/(fsample(handles.Dmeg{posf})/2)],'bandpass');
+    handles.filter.EOG(2)/(fsample(handles.Dmeg{posf})/2)],'pass');
 handles.filter.coeffEOG=[B;A];
 [B,A] = butter(forder,[handles.filter.EMG(1)/(fsample(handles.Dmeg{posf})/2),...
-    handles.filter.EMG(2)/(fsample(handles.Dmeg{posf})/2)],'bandpass');
+    handles.filter.EMG(2)/(fsample(handles.Dmeg{posf})/2)],'pass');
 handles.filter.coeffEMG=[B;A];
 [B,A] = butter(forder,[handles.filter.other(1)/(fsample(handles.Dmeg{posf})/2),...
-    handles.filter.other(2)/(fsample(handles.Dmeg{posf})/2)],'bandpass');
+    handles.filter.other(2)/(fsample(handles.Dmeg{posf})/2)],'pass');
 handles.filter.coeffother=[B;A];
 set(handles.frqabv,'String',num2str(handles.filter.other(2)));
 set(handles.upemg,'String',num2str(handles.filter.EMG(2)));
@@ -840,7 +873,7 @@ else
     forder = 3;
 end
 [B,A] = butter(forder,[handles.filter.other(1)/(fsample(handles.Dmeg{i})/2),...
-    handles.filter.other(2)/(fsample(handles.Dmeg{i})/2)],'bandpass');
+    handles.filter.other(2)/(fsample(handles.Dmeg{i})/2)],'pass');
 handles.filter.coeffother=[B;A];
 
 % Plot 
@@ -891,7 +924,7 @@ else
     forder = 3;
 end
 [B,A] = butter(forder,[handles.filter.other(1)/(fsample(handles.Dmeg{i})/2),...
-    handles.filter.other(2)/(fsample(handles.Dmeg{i})/2)],'bandpass');
+    handles.filter.other(2)/(fsample(handles.Dmeg{i})/2)],'pass');
 handles.filter.coeffother=[B;A];
 guidata(hObject, handles);
 
@@ -942,7 +975,7 @@ else
     forder = 3;
 end
 [B,A] = butter(forder,[handles.filter.EMG(1)/(fsample(handles.Dmeg{i})/2),...
-    handles.filter.EMG(2)/(fsample(handles.Dmeg{i})/2)],'bandpass');
+    handles.filter.EMG(2)/(fsample(handles.Dmeg{i})/2)],'pass');
 handles.filter.coeffEMG=[B;A];
 
 guidata(hObject, handles);
@@ -991,7 +1024,7 @@ else
     forder = 3;
 end
 [B,A] = butter(forder,[handles.filter.EMG(1)/(fsample(handles.Dmeg{i})/2),...
-    handles.filter.EMG(2)/(fsample(handles.Dmeg{i})/2)],'bandpass');
+    handles.filter.EMG(2)/(fsample(handles.Dmeg{i})/2)],'pass');
 handles.filter.coeffEMG=[B;A];
 
 guidata(hObject, handles);
@@ -1043,7 +1076,7 @@ else
     forder = 3;
 end
 [B,A] = butter(forder,[handles.filter.EOG(1)/(fsample(handles.Dmeg{i})/2),...
-    handles.filter.EOG(2)/(fsample(handles.Dmeg{i})/2)],'bandpass');
+    handles.filter.EOG(2)/(fsample(handles.Dmeg{i})/2)],'pass');
 handles.filter.coeffEOG=[B;A];
 guidata(hObject, handles);
 
@@ -1092,7 +1125,7 @@ else
     forder = 3;
 end
 [B,A] = butter(forder,[handles.filter.EOG(1)/(fsample(handles.Dmeg{i})/2),...
-    handles.filter.EOG(2)/(fsample(handles.Dmeg{i})/2)],'bandpass');
+    handles.filter.EOG(2)/(fsample(handles.Dmeg{i})/2)],'pass');
 handles.filter.coeffEOG=[B;A];
 guidata(hObject, handles);
 
@@ -1481,18 +1514,18 @@ mainplot(handles)
 ha=get(handles.currentfigure,'CurrentAxes');
 %display y-labels
 if handles.multcomp
-    i=length(handles.Dmeg);
+    li = length(handles.Dmeg);
 else
     Chanslidval     =   get(handles.Chanslider,'Value');
     slidpos         =   Chanslidval-rem(Chanslidval,1);
     NbreChandisp    =   str2double(get(handles.NbreChan,'String'));
     index           =   handles.index(slidpos:1:slidpos+NbreChandisp-1);
-    i   =   length(index);
+    li   =   length(index);
 end
-ylim([0 handles.scale*(i+1)])
-set(ha,'YTick',[handles.scale/2:handles.scale/2:i*handles.scale+handles.scale/2]);
+ylim([0 handles.scale*(li+1)])
+set(ha,'YTick',[handles.scale/2:handles.scale/2:li*handles.scale+handles.scale/2]);
 ylabels     =   [num2str(round(handles.scale/2))];
-for j=1:i
+for j=1:li
     if handles.multcomp
         ylabels=[ylabels num2str(j)];
     else
@@ -3350,22 +3383,22 @@ end
 %Time pointed 
 chan = ceil((handles.Mouse(1,2)-handles.scale/2)/handles.scale);
 time = handles.Mouse(1,1);
-
-Chanslidval     =   get(handles.Chanslider,'Value');
-slidpos         =   Chanslidval-rem(Chanslidval,1);
-NbreChandisp    =   str2double(get(handles.NbreChan,'String'));
-tmp = slidpos : 1 : slidpos + NbreChandisp -1;
-
+Chanslidval = get(handles.Chanslider,'Value');
+slidpos     = Chanslidval-rem(Chanslidval,1);
+NbreChandisp    = str2double(get(handles.NbreChan,'String'));
+index   = [handles.indnomeeg handles.indexMEEG];
+handles.inddis = index(slidpos : 1 : slidpos + NbreChandisp -1);
 chantodel   =   get(gcbo,'Label');
-channel     =   handles.inddis(tmp(chan));
+channel     =   handles.inddis(chan);
 addend      =   intersect(handles.chan, channel);
-
+artchan     =   find(handles.score{5,:}(:,3)==channel);
+in_art = find(handles.score{5,:}(artchan,1)<time & handles.score{5,:}(artchan,2)>time);
 %label noted in the last line to describe the artefacts  
 lab = 'unspecified on only one channel';  
 
 if ~isempty(strfind(chantodel,'Start'))
     if ~isempty(handles.score{5,handles.currentscore})
-        if ~isempty(addend)
+        if or(~isempty(addend),~isempty(in_art))
             beep
             disp('Invalid "start Artefact" point, you must first end the last artefact on this channel')
             disp(' ')
@@ -3386,11 +3419,6 @@ if ~isempty(strfind(chantodel,'Start'))
                 handles.score{5,handles.currentscore}=[handles.score{5,handles.currentscore}; time tfinal channel];
                 handles.score{8,handles.currentscore}=[handles.score{8,handles.currentscore}; {lab}];          
               	handles.chan =[handles.chan channel]; 
-                plot(handles.axes1,ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
-                    'Color',[0 0 0])
-                axes(handles.axes1)
-                text(time,chan*handles.scale + handles.scale/2, ...
-                    'Start Bad Chan','UIContextMenu',handles.Deletemenuone,'Color',[0 0 0],'FontSize',12) 
             end
          end
     else
@@ -3398,11 +3426,6 @@ if ~isempty(strfind(chantodel,'Start'))
         handles.score{5,handles.currentscore}=[handles.score{5,handles.currentscore}; time tfinal channel];
         handles.score{8,handles.currentscore}=[handles.score{8,handles.currentscore}; {lab}]; 
         handles.chan =[handles.chan channel];  
-        plot(handles.axes1,ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
-            'Color',[0 0 0])
-        axes(handles.axes1)
-        text(time,chan*handles.scale + handles.scale/2, ...
-        	'Start Bad Chan','UIContextMenu',handles.Deletemenuone,'Color',[0 0 0],'FontSize',12) 
     end
 else
     if isempty(addend)
@@ -3425,11 +3448,6 @@ else
             else
                 handles.score{5,handles.currentscore}(in(end),2) = time;
                 handles.chan = setdiff(handles.chan, channel);
-                plot(handles.axes1,ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
-                    'Color',[0 0 0])
-                axes(handles.axes1)
-                text(time,chan*handles.scale + handles.scale/2, ...
-                    'End Bad Chan','UIContextMenu',handles.Deletemenuone,'Color',[0 0 0],'FontSize',12) 
              end 
         else 
             [ch, in, dum] = intersect(handles.score{5,handles.currentscore}(:,3), channel);
@@ -3440,246 +3458,8 @@ else
             else
                 handles.score{5,handles.currentscore}(in(end),2) = time;
                 handles.chan = setdiff(handles.chan, channel);
-                plot(handles.axes1,ones(1,2)*time,[(chan*handles.scale-handles.scale/2) (chan*handles.scale + handles.scale/2)], ...
-                    'Color',[0 0 0])
-                axes(handles.axes1)
-                text(time,chan*handles.scale + handles.scale/2, ...
-                    'End Bad Chan','UIContextMenu',handles.Deletemenuone,'Color',[0 0 0],'FontSize',12) 
             end
         end
-    end
-end
-slidval = get(handles.slider1,'Value');  
-if slidval<1/fsample(handles.Dmeg{1})
-    slidval=1/fsample(handles.Dmeg{1});
-    set(handles.slider1,'Value',slidval);
-elseif slidval>nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2;
-    slidval=nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2;
-end
-if ~isempty(handles.score{5,handles.currentscore})
-    tdebs=str2double(get(handles.currenttime,'String'))-handles.winsize/2;
-    tfins=str2double(get(handles.currenttime,'String'))+handles.winsize/2;       
-    %---artefact on single channels
-    [dumb1,dumb2,index2] = intersect(upper(chanlabels(handles.Dmeg{1},channel)),handles.names);
-    factscale=handles.scale*chan; %cycle on channels if one file
-    tdeb = min(round(slidval*fsample(handles.Dmeg{1})),nsamples(handles.Dmeg{1})-10);
-    temps = tdeb:1:min(tdeb +(fsample(handles.Dmeg{1})*handles.winsize)-1, ...
-        nsamples(handles.Dmeg{1}));
-    toshow = temps;
-    temps = temps/fsample(handles.Dmeg{1});
-    if  any(channel==emgchannels(handles.Dmeg{1}))  %strfind(testcond{:},'EMG')
-        contents = get(handles.EMGpopmenu,'String');
-        selchan = upper(contents{get(handles.EMGpopmenu,'Value')});
-        if isfield(handles,'emgscale') && ~isempty(handles.emgscale)
-            scall=handles.emgscale;
-        else
-            unemg=units(handles.Dmeg{1},channel);
-            try
-                scall=eval(unemg{1});
-            catch
-                if strcmpi(unemg{1},'V')
-                    scall=10^-6;
-                else
-                    scall=1;
-                end
-            end
-        end
-        filtparam=handles.filter.coeffEMG;
-    elseif any(channel==eogchannels(handles.Dmeg{1})) %strfind(testcond{:},'EOG')
-        contents = get(handles.EOGpopmenu,'String');
-        selchan=upper(contents{get(handles.EOGpopmenu,'Value')});
-        if isfield(handles,'eogscale') && ~isempty(handles.eogscale)
-            scall=handles.eogscale;
-        else
-            unemg=units(handles.Dmeg{1},channel);
-            try
-                scall=eval(unemg{1});
-            catch
-                if strcmpi(unemg{1},'V')
-                    scall=10^-6;
-                else
-                    scall=1;
-                end
-            end
-        end
-        filtparam=handles.filter.coeffEOG;
-    elseif any(channel==ecgchannels(handles.Dmeg{1})) %strfind(testcond{:},'ECG')
-        contents = get(handles.otherpopmenu,'String');
-        selchan=upper(contents{get(handles.otherpopmenu,'Value')});
-        if isfield(handles,'ecgscale') && ~isempty(handles.ecgscale)
-            scall=handles.ecgscale;
-        else
-            unemg=units(handles.Dmeg{1},channel);
-            try
-                scall=eval(unemg{1});
-            catch
-                if strcmpi(unemg{1},'V')
-                    scall=3*10^-5;
-                else
-                    scall=1;
-                end
-            end
-        end
-        filtparam=handles.filter.coeffother;
-    elseif any(channel==meegchannels(handles.Dmeg{1})) %'EEG', 'MEGMAG', MEGPLANAR'
-        contents = get(handles.EEGpopmenu,'String');
-        selchan=upper(contents{get(handles.EEGpopmenu,'Value')});
-        chtyp=chantype(handles.Dmeg{1},channel);
-        if strcmpi(chtyp,'EEG')
-            if isfield(handles,'eegscale') && ~isempty(handles.eegscale)
-                scall=handles.eegscale;
-            else
-                unemg=units(handles.Dmeg{1},channel);
-                try
-                    scall=eval(unemg{1});
-                catch
-                    if strcmpi(unemg{1},'V')
-                        scall=10^-6;
-                    else
-                        scall=1;
-                    end
-                end
-            end
-        elseif strcmpi(chtyp,'MEGMAG')
-            selchan = 'MEG';
-            if isfield(handles,'megmagscale') && ~isempty(handles.megmagscale)
-                scall=handles.megmagscale;
-            else
-                unemg=units(handles.Dmeg{1},channel);
-                try
-                    scall=eval(unemg{1});
-                catch
-                    if strcmpi(unemg{1},'T')
-                        scall=5*10^-14;
-                    else
-                        scall=1;
-                    end
-                end
-            end
-        elseif strcmpi(chtyp,'MEGPLANAR')
-            selchan = 'MEG';
-            if isfield(handles,'megplanarscale') && ~isempty(handles.megplanarscale)
-                scall=handles.megplanarscale;
-            else
-                unemg=units(handles.Dmeg{1},channel);
-                try
-                    scall=eval(unemg{1});
-                catch
-                    if strcmpi(unemg{1},'T/m')
-                        scall=5*10^-13;
-                    else
-                        scall=1;
-                    end
-                end
-            end
-        elseif strcmpi(chtyp,'LFP')
-            if isfield(handles,'lfpscale') && ~isempty(handles.lfpscale)
-                scall=handles.lfpscale;
-            else
-                unemg=units(handles.Dmeg{1},channel);
-                try
-                    scall=eval(unemg{1});
-                catch
-                    if strcmpi(unemg{1},'V')
-                        scall=10^-5;
-                    else
-                        scall=10 ;
-                    end
-                end
-            end      
-        end
-        filtparam = handles.filter.coeffother;
-    else
-        contents = get(handles.EEGpopmenu,'String');
-        selchan=upper(contents{get(handles.EEGpopmenu,'Value')});
-        chtyp=chantype(handles.Dmeg{1},channel);
-        if strcmpi(chtyp,'other') || strcmpi(chtyp,'unknown')
-            if isfield(handles,'otherscale') && ~isempty(handles.otherscale)
-                scall=handles.otherscale;
-            else
-                unemg=units(handles.Dmeg{1},channel);
-                try
-                    scall=eval(unemg{1});
-                catch
-                    if strcmpi(unemg{1},'V')
-                        scall=10^-6;
-                    else
-                        scall=1;
-                    end
-                end
-            end
-        end
-        filtparam = handles.filter.coeffother;
-    end
-    switch  selchan
-        case 'MEG'
-            % MEG data
-            normalize = get(handles.normalize,'Value');
-            chtyp=chantype(handles.Dmeg{1},channel);
-            if  strcmpi(chtyp,'MEGMAG') 
-                plt=plot(handles.axes1,temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall,'Color',[0.25 0.25 0.25]);
-            elseif  strcmpi(chtyp,'MEGPLANAR')
-                if (~normalize)
-                    plt=plot(handles.axes1,temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall,'LineStyle',':','Color',[0 0.5 0]);
-                else
-                    plt=plot(handles.axes1,temps,factscale+(((handles.Dmeg{1}(channel,toshow)).^2+...
-                        (handles.Dmeg{1}(channel+1,toshow)).^2).^0.5)/scall,'Color',[0 0.5 0]);
-                end
-            end
-         case    'REF1'
-            plt = plot(handles.axes1,temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall);             
-         case    'MEAN OF REF'
-            basedata = handles.Dmeg{1}(channel,toshow);
-            ref2idx = find(strcmp(chanlabels(handles.Dmeg{1}),'REF2'));
-            scnddata = handles.Dmeg{1}(channel,toshow) - ...
-                handles.Dmeg{1}(ref2idx,toshow);
-            toplotdat = mean([basedata ; scnddata]);
-            plt = plot(handles.axes1,temps,factscale+(toplotdat)/scall);
-
-        case    'M1-M2'
-            basedata = handles.Dmeg{1}(channel,toshow);
-            M1idx = find(strcmp(chanlabels(handles.Dmeg{1}),'M1'));
-            M2idx = find(strcmp(chanlabels(handles.Dmeg{1}),'M2'));
-            meanM = mean([handles.Dmeg{1}(M1idx,toshow) ; ...
-                handles.Dmeg{1}(M2idx,toshow)]);
-            toplotdat = basedata - meanM;
-            plt = plot(handles.axes1,temps,factscale+(toplotdat)/scall);
-
-        case    'BIPOLAR'
-            if handles.crc_types(index2)>0
-                [dumb1,index3] = ...
-                    intersect(upper(chanlabels(handles.Dmeg{1})), ...
-                    upper(handles.names(handles.crc_types(index2))));
-            else
-                index3 = [];
-            end
-            if ~isempty(index3)
-                bipolar = handles.Dmeg{1}(channel,toshow) - ...
-                    handles.Dmeg{1}(index3,toshow);
-                plt = plot(handles.axes1,temps,factscale+(bipolar)/scall,'Color',[0 0 0]);
-            else
-                plt = plot(handles.axes1,temps,factscale+(handles.Dmeg{1}(channel,toshow))/scall,'Color',[0  0 0]);
-            end
-        otherwise
-            [dumb1,index3] = ...
-                intersect(upper(chanlabels(handles.Dmeg{1})),selchan);
-            basedata = handles.Dmeg{1}(channel,toshow);
-            toplotdat = basedata - ...
-                handles.Dmeg{1}(index3,toshow);
-            plt = plot(handles.axes1,temps,factscale+(toplotdat)/scall);
-    end
-    filterlowhigh(plt,1,handles,filtparam,factscale)
-    sart = find(and(or(not(handles.score{5,handles.currentscore}(:,1)>tfins),...
-        not(handles.score{5,handles.currentscore}(:,2)<tdebs)),handles.score{5,handles.currentscore}(:,3)== channel));
-    for p = 1 : length(sart)
-        sfin = min(tfins*fsample(handles.Dmeg{1}),handles.score{5,handles.currentscore}(sart(p),2)*fsample(handles.Dmeg{1}));
-        sdebut = max(handles.score{5,handles.currentscore}(sart(p),1)*fsample(handles.Dmeg{1}), tdebs*fsample(handles.Dmeg{1}));              
-        time = sdebut+1 : sfin;               
-        time = time/fsample(handles.Dmeg{1});
-        X = get(plt,'YData');
-        % Plot
-        X = X(sdebut-tdebs*fsample(handles.Dmeg{1})+1:sfin-tdebs*fsample(handles.Dmeg{1}))+factscale-mean(X);
-        plot(handles.axes1,time,X,'UIContextMenu',handles.Deletemenuone,'LineWidth',1,'Color',[0.8 0.8 0.8]);
     end
 end
 % ---- save data ----  
@@ -3697,14 +3477,12 @@ if ~isempty(handles.chan)
 end
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
-crc_hypnoplot(handles.axes4, ...
-    handles,handles.score{3,handles.currentscore})
+crc_hypnoplot(handles.axes4,handles,handles.score{3,handles.currentscore})
 set(handles.figure1,'CurrentAxes',handles.axes1)
-
 % Update handles structure
 guidata(c, handles);
 fftchan_Callback(hObject,[],handles)
-
+mainplot(handles)
 % --------------------------------------------------------------------
 function addspecart_Callback(hObject, eventdata, handles)
 % hObject    handle to addspecart (see GCBO)
@@ -5216,24 +4994,30 @@ for i=1:maxi
                 set(plt,'Color',cmap(i,:))
             end    
             
-            % plot the spindles detected %NOT READY To be checked
-            %if isfield(handles.Dmeg{1}.CRC,'spindles')
-            %    if size(handles.Dmeg{1}.CRC.spindles,2)>=index(j)
-            %        if and(size(handles.Dmeg{1}.CRC.spindles{index(j)},1)>=win,~isempty(handles.Dmeg{1}.CRC.spindles{index(j)}))
-            %            spindeb = find(diff(handles.Dmeg{1}.CRC.spindles{index(j)}(win,:))==1);
-            %            spinend = find(diff(handles.Dmeg{1}.CRC.spindles{index(j)}(win,:))==-1);
-            %            for k = 1 : length(spindeb)
-            %                ss = spindeb(k) : spinend(k);
-            %                X = get(plt,'YData');
-            %               % plot(temps(ss),X(ss),'color','m','tag','spindle')
-            %            end
-            %        end
-            %    end
-            %end
-            
+            %artefacts on single channel  (To be checked) 
+            if  ~isempty(handles.artefact)
+                deb_epoch   =   find(and(handles.artefact>temps(1),handles.artefact<=temps(end)+1/fsample(handles.Dmeg{1})));%1 seconde = fenetre d'analyse pour la détection des artefacts de courtes durées
+                for epo     =   1 : length(deb_epoch)  
+                    X   =   get(plt,'YData');
+                    deb =  (handles.artefact(deb_epoch(epo)) - (win-1)*handles.winsize/1 - 1)*fsample(handles.Dmeg{1}) + 1; %1=temps d'une époque artefactée
+                    fin =  min(length(X)+win*handles.winsize*fsample(handles.Dmeg{1}),(handles.artefact(deb_epoch(epo)) - (win-1)*handles.winsize/1)*fsample(handles.Dmeg{1}));
+                    time_epo = [(handles.artefact(deb_epoch(epo))-1) + 1/fsample(handles.Dmeg{1}) : 1/fsample(handles.Dmeg{1}) : ((handles.artefact(deb_epoch(epo))-1) + 1/fsample(handles.Dmeg{1}))+length(deb:fin)/fsample(handles.Dmeg{1})-1/fsample(handles.Dmeg{1})];
+                    X   =   X(deb:fin);%fs est le nombre d'échantillons contenus dans une seconde
+                    plot(time_epo,X,'-.','color','r');
+                end
+            end
+            %artefacts channels: automatic 
+            if ~isempty(handles.badchannels)&& ~isempty(find(handles.badchannels == win)) %isfield(handles.Dmeg{1}.CRC,'badchannels')
+                [electr gum]=find(handles.badchannels == win);            
+                electr = handles.chanlab(electr);
+            	if any(index(j) ==  electr)
+                    X   =   get(plt,'YData');
+                    plot(temps,X,'-r');
+                end
+            end
             %artefacts on single channel  (To be checked) 
             if handles.scoring && ~isempty(handles.score{5,handles.currentscore}) && any(index(j)== handles.score{5,handles.currentscore}(:,3))
-                [dum indice]= intersect(handles.score{5,handles.currentscore}(:,3),index(j)); 
+                [indice gum]= find(handles.score{5,handles.currentscore}(:,3)==index(j)); 
                 l=1;
                 tdebs   =   str2double(get(handles.currenttime,'String'))-handles.winsize/2;
                 tfins   =	str2double(get(handles.currenttime,'String'))+handles.winsize/2;
@@ -5279,42 +5063,6 @@ for i=1:maxi
                     l=l+1;
                 end
             end
-            %artefacts : automatique  
-            if ~isempty(handles.artefacteeg)
-                %deb_epoch   =   find(or(or(and(handles.artefacteeg(:,1)>=temps(1)-1/fsample(handles.Dmeg{i}),handles.artefacteeg(:,1)<=temps(end)),...
-                %and(handles.artefacteeg(:,2)>=temps(1)-1/fsample(handles.Dmeg{i}),handles.artefacteeg(:,2)<=temps(end))),...
-                %    and(handles.artefacteeg(:,1)<=temps(1)-1/fsample(handles.Dmeg{i}),handles.artefacteeg(:,2)>=temps(end))));
-                %for epo     =   1 : length(deb_epoch)                
-                %    time_epo    =  max(handles.artefacteeg(deb_epoch(epo),1),temps(1)) : 1/fsample(handles.Dmeg{1}) : min(handles.artefacteeg(deb_epoch(epo),2),temps(end));   
-                %    deb =  (time_epo(1)-(win-1)*handles.winsize)*fsample(handles.Dmeg{i})+1;
-                %    fin =  (time_epo(end)-(win-1)*handles.winsize)*fsample(handles.Dmeg{i})+1;
-                %    X   =   get(plt,'YData');
-                %    X   =   X(deb:fin);
-                %    if length(X) < length(time_epo) % je ne comprends pas d'où vient l'erreur, je mets donc un gardien supplémentaire pour corriger celle-ci lorsqu'elle apparait!
-                %        fin =  (time_epo(end)-(win-1)*handles.winsize)*fsample(handles.Dmeg{i})+2;
-                %    end
-                %    X   =   get(plt,'YData');
-                %    X   =   X(deb:fin);
-                %    plot(time_epo,X,'-.','color','r');
-                %end  
-                deb_epoch   =   find(and(handles.artefacteeg>=temps(1),handles.artefacteeg<=temps(end)));
-                for epo     =   1 : length(deb_epoch)   
-                    time_epo = handles.artefacteeg(deb_epoch(epo)) : 1/fsample(handles.Dmeg{1}) : min(handles.artefacteeg(deb_epoch(epo))+1, temps(end));   
-                    deb =   max((time_epo(1)-(win-1)*30)*fsample(handles.Dmeg{i}),1);
-                    fin =   deb + length(time_epo)-1;
-                    X   =   get(plt,'YData');
-                    X   =   X(deb:fin);
-                    plot(time_epo,X,'-.','color','r');
-                end  
-            end
-            %artefacts channels: automatic        
-            if isfield(handles.Dmeg{1}.CRC,'badchannels')
-                deb_epoch   =   find(handles.Dmeg{i}.CRC.badchannels(:,1) == win);
-                if any(index(j) == handles.indeeg(handles.Dmeg{i}.CRC.badchannels(deb_epoch,2)))   
-                    X   =   get(plt,'YData');
-                    plot(temps,X,'-.','color','r');
-                end
-            end
             plt = 0;
         end
     end
@@ -5329,16 +5077,16 @@ end
 
 %display the labels on the y-axis
 if handles.multcomp
-    i=length(handles.Dmeg);
+    li=length(handles.Dmeg);
 else
-    i=length(index);
+    li=length(index);
 end
 
- ylim([0 handles.scale*(length(index)+1)])
- set(handles.axes1,'YTick',[handles.scale/2 :handles.scale/2:i*handles.scale+handles.scale/2]);
+ ylim([0 handles.scale*(li+1)])
+ set(handles.axes1,'YTick',[handles.scale/2 :handles.scale/2:li*handles.scale+handles.scale/2]);
  ylabels=[num2str(round(handles.scale/2))];
 
-for j = 1 : i
+for j = 1 : li
     if handles.multcomp
         ylabels =[ylabels {num2str(j)}];
     else
@@ -5364,7 +5112,7 @@ set(handles.axes1,'XTickLabel',string)
 
 % display horizontal grid
 if handles.hor_grid
-    for i = 1:length(index)
+    for i = 1:li
         plot([temps(1) temps(end)],[(35+handles.scale*i) (35+handles.scale*i)], ...
             ':','Color',[0.6 0.6 0.6])
         plot([temps(1) temps(end)],[(handles.scale*i-35) (handles.scale*i-35)], ...
@@ -5376,7 +5124,7 @@ end
 if handles.vert_grid
     Ax=get(handles.axes1,'XTick');
     for ii = Ax(1)-1:1:Ax(end)+1
-        plot([ii ii],[0 (handles.scale*(1+length(index)))],':','Color',[0.6 0.6 0.6])
+        plot([ii ii],[0 (handles.scale*(1+li))],':','Color',[0.6 0.6 0.6])
     end
 end
 
@@ -5392,28 +5140,28 @@ if handles.scoring && handles.winsize == handles.score{3,handles.currentscore} %
     text(temps(end-round(0.8*fsample(handles.Dmeg{1}))),handles.scale*(fact+5/8),num2str(curscore),'Color','k','FontSize',14)
     switch  curscore
         case    0
-            plot(temps,((length(index)+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
+            plot(temps,((li+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0.2 0.75 0.6])
         case    1
-            plot(temps,((length(index)+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
+            plot(temps,((li+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0 0.8 1])
         case    2
-            plot(temps,((length(index)+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
+            plot(temps,((li+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0.1 0.5 0.9])
         case    3
-            plot(temps,((length(index)+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
+            plot(temps,((li+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0.1 0.2 0.8])
         case    4
-            plot(temps,((length(index)+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
+            plot(temps,((li+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0.1 0.15 0.5])
         case    5
-            plot(temps,((length(index)+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
+            plot(temps,((li+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0.5 0.5 0.9])
         case    6
-            plot(temps,((length(index)+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
+            plot(temps,((li+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0.9 0.4 0.4])
         case    7
-            plot(temps,((length(index)+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
+            plot(temps,((li+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0.9 0.6 0.3])
     end
 
@@ -5733,7 +5481,7 @@ if nargin<4
     else
         forder = 3;
     end
-    [B,A] = butter(forder,[flc,fhc],'bandpass');
+    [B,A] = butter(forder,[flc,fhc],'pass');
 else
     B = frqcut(1,:);
     A = frqcut(2,:);
@@ -5756,7 +5504,7 @@ else
     forder = 3;
 end
 [B,A] = butter(forder,[frqcut(1)/(fsample(handles.Dmeg{ii})/2),...
-    frqcut(2)/(fsample(handles.Dmeg{ii})/2)],'bandpass');
+    frqcut(2)/(fsample(handles.Dmeg{ii})/2)],'pass');
 
 % Apply Butterworth filter
 Y = filtfilt(B,A,X);
@@ -6168,7 +5916,7 @@ set(handles.figure1, 'windowbuttonmotionfcn', '')
 flags.index	=   handles.index;
 flags.Dmeg  =   handles.Dmeg;
 flags.file  =   handles.file;
-DC_selection(flags)
+% DC_selection(flags)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

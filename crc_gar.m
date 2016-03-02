@@ -21,7 +21,7 @@ if nargin<1 || (size(prefile,1)==1 && ~exist(prefile,'file'))
 end
 
 for fileii=1:size(prefile,1)
-    try
+%     try
         D = crc_eeg_load(deblank(prefile(fileii,:)));
         file = fullfile(D.path,D.fname);
         if ~exist(file,'file'),
@@ -245,9 +245,9 @@ for fileii=1:size(prefile,1)
 
         save(Do)
         close(h)
-    catch
-        disp([' !!! ERROR while processing file:' deblank(prefile(fileii,:)),' !!!']);
-    end
+%     catch
+%         disp([' !!! ERROR while processing file:' deblank(prefile(fileii,:)),' !!!']);
+%     end
 end
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

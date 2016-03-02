@@ -27,7 +27,12 @@ function D = crc_eeg_load(P)
 
 % Written by C. Phillips, 2011.
 % Cyclotron Research Centre, University of Liege, Belgium
-% $Id$
+
+%% Check initilization of FASST/SPM
+persistent fasst_defs
+if isempty(fasst_defs) || ~fasst_defs
+    fasst_defs = crc_main('SetDefs');
+end
 
 %% Bypass if the input is already an MEEG object
 %--------------------------------------------------------------------------
@@ -54,7 +59,7 @@ if strcmpi(ext,'.vhdr') % BrainProducts
         % Conversion from vhdr to mat file
         crc_eeg_rdata_brpr(P);
         disp(' ')
-        disp('.vhdr file converted to .mat file (spm8 compatible)')
+        disp('.vhdr file converted to .mat file (spm8/12 compatible)')
     else
         disp(' ')
         disp('.mat file already existing, the conversion of the vhdr file is not needed')
@@ -155,9 +160,17 @@ if isfield(D,'CRC')
         % assume pwrspect data are next to the .mat file!
         fn_pwrs = D.CRC.pwrspect.frqdata.fname;
         if ~ispc, fn_pwrs = strrep(fn_pwrs,'\',filesep); end
-        [pth, pfname, pext] = fileparts(fn_pwrs);
+        [~, pfname, pext] = fileparts(fn_pwrs);
+        if isempty(pfname)
+            if isempty(D.CRC.pwrspect.frqname)
+                [~, pfname, ~] = fileparts(D.fname);
+                pext = '.frq';
+            else
+                [~, pfname, pext] = fileparts(D.CRC.pwrspect.frqname);
+            end
+        end
         nfn_pwrs = fullfile(D.path,[pfname,pext]);
-        if ~strcmpi(fn_pwrs,nfn_pwrs)
+        if ~strcmpi(fn_pwrs,nfn_pwrs) % New location -> update fname
             if exist(nfn_pwrs,'file') && ~exist(nfn_pwrs,'dir')
                 D.CRC.pwrspect.frqdata.fname = nfn_pwrs;
             else

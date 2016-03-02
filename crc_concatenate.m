@@ -84,7 +84,7 @@ end
 
 Ntb_o = D1.nsamples + D2.nsamples + tb_gap;
 
-fnamedat_o = fullfile(D1.path,[prefix,D1.fnamedat]);
+fnamedat_o = fullfile(D1.path,[prefix,spm_str_manip(D1.fnamedat,'t')]);
 Do = clone(D1, fnamedat_o, [D1.nchannels Ntb_o 1]);
 
 % Copy D1 data, then D2

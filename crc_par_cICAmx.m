@@ -21,7 +21,7 @@ function D = crc_par_cICAmx(Di)
 crcdef = crc_get_defaults('par');
 
 % Recover Peaks and badchan
-badindex = cache(Di,'badch');
+badindex = Di.cache.badch;
 
 mxes = cell(0);
 

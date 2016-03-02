@@ -76,13 +76,12 @@ if isempty(varargin) || ~isfield(varargin{1},'file')
         set(handles.selectMEG,'enable','off','visible','off');
         set(handles.selectEEG,'enable','off','visible','off');
         set(handles.fctother,'enable','off','visible','off');
-        set(handles.selectMEG,'enable','off','visible','off');
-        set(handles.selectMEGPLANAR,'enable','off','visible','off');
+        set(handles.selectMEGPLAN,'enable','off','visible','off');
         set(handles.desall,'enable','off','visible','off');
         set(handles.checkcICA,'enable','off','visible','off');
         set(handles.Score,'enable','off','visible','off');
-        set(handles.text4,'visible','off');
-        set(handles.text5,'visible','off');
+%         set(handles.text4,'visible','off');
+%         set(handles.text5,'visible','off');
         set(handles.Save,'visible','off');
         handles.multcomp=1;
     catch
@@ -181,6 +180,10 @@ handles.indmeeg = meegchannels(handles.Dmeg{1});
 handles.indeeg = [meegchannels(handles.Dmeg{1},'EEG') meegchannels(handles.Dmeg{1},'LFP')];
 handles.indmeg = meegchannels(handles.Dmeg{1},'MEG');
 handles.indmegplan = meegchannels(handles.Dmeg{1},'MEGPLANAR');
+% handles.indmeeg = indchantype(handles.Dmeg{1},{'MEEG','REF','LFP'});
+% handles.indeeg = [indchantype(handles.Dmeg{1},'EEG') indchantype(handles.Dmeg{1},'LFP')];
+% handles.indmeg = indchantype(handles.Dmeg{1},'MEG');
+% handles.indmegplan = indchantype(handles.Dmeg{1},'MEGPLANAR');
 handles.namother = setdiff(chanlabels(handles.Dmeg{1}), chanlabels(handles.Dmeg{1},handles.indmeeg));
 
 if isempty(handles.indeeg)

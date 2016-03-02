@@ -14,11 +14,12 @@ crcdef = crc_get_defaults('par');
 Peaks = Di.CRC.EKGPeaks;
 
 % Split good EEG channel, to correct, and others
-l_eeg = cache(Di,'l2cor');
+l_eeg = Di.cache.l2cor;
 l_other = setdiff(1:Di.nchannels,l_eeg);
 % Initializaing the cleaned EEG datafile
 prefPCA = crcdef.pcapref;
-fn_dat = [ prefPCA, fnamedat(Di)];
+fn_dat = fullfile(spm_str_manip(fnamedat(Di),'H'), ...
+    [ prefPCA, spm_str_manip(fnamedat(Di),'t')]);
 
 if exist(fullfile(path(Di), fn_dat),'file')
     % This check is because I want append data in the new file
@@ -51,7 +52,7 @@ end
 % Loop over chunks
 for ii=1:Nchunks
     chunk_ii = t_chunk(:,ii);
-    Di = cache(Di,chunk_ii);
+    Di.cache.chunk_ii = chunk_ii;
     tmpPeaks = intersect(Peaks,t_chunk(1,ii):t_chunk(2,ii));
     tmpPeaks = tmpPeaks-t_chunk(1,ii)+1;
 
