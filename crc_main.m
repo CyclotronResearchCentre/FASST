@@ -95,7 +95,7 @@ if isempty(flag_filter)
     flag_filter = true;
 end
 
-if nargin && ischar(varargin{1}) && ~strcmp(varargin{1},'SetDefs')
+if ~nargin || (ischar(varargin{1}) && ~strcmp(varargin{1},'SetDefs'))
     %% Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
