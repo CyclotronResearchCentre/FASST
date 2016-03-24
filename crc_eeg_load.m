@@ -1,8 +1,9 @@
-function D = crc_eeg_load(P)
+function D = crc_eeg_load(P,opt)
 % Load an M/EEG file in SPM format
-% FORMAT D = crc_eeg_load(P)
+% FORMAT D = crc_eeg_load(P,opt)
 %
 % P         - filename of M/EEG file, or any format supported by FASST
+% opt       - option flag (can be omited to ensure back compatibility)
 % D         - MEEG object
 %__________________________________________________________________________
 %
@@ -12,6 +13,9 @@ function D = crc_eeg_load(P)
 % the fly.
 % Importantly, the data array is memory-mapped and the struct is converted
 % to MEEG object.
+%
+% ONLY for BrainProducts data, the datafile.eeg file can be renamed into
+% datafile.dat to fit SPM's usual format (if opt = true).
 %
 % After using spm_eeg_load, some housekeeping is done to handle FASST
 % specific add-ons to the object/structure.
@@ -29,6 +33,7 @@ function D = crc_eeg_load(P)
 % Cyclotron Research Centre, University of Liege, Belgium
 
 %% Check initilization of FASST/SPM
+%--------------------------------------------------------------------------
 persistent fasst_defs
 if isempty(fasst_defs) || ~fasst_defs
     fasst_defs = crc_main('SetDefs');
@@ -43,7 +48,7 @@ end
 %% Select the data and convert if necessary
 %--------------------------------------------------------------------------
 % Filter for mat, vhdr, raw and edf files
-if ~nargin
+if nargin<1 || isempty(P)
     P = spm_select(1, 'any', 'Select an EEG file','' ,pwd, ...
         '\.[mMvVeErR][dDhHaA][fFDdTtwW]');
 end
@@ -57,7 +62,9 @@ if strcmpi(ext,'.vhdr') % BrainProducts
     fn_mat = fullfile(pth,[name,'.mat']);
     if ~exist(fn_mat,'file')
         % Conversion from vhdr to mat file
-        crc_eeg_rdata_brpr(P);
+        % and possibly turning the .eeg file into .dat
+        if nargin<2, opt = false; end
+        crc_eeg_rdata_brpr(P,opt);
         disp(' ')
         disp('.vhdr file converted to .mat file (spm8/12 compatible)')
     else

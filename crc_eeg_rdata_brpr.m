@@ -1,8 +1,9 @@
-function [D,Fdata] = crc_eeg_rdata_brpr(Fdata)
+function [D,Fdata] = crc_eeg_rdata_brpr(Fdata,opt)
 % converts EEG data from BrainProduct- to SPM-format
 % FORMAT D = crc_eeg_rdata_brpr(Fdata)
 %
 % Fdata       - filename of header-file
+% opt         - option flag (can be omited to ensure back compatibility)
 % D           - SPM8/12 compatible matlab structure for an M/EEG object.
 %_______________________________________________________________________
 %
@@ -13,6 +14,9 @@ function [D,Fdata] = crc_eeg_rdata_brpr(Fdata)
 % The data are stored separately in a data-file. This file is NOT copied
 % when importing the data into SPM8/12 !
 % Please keep a safe copy of your data...
+%
+% NOTE: the datafile.eeg file can be renamed into datafile.dat to fit SPM's
+% usual format (if opt = true).
 %_______________________________________________________________________
 % Copyright (C) 2009 Cyclotron Research Centre
 
@@ -22,7 +26,8 @@ function [D,Fdata] = crc_eeg_rdata_brpr(Fdata)
 % which had been written by Stefan Kiebel, thanks mate !
 
 %% Read in file information
-if nargin<1
+if nargin<2, opt = false; end
+if nargin<1 || isempty(Fdata)
     Fdata = spm_select(1,'^.*\.vhdr$','select EEG data header file');
 end
 
@@ -50,18 +55,27 @@ else
     %     D.type = ''; % Not sure what to put in !
 end
 
-[pth,fname,ext] = fileparts(Fdata);
+[pth,fname,ext] = fileparts(Fdata); %#ok<*NASGU>
 D.fname = [fname,'.mat'];
 D.path = pth;
 D.timeOnset = 0;
 D.Fsample = 1e6/header.SamplingInterval;
 
 % Other stuff
-[kk,fname,ext] = fileparts(header.DataFile);
-fnamedat = [fname,ext];
 Nchannels = header.NumberOfChannels;
 
 %% Deal with the data
+if opt
+    % ensure that the datafile has .dat extension -> need to rename it!
+    [kk,fname,ext] = fileparts(header.DataFile); %#ok<*ASGLU>
+    fnamedatO = [fname,ext];
+    fnamedat = [fname,'.dat'];
+    movefile(fullfile(pth,fnamedatO),fullfile(pth,fnamedat));
+else
+    % or leave unchanged
+    [kk,fname,ext] = fileparts(header.DataFile);
+    fnamedat = [fname,ext];
+end
 
 if ~strcmp(header.DataFormat,'BINARY')
     error('Data are NOT in binary format, sorry can''t deal with that');
@@ -126,7 +140,7 @@ D.data = data;
 %% Deal with channels
 blankchan = struct('label',[],'bad', [], 'type', 'unknown', ...
     'X_plot2D', [],'Y_plot2D',[], 'units', 'unknown');
-
+channels(header.NumberOfChannels) = blankchan;
 for ii=1:header.NumberOfChannels
     tempchan = blankchan;
     % Get chnnel label from header, i.e. EEG montage

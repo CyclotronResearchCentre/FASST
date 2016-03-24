@@ -33,6 +33,7 @@ if isempty(fasst_defs) || ~fasst_defs
     fasst_defs = crc_main('SetDefs');
 end
 
+%% Deal with options
 if nargin<2
     try
         prefix = crc_get_defaults('cat.prefix1');
@@ -40,6 +41,10 @@ if nargin<2
         prefix = 'cc_';
     end
 end
+
+% In the case of BrainProducts data, force the renaming of the data file
+% from datafile.eeg into datafile.dat (true) or not (false).
+opt = true;
 
 %% Loading data
 if nargin<1
@@ -49,7 +54,7 @@ end
 Nfile = size(Pfile,1);
 Di = cell(Nfile,1);
 for ii=1:Nfile
-    Di{ii} = crc_eeg_load(deblank(Pfile(ii,:)));
+    Di{ii} = crc_eeg_load(deblank(Pfile(ii,:)),opt);
 end
 
 %% Checking and sorting stuff
