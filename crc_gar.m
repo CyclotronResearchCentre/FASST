@@ -59,7 +59,7 @@ for fileii=1:size(prefile,1)
             % Create event code
             evts = round([ev(abs([ev.value])==crcdef.ScanMrk1).time]*D.fsample); % CP, why not use true tb index???
             if isempty(evts)
-                evts = round([ev(abs([evvalue])==crcdef.ScanMrk2).time]*D.fsample); % CP, why not use true tb index???
+                evts = round([ev(abs([ev.value])==crcdef.ScanMrk2).time]*D.fsample); % CP, why not use true tb index???
             end
             
             if length(evts)<crcdef.Nsc_aver
