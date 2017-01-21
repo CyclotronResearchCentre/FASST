@@ -15,7 +15,7 @@ To be able to score using z3score API, you will need a license key. Request a ke
 # See it in action
 [![FASST-Z3Score Demo](https://img.youtube.com/vi/kTPDIZSy15E/maxresdefault.jpg)](https://www.youtube.com/watch?v=kTPDIZSy15E)
 
-For more information visit z3score.com 
+For more information visit https://z3score.com 
 
 (c)-Amiya Patanaik, 2017, Patents pending
 
