@@ -69,11 +69,20 @@ handles.file    =   varargin{1}.file;
 handles.figz    =   0;
 handles.Dmeg    =   varargin{1}.Dmeg;
 
+
+if isfield(varargin{1},'showOracle')
+    handles.showOracle     =   1;
+else
+    handles.showOracle     =   0;
+end
+
 if isfield(varargin{1},'scoresleep')
     handles.scoring     =   1;
 else
     handles.scoring     =   0;
 end
+
+handles.gui_active = 1;
 
 for i=1:numel(handles.Dmeg)
     handles.Dmeg{i} =   meeg(handles.Dmeg{i});
@@ -207,6 +216,16 @@ else       % It's the begining
     end 
 end
 
+[path, ~,~] = fileparts([mfilename('fullpath') '.m']);
+settings_path = fullfile(path,'/settings.mat');
+
+if exist(settings_path, 'file') == 2,
+    load(settings_path);
+    set(handles.validity,'string',['License Validity: ' settings.validity ' UTC.']) 
+else
+    set(handles.validity,'string','License Validity: NA') 
+end
+
 delete(get(handles.manevent,'Children'));
 for itp = 1:size(handles.type,1)
     uimenu(handles.manevent,'Label', char(handles.type(itp,1)),'Callback',@Define_event)
@@ -322,7 +341,7 @@ if isfield(varargin{1},'multcomp') % if comparing multiple files
     set(handles.Delaro,'visible','off')
     set(handles.Del_eoi,'visible','off')
     set(handles.Delartonlyone,'visible','off')
-	set(handles.Detection,'visible','off')
+	%set(handles.Detection,'visible','off')
     set(handles.addonlyone,'visible','off')	
 %     set(handles.others,'enable','off','visible','off')
 %     set(handles.com,'enable','off','visible','off')
@@ -341,7 +360,7 @@ if isfield(varargin{1},'multcomp') % if comparing multiple files
     set(handles.figure1,'name','Multiple files comparison')
 
 else %if only one file to display
-    set(handles.Detection,'visible','off') %Not ready yet
+    %set(handles.Detection,'visible','off') %Not ready yet
     handles.multcomp=0;
     set(handles.axes5,'visible','on');
     set(handles.axes4,'visible','on');
@@ -372,7 +391,7 @@ else %if only one file to display
     Nchdisp     =   str2double(get(handles.NbreChan,'String'));
     set(handles.NbreChan,'String', num2str(min(Nchdisp, length(handles.indexMEEG) + length(handles.indnomeeg))))
     Nchdisp     =   str2double(get(handles.NbreChan,'String'));
-    totind      =   length(handles.index); %length(handles.indexMEEG) + length(handles.indnomeeg);
+    totind      =   numel(handles.index); %length(handles.indexMEEG) + length(handles.indnomeeg);
     set(handles.Chanslider,...
         'Min',1,...
         'Max',totind - Nchdisp+1,...
@@ -510,8 +529,8 @@ if ~handles.multcomp
             handles.currentscore = varargin{1}.user;
         else 
             handles.currentscore    =   1;
-        end 
- 
+        end
+
         crc_hypnoplot(handles.axes4, ...
             handles,handles.winsize)
 
@@ -528,7 +547,7 @@ if ~handles.multcomp
         set(handles.Delaro,'visible','off')
         set(handles.Del_eoi,'visible','off')
         set(handles.manevent,'visible','off') %To make visible to put events manually
-        set(handles.Detection,'visible','on')
+        %set(handles.Detection,'visible','on')
     end
 end
 D   =   handles.Dmeg{1};
@@ -627,6 +646,24 @@ end
 mainplot(handles)
 % Update handles structure
 guidata(hObject, handles);
+
+function confslider_Callback(hObject, eventdata, handles)
+value = get(hObject,'Value');
+set(handles.conftext,'String',sprintf('Confidence Threshold %.1f',value));
+%removed and then readd%%%%%%%%
+if isfield(handles,'scoring') & handles.scoring
+    set(handles.figure1,'CurrentAxes',handles.axes4)
+    crc_hypnoplot(handles.axes4, ...
+        handles,handles.score{3,handles.currentscore})
+    set(handles.figure1,'CurrentAxes',handles.axes1)
+end
+mainplot(handles)
+guidata(hObject, handles);
+
+
+function confslider_CreateFcn(hObject, eventdata, handles)
+set(hObject,'Value',1.5);
+%set(handles.conftext,'String','Confidence Threshold: 1.5');
 
 % --- Executes during object creation, after setting all properties.
 function slider1_CreateFcn(hObject, eventdata, handles)
@@ -893,6 +930,40 @@ function frqabv_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+function settings_Callback(hObject, eventdata, handles)
+% Update handles structure
+handles.gui_active = 0;
+guidata(hObject, handles);
+h = crc_z3score_settings();
+uiwait(h);
+handles.gui_active = 1;
+[path, ~,~] = fileparts([mfilename('fullpath') '.m']);
+settings_path = fullfile(path,'/settings.mat');
+
+if exist(settings_path, 'file') == 2,
+    load(settings_path);
+    set(handles.validity,'string',['License Validity: ' settings.validity ' UTC.']) 
+else
+    set(handles.validity,'string','License Validity: NA') 
+end
+
+guidata(hObject, handles);
+
+function autoscore_Callback(hObject, eventdata, handles)
+handles.gui_active = 0;
+guidata(hObject, handles);
+flags.Dmeg=handles.Dmeg;
+flags.file=handles.file;
+flags.scoresleep=1;
+flags.index = handles.index;
+crc_z3score_score(handles.Dmeg{1}, flags);
+close(handles.figure1);
+return
+
+
+
 
 
 %Edit the highpass filter cutoff
@@ -1523,8 +1594,8 @@ else
     li   =   length(index);
 end
 ylim([0 handles.scale*(li+1)])
-set(ha,'YTick',[handles.scale/2:handles.scale/2:li*handles.scale+handles.scale/2]);
-ylabels     =   [num2str(round(handles.scale/2))];
+%set(ha,'YTick',[handles.scale/2:handles.scale/2:li*handles.scale+handles.scale/2]);
+%ylabels     =   [num2str(round(handles.scale/2))];
 for j=1:li
     if handles.multcomp
         ylabels=[ylabels num2str(j)];
@@ -1533,7 +1604,7 @@ for j=1:li
     end
     ylabels=[ylabels num2str(round(handles.scale/2))];
 end
-set(ha,'YTickLabel',ylabels);
+%set(ha,'YTickLabel',ylabels);
 
 %display x-labels
 slidval=get(handles.slider1,'Value');
@@ -1646,7 +1717,7 @@ if norm
         ind = ind(2:end);
     end
 else 
-    handles.indexMEEG = handles.index(length(handles.indnomeeg)+1:length(handles.index));
+    handles.indexMEEG = handles.index(length(handles.indnomeeg)+1:numel(handles.index));
 end
 %Update the number of channels available
 NbreChan    =   length(handles.indexMEEG) + length(handles.indnomeeg);   
@@ -2226,6 +2297,8 @@ end
 handles.Dmeg{1}=D;
 save(D);
 
+
+
 %--------------------------------------------------------------------------
 %----------------------- Scoring options ----------------------------------
 %--------------------------------------------------------------------------
@@ -2286,6 +2359,15 @@ try
     end
     handles.Dmeg{1}.CRC.score = handles.score;
     handles.currentscore = 1;
+    if(handles.showOracle)
+        for isc=1:size(handles.score,2)
+            if strcmpi('Oracle',handles.score{2,isc})
+                handles.currentscore=isc;
+                break;
+            end
+        end
+    end
+    
     if ~isempty (handles.score{5,handles.currentscore})&&size(handles.score{5,handles.currentscore},2)<3
         handles.score{5,1}(:,3)=0;
     end
@@ -4329,7 +4411,7 @@ return
 function click(hObject, eventdata, handles)
 
 Mouse = get(handles.axes4,'CurrentPoint');
-
+ 
 if Mouse(1,2) > 0   %Even without score sleep, possibility to access from axes4 where we want on main screen
     slidval = Mouse(1);
     slidval = floor(slidval/handles.winsize)*handles.winsize;
@@ -5706,9 +5788,12 @@ function fftchan_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns fftchan contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from fftchan
-
+if handles.gui_active ~= 1,
+    return; 
+end
 set(handles.fftchan,'visible','off');
-set(handles.figure1,'CurrentAxes',handles.axes5);
+%set(handles.figure1,'Parent',handles.axes5);
+axes(handles.axes5); 
 Chan    =   get(handles.fftchan, 'Value');                  
 delete(findobj('tag', 'powerspctrm'))   %Effacer le denier power spectrum
 delete(findobj('tag', 'error')) 
@@ -5776,7 +5861,8 @@ if ~isempty(handles.score{5,handles.currentscore})
     end 
 end
 
-set(handles.figure1,'CurrentAxes',handles.axes5);
+%set(handles.figure1,'Parent',handles.axes5);
+axes(handles.axes5);
 fs      =   fsample(handles.Dmeg{fil});
 leg     =   cell(0);
 hold on
@@ -5812,15 +5898,18 @@ else
         X   =   0;
     end
 end
+
 if length(X) == 1
-    set(handles.figure1,'CurrentAxes',handles.axes5);
+    %set(handles.figure1,'Parent',handles.axes5);
+    axes(handles.axes5);
     text(0.75,1, 'No Signal here')
     xlim([0 2])
     ylim([0 2])
     grid off
 else
-    set(handles.figure1,'CurrentAxes',handles.axes5)%,'PaperSize',[20.98 29.68]);
-    reset(handles.axes5)
+    %set(handles.figure1,'Parent',handles.axes5)%,'PaperSize',[20.98 29.68]);
+    axes(handles.axes5);
+    reset(handles.axes5);
     X       =   filterforspect(handles,X,[0.001 fs/3],fil);
     [P,F]   =   pwelch(X,[],[],[],fs);    
     P       =   log(P);
@@ -5864,7 +5953,6 @@ end
 
 %New Function : To be checked %%%%%%%%%%%%%%%%%%%%%%
 function update_powerspect(hObject, eventdata, handles)
-
 handles = guidata(hObject);
 % Get the current position of the mouse pointer
 set(handles.figure1,'CurrentAxes',handles.axes1)

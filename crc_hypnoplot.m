@@ -33,6 +33,7 @@ if nargin < 3
         windowsize = def.winsize;
     end
 end
+  
 
 vect = -.5:1/windowsize:(.5-1/windowsize);
 
@@ -76,6 +77,14 @@ if isfield(handles,'scoring') && handles.scoring
     mxSeven = ones(length(vect),1)*Seven;
     mxvect = vect'*ones(1,length(Seven));
     Seven = reshape(mxSeven+mxvect, 1, numel(mxvect));
+end
+
+confidence = [];
+if strcmp(handles.score{2,handles.currentscore},'Oracle'),
+    RC = D.relConfidence;
+    threshold = get(handles.confslider,'Value');
+    confidence = find(RC<threshold);
+    confidence = (confidence+0.5)*30;
 end
 
 labl = def.stnames_S(end:-1:1);
@@ -162,6 +171,15 @@ if ~isempty(eoi)
     plot(eoi, ones(length(eoi),1)*8, '+', 'MarkerSize',8, ...
         'MarkerFaceColor',[0.75 0.2 0.2],...
         'MarkerEdgeColor',[0.75 0.2 0.2],'tag','eoi')
+end
+
+if ~isempty(confidence)
+    plot(confidence, ones(length(confidence),1)*8, 'V', ...
+        'MarkerSize',5,'MarkerFaceColor',[1 0 0],...
+        'MarkerEdgeColor',[1 0 0])
+    for vert = 1 : length(confidence)
+        plot(ones(1,2)*confidence(vert),[0 8],'-.','Color',[1 0 0])
+    end
 end
 
 if isfield(handles,'type')
