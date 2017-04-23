@@ -83,8 +83,7 @@ if isfield(handles, 'metricdata') && ~isreset
     return;
 end
 
-[path, ~,~] = fileparts([mfilename('fullpath') '.m']);
-settings_path = fullfile(path,'/settings.mat');
+settings_path = fullfile(getuserdir,'/z3license.mat');
 
 if exist(settings_path, 'file') == 2,
     load(settings_path);
@@ -119,8 +118,7 @@ serverURL = get(handles.server,'String');
 email = get(handles.email,'String');
 key = get(handles.key,'String');
 
-[path, ~,~] = fileparts([mfilename('fullpath') '.m']);
-settings_path = fullfile(path,'/settings.mat');
+settings_path = fullfile(getuserdir,'/z3license.mat');
 
 h = waitbar(0,'Please wait, communicating with server...');
 
