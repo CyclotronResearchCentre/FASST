@@ -184,8 +184,7 @@ EL = get(handles.EL,'Value');
 ER = get(handles.ER,'Value');
 C3 = get(handles.C3,'Value');
 C4 = get(handles.C4,'Value');
-[path, ~,~] = fileparts([mfilename('fullpath') '.m']);
-settings_path = fullfile(path,'/settings.mat');
+settings_path = fullfile(getuserdir,'/z3license.mat');
 h = waitbar(0,'Please wait, authenticating user...');
 if exist(settings_path, 'file') == 2,
     load(settings_path);
