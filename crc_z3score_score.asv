@@ -270,10 +270,10 @@ if isfield(response,'artifact'),
         n_art = size(handles.D.CRC.score,2)+1;
     end
     
-    handles.D.CRC.score{1,n_art} = artifacts';
+    handles.D.CRC.score{1,n_art} = scores(:,1)';
     handles.D.CRC.score{2,n_art} = 'Oracle_Artifact';
-    handles.D.CRC.score{3,n_art} = 5;
-    handles.D.CRC.score{4,n_art} = [0.005,length(artifacts)*5];
+    handles.D.CRC.score{3,n_art} = 30;
+    handles.D.CRC.score{4,n_art} = [0.005,length(scores(:,1))*30];
     handles.D.CRC.score{5,n_art} = [];
     handles.D.CRC.score{6,n_art} = [];
     handles.D.CRC.score{7,n_art} = [];
@@ -283,7 +283,7 @@ end
 handles.flags.Dmeg{1} = save(handles.D);
 waitbar(1,h,'Done...');
 close(h);
-h = msgbox('Data scored successfully. Sleep is scored by Oracle and Sleep Artifacts are scored by Oracle_Artifact.','Success');
+h = msgbox('Data scored successfully.','Success');
 waitfor(h);
 handles.flags.showOracle = 1;
 guidata(hObject, handles);

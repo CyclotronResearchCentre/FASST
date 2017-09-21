@@ -52,8 +52,21 @@ disp('                                                            ');
 disp(' fMRI Artefact removal and Sleep Scoring Toolbox, FASST.2   ');
 disp(' http://www.montefiore.ulg.ac.be/~phillips/FASST.html       ');
 disp(' An SPM8/12-compatible toolbox.                             ');
-fprintf('\n');
-
+disp('															  ');
+disp('															  ');
+disp('         ****                                               ');
+disp('        */// *                                              ');
+disp(' ******/    /*  ******  *****   ******  ******  *****       ');
+disp('////**    ***  **////  **///** **////**//**//* **///**      ');
+disp('   **    /// *//***** /**  // /**   /** /** / /*******      ');
+disp('  **    *   /* /////**/**   **/**   /** /**   /**////       ');
+disp(' ******/ ****  ****** //***** //****** /***   //******      ');
+disp('//////  ////  //////   /////   //////  ///     //////       ');
+disp('															  ');
+disp(' Z3Score.com - Automatic Sleep Scoring and Artifact         ');
+disp(' detection module. https://z3score.com        			  ');
+disp(' For API documentation and sample code visit:               ');
+disp(' https://github.com/amiyapatanaik/z3score-api               ');
 %% Checking the installation and defaults
 persistent flag_filter flag_initialize
 
