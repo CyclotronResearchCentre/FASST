@@ -61,7 +61,7 @@ function dis_selchan_OpeningFcn(hObject, eventdata, handles, varargin)
 set(0,'CurrentFigure',handles.figure1);
 handles.output = hObject;
 
-load CRC_electrodes.mat;
+load CRC_electrodes.mat
 handles.names     = names;
 handles.pos       = pos';
 handles.crc_types = crc_types;

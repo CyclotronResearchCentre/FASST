@@ -22,7 +22,7 @@ function varargout = crc_z3score_score(varargin)
 
 % Edit the above text to modify the response to help crc_z3score_score
 
-% Last Modified by GUIDE v2.5 21-Jan-2017 16:20:13
+% Last Modified by GUIDE v2.5 17-Nov-2017 15:32:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,6 +60,11 @@ set(handles.C3,'String',handles.D.chanlabels);
 set(handles.C4,'String',handles.D.chanlabels);
 set(handles.EL,'String',handles.D.chanlabels);
 set(handles.ER,'String',handles.D.chanlabels);
+
+set(handles.C3_Ref,'String',['No Reref', handles.D.chanlabels]);
+set(handles.C4_Ref,'String',['No Reref', handles.D.chanlabels]);
+set(handles.EL_Ref,'String',['No Reref', handles.D.chanlabels]);
+set(handles.ER_Ref,'String',['No Reref', handles.D.chanlabels]);
 
 handles.output = hObject;
 
@@ -184,6 +189,12 @@ EL = get(handles.EL,'Value');
 ER = get(handles.ER,'Value');
 C3 = get(handles.C3,'Value');
 C4 = get(handles.C4,'Value');
+
+EL_Ref = get(handles.EL_Ref,'Value')-1;
+ER_Ref = get(handles.ER_Ref,'Value')-1;
+C3_Ref = get(handles.C3_Ref,'Value')-1;
+C4_Ref = get(handles.C4_Ref,'Value')-1;
+
 settings_path = fullfile(getuserdir,'/z3license.mat');
 h = waitbar(0,'Please wait, authenticating user...');
 if exist(settings_path, 'file') == 2,
@@ -217,7 +228,32 @@ waitbar(0.333,h,'Converting data to compressed feature set (CFS)...');
 p = dcblock(0.2/fsample(handles.D));
 b = [1 -1];                         % set up differentiator
 a = [1 -p];                         % set up integrator
-EEGData = filter(b,a,handles.D([C3, C4, EL, ER],:,1)')';
+
+if EL_Ref == 0
+    EL_Data = handles.D(EL,:,1);
+else
+    EL_Data = handles.D(EL,:,1) - handles.D(EL_Ref,:,1);
+end
+
+if ER_Ref == 0
+    ER_Data = handles.D(ER,:,1);
+else
+    ER_Data = handles.D(ER,:,1) - handles.D(ER_Ref,:,1);
+end
+
+if C3_Ref == 0
+    C3_Data = handles.D(C3,:,1);
+else
+    C3_Data = handles.D(C3,:,1) - handles.D(C3_Ref,:,1);
+end
+
+if C4_Ref == 0
+    C4_Data = handles.D(C4,:,1);
+else
+    C4_Data = handles.D(C4,:,1) - handles.D(C4_Ref,:,1);
+end
+
+EEGData = filter(b,a,[C3_Data; C4_Data; EL_Data; ER_Data]')';
 stream = streamCFS(EEGData, fsample(handles.D));
 waitbar(0.666,h,'Now uploading data and waiting for results...');
 
@@ -302,3 +338,94 @@ function gui_CloseRequestFcn(hObject, eventdata, handles)
 crc_dis_main(handles.flags);
 delete(hObject);
 
+
+% --- Executes during object creation, after setting all properties.
+function C3_Ref_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to C3_Ref (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in C4_Ref.
+function C4_Ref_Callback(hObject, eventdata, handles)
+% hObject    handle to C4_Ref (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns C4_Ref contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from C4_Ref
+
+
+% --- Executes during object creation, after setting all properties.
+function C4_Ref_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to C4_Ref (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in EL_Ref.
+function EL_Ref_Callback(hObject, eventdata, handles)
+% hObject    handle to EL_Ref (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns EL_Ref contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from EL_Ref
+
+
+% --- Executes during object creation, after setting all properties.
+function EL_Ref_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to EL_Ref (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in ER_Ref.
+function ER_Ref_Callback(hObject, eventdata, handles)
+% hObject    handle to ER_Ref (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns ER_Ref contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from ER_Ref
+
+
+% --- Executes during object creation, after setting all properties.
+function ER_Ref_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to ER_Ref (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in C3_Ref.
+function C3_Ref_Callback(hObject, eventdata, handles)
+% hObject    handle to C3_Ref (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns C3_Ref contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from C3_Ref
