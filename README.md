@@ -2,10 +2,13 @@
 
 FASST-Z3Score is a fork of FASST toolbox (fMRI Artefact rejection and Sleep Scoring Toolbox, see below). It includes modifications to allow automatic scoring using the z3score.com/Z3Score-Server sleep scoring API. Read about the API here: https://github.com/neurobittechnologies/z3score-api
 
-Version 1.1.3
+## Version 1.1.3
+
 Feature Updates:
 FASST-Z3Score now supports offline z3score server 
+
 One click import and export of sleep scores
+
 One click report generation
 
 The API uses a three step process (which is transparent to the user):
