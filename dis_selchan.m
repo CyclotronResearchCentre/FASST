@@ -28,7 +28,7 @@ function varargout = dis_selchan(varargin)
 
 % Edit the above text to modify the response to help dis_selchan
 
-% Last Modified by GUIDE v2.5 08-Feb-2012 19:07:10
+% Last Modified by GUIDE v2.5 16-Jun-2018 15:02:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1012,9 +1012,3 @@ set(handles.Localizer,'XTick',[]);
 set(handles.Localizer,'YTick',[]);
 
 set(handles.load,'Value',0)
-
-
-
-
-
-

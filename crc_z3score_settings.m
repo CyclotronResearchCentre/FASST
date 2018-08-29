@@ -22,7 +22,7 @@ function varargout = crc_z3score_settings(varargin)
 
 % Edit the above text to modify the response to help crc_z3score_settings
 
-% Last Modified by GUIDE v2.5 14-Jan-2017 18:25:07
+% Last Modified by GUIDE v2.5 12-Aug-2018 13:23:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -90,16 +90,23 @@ if exist(settings_path, 'file') == 2,
     server = settings.serverURL;
     email = settings.email;
     key = settings.key;
+    if(isfield(settings,'isLocalServer'))
+        isLocalServer = settings.isLocalServer;
+    else
+        settings.isLocalServer = 0;
+        isLocalServer = settings.isLocalServer;
+    end
 else
     server = 'http://z3score.com/api/v1';
     email = 'name@domain.com';
     key = 'yourAPIKey';
+    isLocalServer = 0;
 end
 
 set(handles.server, 'String', server);
 set(handles.email,  'String', email);
 set(handles.key,  'String', key);
-
+set(handles.isLocalServer, 'Value', isLocalServer);
 
 % Update handles structure
 guidata(handles.settings_gui, handles);
@@ -117,14 +124,26 @@ function setLicense_Callback(hObject, eventdata, handles)
 serverURL = get(handles.server,'String');
 email = get(handles.email,'String');
 key = get(handles.key,'String');
+isLocalServer = get(handles.isLocalServer, 'Value');
 
 settings_path = fullfile(getuserdir,'/z3license.mat');
 
 h = waitbar(0,'Please wait, communicating with server...');
 
 try
-    response = loadjson(urlreadpost([serverURL '/check'],...
+    response.status = 0;
+    response.message = 'Cannot communicate with local server.';
+    if(isLocalServer),
+        client = connectZ3Score(serverURL);
+        res = client.execute('ping', '');
+        if(isa(res,'java.util.HashMap'))
+            response.status = res.get('status');
+            response.message = 'Local server is up and running.';
+        end
+    else
+        response = loadjson(urlreadpost([serverURL '/check'],...
                                         {'email',email,'key',key}));
+    end
 catch
     close(h);
     errordlg('Error connecting server. Please check server address and internet connection.','Error Connecting Server');
@@ -141,14 +160,32 @@ close(h);
 settings.serverURL = serverURL;
 settings.email = email;
 settings.key = key;
-settings.call_limit = response.call_limit;
-settings.epoch_limit = response.epoch_limit;
-r = regexp(response.message,'\d*-\w*-\d*','match');
-%settings.validity = datetime(r{1},'InputFormat','dd-MMMM-yyyy','TimeZone','UTC');
-settings.validity = r{1};
+settings.isLocalServer = isLocalServer;
 
-save(settings_path, 'settings');
+if(isLocalServer),
+    settings.call_limit = 100000;
+    settings.epoch_limit = 100000;
+    settings.validity = '1-Jan-2099';
+    save(settings_path, 'settings');
+    h = msgbox(response.message,'License Validated');
+    waitfor(h);
+else
+    settings.call_limit = response.call_limit;
+    settings.epoch_limit = response.epoch_limit;
+    r = regexp(response.message,'\d*-\w*-\d*','match');
+    settings.validity = r{1};
+    save(settings_path, 'settings');
+    h = msgbox([response.message ' Call limit (hourly): ' num2str(response.call_limit) ' Epoch limit (daily): ' num2str(response.epoch_limit) '.'],'License Validated');
+    waitfor(h);
+end
 
-h = msgbox([response.message ' Call limit (hourly): ' num2str(response.call_limit) ' Epoch limit (daily): ' num2str(response.epoch_limit) '.'],'License Validated');
-waitfor(h);
 close(handles.settings_gui);
+
+
+% --- Executes on button press in isLocalServer.
+function isLocalServer_Callback(hObject, eventdata, handles)
+% hObject    handle to isLocalServer (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of isLocalServer

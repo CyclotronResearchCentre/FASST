@@ -1,7 +1,12 @@
 # FASST-Z3Score - One Click Automatic Sleep Scoring
 
-FASST-Z3Score is a fork of FASST toolbox (fMRI Artefact rejection and Sleep Scoring Toolbox, see below). It includes modifications to allow automatic scoring using the z3score.com sleep scoring API. Read about the API here: https://github.com/amiyapatanaik/z3score-api 
+FASST-Z3Score is a fork of FASST toolbox (fMRI Artefact rejection and Sleep Scoring Toolbox, see below). It includes modifications to allow automatic scoring using the z3score.com/Z3Score-Server sleep scoring API. Read about the API here: https://github.com/neurobittechnologies/z3score-api
 
+Version 1.1.3
+Feature Updates:
+FASST-Z3Score now supports offline z3score server 
+One click import and export of sleep scores
+One click report generation
 
 The API uses a three step process (which is transparent to the user):
 
@@ -19,11 +24,12 @@ To be able to score using z3score API, you will need a license key. Request a ke
 **cfslib-MATLAB**: CFS MATLAB library to convert raw data to compressed feature set. Already included here.
 
 # See it in action
+Note that the video is slightly outdated. 
 [![FASST-Z3Score Demo](https://img.youtube.com/vi/kTPDIZSy15E/maxresdefault.jpg)](https://www.youtube.com/watch?v=kTPDIZSy15E)
 
 For more information visit https://z3score.com 
 
-(c)-Amiya Patanaik, 2017, Patents pending
+(c)-Neurobit Technologies, 2018, Patent pending
 
 This software is released under GPL. 
 

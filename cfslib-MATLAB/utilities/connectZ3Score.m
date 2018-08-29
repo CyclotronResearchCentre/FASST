@@ -12,7 +12,7 @@
 function client = connectZ3Score(server)
 
 if(nargin < 1),
-    server = 'http://localhost:18778';
+    server = 'http://localhost:80';
 end
 
 client = javaObject('org.apache.xmlrpc.client.XmlRpcClient');
