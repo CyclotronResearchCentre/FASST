@@ -18,7 +18,7 @@ end
 currentFile = mfilename('fullpath');
 [pathstr,~,~] = fileparts(currentFile);
 try
-    javarmpath({fullfile(pathstr,'utils.jar'), fullfile(pathstr,'xmlrpc.jar')});
+    javarmpath(fullfile(pathstr,'utils.jar'), fullfile(pathstr,'xmlrpc.jar'));
     javaaddpath({fullfile(pathstr,'utils.jar'), fullfile(pathstr,'xmlrpc.jar')});
 catch
 end
