@@ -202,6 +202,12 @@ if exist(settings_path, 'file') == 2,
     serverURL = settings.serverURL;
     email = settings.email;
     key = settings.key;
+    if(isfield(settings,'isLocalServer'))
+        isLocalServer = settings.isLocalServer;
+    else
+        settings.isLocalServer = 0;
+        isLocalServer = settings.isLocalServer;
+    end
 else
     close(h);
     errordlg('No license found. Please go to settings and add your license information.','License missing');
@@ -211,8 +217,19 @@ end
 
 
 try
-    response = loadjson(urlreadpost([serverURL '/check'],...
+    response.status = 0;
+    response.message = 'Cannot communicate with local server.';
+    if(isLocalServer),
+        client = connectZ3Score(serverURL);
+        res = client.execute('ping', '');
+        if(isa(res,'java.util.HashMap'))
+            response.status = res.get('status');
+            response.message = 'Local server is up and running.';
+        end
+    else
+        response = loadjson(urlreadpost([serverURL '/check'],...
                                         {'email',email,'key',key}));
+    end
 catch
     close(h);
     errordlg('Error connecting server. Please check server address and internet connection.','Error Connecting Server');
@@ -258,8 +275,17 @@ stream = streamCFS(EEGData, fsample(handles.D));
 waitbar(0.666,h,'Now uploading data and waiting for results...');
 
 try
-    response = loadjson(urlreadpost([serverURL '/score'], ... 
-        {'email',email,'key',key,'file',stream}));
+    if(isLocalServer),
+        client = connectZ3Score(serverURL);
+        res = client.execute('score', base64encode(stream));
+        response.status = res.get('status');
+        response.message = loadjson(res.get('score'));
+        response.artifact = loadjson(res.get('artifact'));
+    else
+        
+        response = loadjson(urlreadpost([serverURL '/score'], ...
+            {'email',email,'key',key,'file',stream}));
+    end
 catch
     close(h);
     errordlg('Error connecting server. Please check server address and internet connection.','Error Connecting Server');
