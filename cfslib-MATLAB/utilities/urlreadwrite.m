@@ -56,4 +56,3 @@ if isempty(proxy)
 else
     urlConnection = url.openConnection(proxy);
 end
-

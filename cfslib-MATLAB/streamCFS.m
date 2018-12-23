@@ -8,7 +8,7 @@
 % Compress is optional argument (default = 1), to control compression
 % Hash is optional argument (default = 1), to control transport security
 %
-% Patents pending (c)-2016 Amiya Patanaik amiyain@gmail.com
+% (c)-2018 Neurobit Technologies Amiya Patanaik amiya@neurobit.io
 %
 % THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 % IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

@@ -12,15 +12,7 @@
 function client = connectZ3Score(server)
 
 if(nargin < 1),
-    server = 'http://localhost:80';
-end
-
-currentFile = mfilename('fullpath');
-[pathstr,~,~] = fileparts(currentFile);
-try
-    javarmpath(fullfile(pathstr,'utils.jar'), fullfile(pathstr,'xmlrpc.jar'));
-    javaaddpath({fullfile(pathstr,'utils.jar'), fullfile(pathstr,'xmlrpc.jar')});
-catch
+    server = 'http://localhost:18778';
 end
 
 client = javaObject('org.apache.xmlrpc.client.XmlRpcClient');

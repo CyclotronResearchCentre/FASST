@@ -74,6 +74,13 @@ disp(' Z3Score is powered by Neurobit Technologies Pte. Ltd.      ');
 disp(' More details at: https://z3score.com          			  ');
 disp(' For API documentation and sample code visit:               ');
 disp(' https://github.com/neurobittechnologies/z3score-api        ');
+disp(' this version now uses Z3Score-V2 (NEO) sleep staging system.');
+disp(' Z3Score V2 shows 35 to 40% lower error rates compared to V1.');
+disp('															  ');
+disp('															  ');
+disp(' Cite this version as:                                       ');
+disp(' Z3Score-Cloud Version 2.0, Neurobit Technologies, Singapore.');
+disp(' and Patanaik et al., Sleep 41(5), 2018                       ');
 
 
 %% Checking the installation and defaults

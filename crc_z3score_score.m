@@ -22,7 +22,7 @@ function varargout = crc_z3score_score(varargin)
 
 % Edit the above text to modify the response to help crc_z3score_score
 
-% Last Modified by GUIDE v2.5 17-Nov-2017 15:32:28
+% Last Modified by GUIDE v2.5 23-Dec-2018 18:01:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,11 +60,13 @@ set(handles.C3,'String',handles.D.chanlabels);
 set(handles.C4,'String',handles.D.chanlabels);
 set(handles.EL,'String',handles.D.chanlabels);
 set(handles.ER,'String',handles.D.chanlabels);
+set(handles.EM,'String',handles.D.chanlabels);
 
 set(handles.C3_Ref,'String',['No Reref', handles.D.chanlabels]);
 set(handles.C4_Ref,'String',['No Reref', handles.D.chanlabels]);
 set(handles.EL_Ref,'String',['No Reref', handles.D.chanlabels]);
 set(handles.ER_Ref,'String',['No Reref', handles.D.chanlabels]);
+set(handles.EM_Ref,'String',['No Reref', handles.D.chanlabels]);
 
 handles.output = hObject;
 
@@ -184,12 +186,13 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
+EM = get(handles.EM,'Value');
 EL = get(handles.EL,'Value');
 ER = get(handles.ER,'Value');
 C3 = get(handles.C3,'Value');
 C4 = get(handles.C4,'Value');
 
+EM_Ref = get(handles.EM_Ref,'Value')-1;
 EL_Ref = get(handles.EL_Ref,'Value')-1;
 ER_Ref = get(handles.ER_Ref,'Value')-1;
 C3_Ref = get(handles.C3_Ref,'Value')-1;
@@ -197,6 +200,13 @@ C4_Ref = get(handles.C4_Ref,'Value')-1;
 
 settings_path = fullfile(getuserdir,'/z3license.mat');
 h = waitbar(0,'Please wait, authenticating user...');
+
+if fsample(handles.D) < 200,
+    close(h);
+    errordlg(' Error message: Sampling rate too low','Minimum sampling rate must be 200Hz or more.');
+    return
+end
+
 if exist(settings_path, 'file') == 2,
     load(settings_path);
     serverURL = settings.serverURL;
@@ -242,9 +252,9 @@ if response.status == 0,
     return
 end
 waitbar(0.333,h,'Converting data to compressed feature set (CFS)...');
-p = dcblock(0.2/fsample(handles.D));
-b = [1 -1];                         % set up differentiator
-a = [1 -p];                         % set up integrator
+%p = dcblock(0.2/fsample(handles.D));
+%b = [1 -1];                         % set up differentiator
+%a = [1 -p];                         % set up integrator
 
 if EL_Ref == 0
     EL_Data = handles.D(EL,:,1);
@@ -270,8 +280,13 @@ else
     C4_Data = handles.D(C4,:,1) - handles.D(C4_Ref,:,1);
 end
 
-EEGData = filter(b,a,[C3_Data; C4_Data; EL_Data; ER_Data]')';
-stream = streamCFS(EEGData, fsample(handles.D));
+if EM_Ref == 0
+    EM_Data = handles.D(EM,:,1);
+else
+    EM_Data = handles.D(EM,:,1) - handles.D(EM_Ref,:,1);
+end
+
+stream = streamCFS_V2(C3_Data', C4_Data', EL_Data', ER_Data', EM_Data', fsample(handles.D), fsample(handles.D), fsample(handles.D));
 waitbar(0.666,h,'Now uploading data and waiting for results...');
 
 try
@@ -455,3 +470,49 @@ function C3_Ref_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns C3_Ref contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from C3_Ref
+
+
+% --- Executes on selection change in EM.
+function EM_Callback(hObject, eventdata, handles)
+% hObject    handle to EM (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns EM contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from EM
+
+
+% --- Executes during object creation, after setting all properties.
+function EM_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to EM (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in EM_Ref.
+function EM_Ref_Callback(hObject, eventdata, handles)
+% hObject    handle to EM_Ref (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns EM_Ref contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from EM_Ref
+
+
+% --- Executes during object creation, after setting all properties.
+function EM_Ref_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to EM_Ref (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
