@@ -60,7 +60,7 @@ set(handles.C3,'String',handles.D.chanlabels);
 set(handles.C4,'String',handles.D.chanlabels);
 set(handles.EL,'String',handles.D.chanlabels);
 set(handles.ER,'String',handles.D.chanlabels);
-set(handles.EM,'String',handles.D.chanlabels);
+set(handles.EM,'String',['Not Available', handles.D.chanlabels]);
 
 set(handles.C3_Ref,'String',['No Reref', handles.D.chanlabels]);
 set(handles.C4_Ref,'String',['No Reref', handles.D.chanlabels]);
@@ -186,7 +186,7 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-EM = get(handles.EM,'Value');
+EM = get(handles.EM,'Value')-1;
 EL = get(handles.EL,'Value');
 ER = get(handles.ER,'Value');
 C3 = get(handles.C3,'Value');
@@ -201,9 +201,15 @@ C4_Ref = get(handles.C4_Ref,'Value')-1;
 settings_path = fullfile(getuserdir,'/z3license.mat');
 h = waitbar(0,'Please wait, authenticating user...');
 
-if fsample(handles.D) < 200,
+if fsample(handles.D) < 200 && EM ~= 0,
     close(h);
-    errordlg(' Error message: Sampling rate too low','Minimum sampling rate must be 200Hz or more.');
+    errordlg(' Error message: Sampling rate too low','Minimum sampling rate must be 200Hz or more for Z3Score V2.');
+    return
+end
+
+if fsample(handles.D) < 100 && EM == 0,
+    close(h);
+    errordlg(' Error message: Sampling rate too low','Minimum sampling rate must be 100Hz or more for Z3Score V1.');
     return
 end
 
@@ -252,9 +258,9 @@ if response.status == 0,
     return
 end
 waitbar(0.333,h,'Converting data to compressed feature set (CFS)...');
-%p = dcblock(0.2/fsample(handles.D));
-%b = [1 -1];                         % set up differentiator
-%a = [1 -p];                         % set up integrator
+p = dcblock(0.2/fsample(handles.D));
+b = [1 -1];                         % set up differentiator
+a = [1 -p];                         % set up integrator
 
 if EL_Ref == 0
     EL_Data = handles.D(EL,:,1);
@@ -280,13 +286,21 @@ else
     C4_Data = handles.D(C4,:,1) - handles.D(C4_Ref,:,1);
 end
 
-if EM_Ref == 0
+if EM == 0
+    waitbar(0.5,h,'No EMG channel, using Z3Score V1...');
+    EEGData = filter(b,a,[C3_Data; C4_Data; EL_Data; ER_Data]')';
+    stream = streamCFS(EEGData, fsample(handles.D));
+elseif EM_Ref == 0
+    waitbar(0.5,h,'Using Z3Score V2 (NEO)...');
     EM_Data = handles.D(EM,:,1);
+    stream = streamCFS_V2(C3_Data', C4_Data', EL_Data', ER_Data', EM_Data', fsample(handles.D), fsample(handles.D), fsample(handles.D));
 else
+    waitbar(0.5,h,'Using Z3Score V2 (NEO)...');
     EM_Data = handles.D(EM,:,1) - handles.D(EM_Ref,:,1);
+    stream = streamCFS_V2(C3_Data', C4_Data', EL_Data', ER_Data', EM_Data', fsample(handles.D), fsample(handles.D), fsample(handles.D));
 end
 
-stream = streamCFS_V2(C3_Data', C4_Data', EL_Data', ER_Data', EM_Data', fsample(handles.D), fsample(handles.D), fsample(handles.D));
+
 waitbar(0.666,h,'Now uploading data and waiting for results...');
 
 try
