@@ -5,6 +5,13 @@ The getting started guide is included in this repo (getting started.pdf)
 
 ## Version 2.0.0
 Major rivision: Added support for Z3Score Version 2.0 (NEO). NEO shows 30 to 40% lower error rates compared to previous generation sleep stager.
+=======
+## Version 2.0.1
+Added support for both versions of Z3Score. FASST automatically detects which version to use by detecting if EMG channel is used or not.
+
+## Version 2.0.0
+Major revision: Added support for Z3Score Version 2.0 (NEO). NEO shows 30 to 40% lower error rates compared to previous generation sleep stager.
+
 
 ## Version 1.1.4
 
