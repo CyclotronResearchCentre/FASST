@@ -289,17 +289,24 @@ end
 if EM == 0
     waitbar(0.5,h,'No EMG channel, using Z3Score V1...');
     EEGData = filter(b,a,[C3_Data; C4_Data; EL_Data; ER_Data]')';
-    stream = streamCFS(EEGData, fsample(handles.D));
+    [stream, status, message, ~] = streamCFS(EEGData, fsample(handles.D));
 elseif EM_Ref == 0
     waitbar(0.5,h,'Using Z3Score V2 (NEO)...');
     EM_Data = handles.D(EM,:,1);
-    stream = streamCFS_V2(C3_Data', C4_Data', EL_Data', ER_Data', EM_Data', fsample(handles.D), fsample(handles.D), fsample(handles.D));
+    [stream, status, message, ~] = streamCFS_V2(C3_Data', C4_Data', EL_Data', ER_Data', EM_Data', fsample(handles.D), fsample(handles.D), fsample(handles.D));
 else
     waitbar(0.5,h,'Using Z3Score V2 (NEO)...');
     EM_Data = handles.D(EM,:,1) - handles.D(EM_Ref,:,1);
-    stream = streamCFS_V2(C3_Data', C4_Data', EL_Data', ER_Data', EM_Data', fsample(handles.D), fsample(handles.D), fsample(handles.D));
+    [stream, status, message, ~] = streamCFS_V2(C3_Data', C4_Data', EL_Data', ER_Data', EM_Data', fsample(handles.D), fsample(handles.D), fsample(handles.D));
 end
 
+waitbar(0.6,h,'Doing quality check...');
+if status,
+    close(h);
+    errordlg(message,'Quality check failed');
+    return;
+end
+    
 
 waitbar(0.666,h,'Now uploading data and waiting for results...');
 
