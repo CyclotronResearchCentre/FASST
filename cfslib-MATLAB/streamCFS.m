@@ -17,7 +17,7 @@
 % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
-function stream = streamCFS(EEGData, samplingRate, varargin)
+function [stream, status, message, quality] = streamCFS(EEGData, samplingRate, varargin)
 
 % set defaults for optional inputs
 optargs = {1 1};
@@ -35,6 +35,7 @@ LOWPASS = 45; %Hz
 HIGHPASS = 0.3; %Hz
 LOWPASSEOG = 12; %Hz
 EPOCH = 30*SRATE; %Samples
+threshold = 10;
 Fs = samplingRate/2;
 bEEG = fir1(50,[HIGHPASS/Fs LOWPASS/Fs]);
 bEOG = fir1(50,[HIGHPASS/Fs LOWPASSEOG/Fs]);
@@ -76,6 +77,22 @@ for j=1:totalEpochs,
     s(33:end,:) = [];
     data(:,:,3,j) = abs(s);
     
+end
+
+quality = sum(squeeze(mean(mean(squeeze(data))))>800,2)*100/size(data,4);
+status = 0;
+electrodes = {'C3/C4', 'EoG-L', 'EoG-R', 'EMG'};
+message = 'All channels passed quality checks.';
+failed_channels = '';
+qc = quality > threshold;
+if(any(qc))
+    status = 1;
+    for i = 1: numel(qc),
+        if qc(i) 
+            failed_channels = strcat(failed_channels, electrodes{i}, ', ');
+        end
+    end
+    message = strcat('The following channel(s) failed quality checks: ', failed_channels);
 end
 
 %Signature first 3 bytes

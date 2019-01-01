@@ -26,7 +26,7 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
-function stream = streamCFS_V2(C3, C4, EOGL, EOGR, EMG, fsamp_EEG, fsamp_EOG, fsamp_EMG, varargin)
+function [stream, status, message, quality] = streamCFS_V2(C3, C4, EOGL, EOGR, EMG, fsamp_EEG, fsamp_EOG, fsamp_EMG, varargin)
 
 % set defaults for optional inputs
 optargs = {1 1};
@@ -59,6 +59,7 @@ LOWPASS = 35.0;  % Hz
 HIGHPASS = 0.3;  % Hz
 LOWPASSEOG = 35.0;  % Hz
 LOWPASSEMG = 80.0; % Hz
+threshold = 10;
 
 Fs_EEG = fsamp_EEG/2;
 Fs_EOG = fsamp_EOG/2;
@@ -119,6 +120,22 @@ for j=1:totalEpochs,
     s = abs(s(2:end,:));
     data(:,:,4,j) = blockproc(s, [4 1], fun);
     
+end
+
+quality = sum(squeeze(mean(mean(squeeze(data))))>800,2)*100/size(data,4);
+status = 0;
+electrodes = {'C3/C4', 'EoG-L', 'EoG-R', 'EMG'};
+message = 'All channels passed quality checks.';
+failed_channels = '';
+qc = quality > threshold;
+if(any(qc))
+    status = 1;
+    for i = 1: numel(qc),
+        if qc(i) 
+            failed_channels = strcat(failed_channels, electrodes{i}, ', ');
+        end
+    end
+    message = strcat('The following channel(s) failed quality checks: ', failed_channels);
 end
 
 %Signature first 3 bytes
