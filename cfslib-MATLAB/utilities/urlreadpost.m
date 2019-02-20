@@ -62,12 +62,9 @@ end
 % Modified for multipart/form-data 2010-04-06 dpwe@ee.columbia.edu
 %    try
         urlConnection.setDoOutput(true);
-        urlConnection.setConnectTimeout(300000);
-        urlConnection.setReadTimeout(300000);
         boundary = '***********************';
         urlConnection.setRequestProperty( ...
             'Content-Type',['multipart/form-data; boundary=',boundary]);
-        urlConnection.setRequestProperty('Keep-Alive', '300');
         printStream = java.io.PrintStream(urlConnection.getOutputStream);
         % also create a binary stream
         dataOutputStream = java.io.DataOutputStream(urlConnection.getOutputStream);

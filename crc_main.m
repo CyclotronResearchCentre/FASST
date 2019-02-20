@@ -39,9 +39,15 @@ function varargout = crc_main(varargin)
 
 % Edit the above text to modify the response to help crc_main
 
-% Last Modified by GUIDE v2.5 15-Oct-2009 11:43:00
+% Last Modified by GUIDE v2.5 16-Jun-2018 15:00:03
 
 % Display ASCII Welcome
+try
+    version = load('z3score-version.txt');
+    fprintf(' FASST-Z3Score version no: %d.%02d.%02d \n',version);
+catch
+    
+end
 disp('                                                            ');
 disp('     ________  _____________ ___                            ');
 disp('    / ____/  |/ ___/_/_  __/|__ \                           ');
@@ -63,10 +69,20 @@ disp('  **    *   /* /////**/**   **/**   /** /**   /**////       ');
 disp(' ******/ ****  ****** //***** //****** /***   //******      ');
 disp('//////  ////  //////   /////   //////  ///     //////       ');
 disp('															  ');
-disp(' Z3Score.com - Automatic Sleep Scoring and Artifact         ');
-disp(' detection module. https://z3score.com        			  ');
+disp(' Z3Score.com - Automatic Sleep Scoring & Artifact Detection ');
+disp(' Z3Score is powered by Neurobit Technologies Pte. Ltd.      ');
+disp(' More details at: https://z3score.com          			  ');
 disp(' For API documentation and sample code visit:               ');
-disp(' https://github.com/amiyapatanaik/z3score-api               ');
+disp(' https://github.com/neurobittechnologies/z3score-api        ');
+disp(' this version now uses Z3Score-V2 (NEO) sleep staging system.');
+disp(' Z3Score V2 shows 35 to 40% lower error rates compared to V1.');
+disp('															  ');
+disp('															  ');
+disp(' Cite this version as:                                       ');
+disp(' Z3Score-Cloud Version 2.0, Neurobit Technologies, Singapore.');
+disp(' and Patanaik et al., Sleep 41(5), 2018                       ');
+
+
 %% Checking the installation and defaults
 persistent flag_filter flag_initialize
 
@@ -340,5 +356,3 @@ else
 end
 
 return
-
-

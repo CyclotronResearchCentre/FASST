@@ -82,7 +82,11 @@ end
 confidence = [];
 if strcmp(handles.score{2,handles.currentscore},'Oracle'),
     RC = D.relConfidence;
-    threshold = get(handles.confslider,'Value');
+    try
+        threshold = get(handles.confslider,'Value');
+    catch
+        threshold = 0;
+    end
     confidence = find(RC<threshold);
     confidence = (confidence+0.5)*30;
 end

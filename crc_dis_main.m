@@ -951,6 +951,20 @@ end
 
 guidata(hObject, handles);
 
+
+function gen_report_Callback(hObject, eventdata, handles)
+handles.gui_active = 0;
+guidata(hObject, handles);
+flags.Dmeg=handles.Dmeg;
+flags.file=handles.file;
+flags.scoresleep=1;
+flags.index = handles.index;
+flags.currentscore = handles.currentscore;
+crc_z3score_report(handles.Dmeg{1}, flags);
+close(handles.figure1);
+return
+
+
 function autoscore_Callback(hObject, eventdata, handles)
 handles.gui_active = 0;
 guidata(hObject, handles);
@@ -961,9 +975,6 @@ flags.index = handles.index;
 crc_z3score_score(handles.Dmeg{1}, flags);
 close(handles.figure1);
 return
-
-
-
 
 
 %Edit the highpass filter cutoff
@@ -2395,7 +2406,7 @@ catch
 
     %Choosing size of window to score
     prompt = {'Please choose the size of the scoring windows'};
-    def= {'20'};
+    def= {'30'};
     num_lines = 1;
     dlg_title = 'Size of the scoring windows (in sec)';
     handles.score(3,1) = inputdlg(prompt,dlg_title,num_lines,def);
@@ -2453,11 +2464,12 @@ handles.winsize=handles.score{3,handles.currentscore};
 set(handles.axes4,'Visible','on')
 set(handles.fftchan,'Visible','off') %to plot fft
 set(handles.score_menu,'enable','on')
-set(handles.score_stats,'enable','on')
+%set(handles.score_stats,'enable','on')
 set(handles.score_import,'enable','on')
 set(handles.score_compare,'enable','on')
-set(handles.score_check,'enable','on')
+%set(handles.score_check,'enable','on')
 set(handles.score_user,'enable','on')
+set(handles.del_user,'enable','on')
 set(handles.vertgrid,'enable','on')
 set(handles.horgrid,'enable','on')
 set(handles.grid,'enable','on')
@@ -2479,6 +2491,13 @@ delete(get(handles.score_user,'Children'));
 for isc=1:size(handles.score,2)
     handles.scorers{isc} = uimenu(handles.score_user,'Label', ...
         char(handles.score(2,isc)),'Callback',@defined_scorer) ;
+    handles.namesc{isc}=char(handles.score(2,isc));
+end
+
+delete(get(handles.del_user,'Children'));
+for isc=1:size(handles.score,2)
+    handles.scorers{isc} = uimenu(handles.del_user,'Label', ...
+        char(handles.score(2,isc)),'Callback',@delete_scorer) ;
     handles.namesc{isc}=char(handles.score(2,isc));
 end
 
@@ -2716,6 +2735,92 @@ end
 handles.figz = fig_z;
 % Update handles structure
 guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function score_export_Callback(hObject, eventdata, handles)
+% hObject    handle to score_import (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+[~,name,~] = fileparts(fullfile(handles.Dmeg{1}));
+[file, path, ~] = uiputfile([name '_' handles.Dmeg{1}.CRC.score{2,handles.currentscore} '_scores.csv']);
+scores = handles.Dmeg{1}.CRC.score{1,handles.currentscore};
+csvwrite([path file], scores');
+
+% --------------------------------------------------------------------
+function score_importcsv_Callback(hObject, eventdata, handles)
+% hObject    handle to score_import (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[file,path,indx] = uigetfile('*.csv');
+if ~indx
+    return;
+end
+try
+    
+    scores = csvread([path file]);
+    prompt = {'Enter scorer name:','Epoch size (secs):'};
+    defaultans = {file,'30'};
+    input = inputdlg(prompt,'Import Sleep Scores',[1 40], defaultans);
+    if isempty(input{1}) || isempty(input{2}),
+        return;
+    end
+    name = input{1};
+    winsize = str2double(input{2});
+    n_imp = find(ismember(handles.Dmeg{1}.CRC.score(2,:),name),1,'first');
+    if(isempty(n_imp))
+        n_imp = size(handles.Dmeg{1}.CRC.score,2)+1;
+    end
+    
+    handles.Dmeg{1}.CRC.score{1,n_imp} = scores';
+    handles.Dmeg{1}.CRC.score{2,n_imp} = name;
+    handles.Dmeg{1}.CRC.score{3,n_imp} = winsize;
+    handles.Dmeg{1}.CRC.score{4,n_imp} = [0.005,length(scores)*winsize];
+    handles.Dmeg{1}.CRC.score{5,n_imp} = [];
+    handles.Dmeg{1}.CRC.score{6,n_imp} = [];
+    handles.Dmeg{1}.CRC.score{7,n_imp} = [];
+ 
+    handles.Dmeg{1} = save(handles.Dmeg{1});
+    
+    %update the uimenu to add this new scorer
+    delete(get(handles.score_user,'Children'));
+    handles.score = handles.Dmeg{1}.CRC.score;
+    for isc=1:size(handles.score,2)
+        handles.scorers{isc} = uimenu(handles.score_user,'Label', ...
+            char(handles.score{2,isc}),'Callback',@defined_scorer) ;
+        handles.namesc{isc}=char(handles.score{2,isc});
+    end
+    handles.num_scorers=isc;
+    handles.currentscore=isc;
+    handles.scorers{isc+1}=uimenu(handles.score_user,'Label', ...
+        'New scorer','Callback', @new_scorer,...
+        'Separator','on') ;
+    set(handles.scorers{handles.currentscore},'Checked','on');
+    set(handles.figure1,'CurrentAxes',handles.axes4);
+    crc_hypnoplot(handles.axes4, ...
+        handles,handles.score{3,handles.currentscore});
+    set(handles.figure1,'CurrentAxes',handles.axes1);
+    % Setting up the add artefact/arousal/event of interest.
+    handles.adddeb = ones(1,size(handles.score,2));
+    handles.addardeb = ones(1,size(handles.score,2));
+    handles.add_eoi = ones(1,size(handles.score,2));
+    mainplot(handles)
+    % Update del user menu
+    delete(get(handles.del_user,'Children'));
+    handles.score = handles.Dmeg{1}.CRC.score;
+    for isc=1:size(handles.score,2)
+        handles.scorers{isc} = uimenu(handles.del_user,'Label', ...
+            char(handles.score{2,isc}),'Callback',@delete_scorer) ;
+        handles.namesc{isc}=char(handles.score{2,isc});
+    end
+    % Update handles structure
+    guidata(hObject, handles);
+    msgbox('Sleep scores imported successfully','Success');
+catch
+    msgbox('Error importing sleep scores.','Error');
+    return
+end
+
 
 % --------------------------------------------------------------------
 function score_import_Callback(hObject, eventdata, handles)
@@ -3121,6 +3226,13 @@ if handles.Dmeg{1}.CRC.score{3,Val1}==handles.Dmeg{1}.CRC.score{3,Val2}
         handles.score{1,handles.currentscore}, ...
         handles.score{2,handles.currentscore})
     set(handles.figure1,'CurrentAxes',handles.axes1);
+    
+    delete(get(handles.del_user,'Children'));
+    for isc=1:size(handles.score,2)
+        handles.scorers{isc} = uimenu(handles.del_user,'Label', ...
+            char(handles.score(2,isc)),'Callback',@delete_scorer) ;
+        handles.namesc{isc} = char(handles.score(2,isc));
+    end
     close(fig);
 else
     errordlg({'The window size of the score are not the same. The scores cannot be merged'}, 'Error');
@@ -4355,6 +4467,14 @@ for isc=1:size(handles.score,2)
         char(handles.score{2,isc}),'Callback',@defined_scorer) ;
     handles.namesc{isc}=char(handles.score{2,isc});
 end
+
+delete(get(handles.del_user,'Children'));
+for isc=1:size(handles.score,2)
+    handles.scorers{isc} = uimenu(handles.del_user,'Label', ...
+        char(handles.score{2,isc}),'Callback',@delete_scorer) ;
+    handles.namesc{isc}=char(handles.score{2,isc});
+end
+
 handles.num_scorers=isc;
 handles.currentscore=isc;
 handles.scorers{isc+1}=uimenu(handles.score_user,'Label', ...
@@ -4373,6 +4493,88 @@ mainplot(handles)
 % Update handles structure
 guidata(c, handles);
 return
+
+
+function delete_scorer(hObject, eventdata)
+% hObject    handle to score_user (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+a = get(gcbo,'Parent');
+b = get(a,'Parent');
+c = get(b,'Parent');
+%To be checked = old version contained : get(c);
+
+handles = guidata(gcbo);
+namuser = get(gcbo,'Label');
+
+handles.score = handles.Dmeg{1}.CRC.score;
+for isc=1:size(handles.score,2)
+    handles.namesc{isc}=char(handles.score{2,isc});
+end
+
+for isc=1:size(handles.namesc,2)
+    if strcmpi(namuser,handles.namesc{isc})
+        delete_id=isc;
+    end
+end
+
+handles.score = handles.Dmeg{1}.CRC.score;
+if size(handles.score,2) <= 1,
+    msgbox('You cannot delete the last scorer.','Success');
+    return;
+end
+
+%keyboard
+answer = questdlg(sprintf('Are you sure you want to permanently delete the scorer: %s?',namuser) , ...
+	'Confirm delete', ...
+	'Yes','No', 'No');
+% Handle response
+switch answer
+    case 'No'
+        return    
+end
+
+handles.Dmeg{1}.CRC.score(:,delete_id) = [];
+handles.Dmeg{1} = save(handles.Dmeg{1});
+
+handles.score = handles.Dmeg{1}.CRC.score;
+%update the uimenu to add this new scorer
+delete(get(handles.score_user,'Children'));
+
+for isc=1:size(handles.score,2)
+    handles.scorers{isc} = uimenu(handles.score_user,'Label', ...
+        char(handles.score{2,isc}),'Callback',@defined_scorer) ;
+    handles.namesc{isc}=char(handles.score{2,isc});
+end
+handles.num_scorers=isc;
+handles.currentscore=isc;
+handles.scorers{isc+1}=uimenu(handles.score_user,'Label', ...
+    'New scorer','Callback', @new_scorer,...
+    'Separator','on') ;
+set(handles.scorers{handles.currentscore},'Checked','on');
+set(handles.figure1,'CurrentAxes',handles.axes4);
+crc_hypnoplot(handles.axes4, ...
+    handles,handles.score{3,handles.currentscore});
+set(handles.figure1,'CurrentAxes',handles.axes1);
+% Setting up the add artefact/arousal/event of interest.
+handles.adddeb = ones(1,size(handles.score,2));
+handles.addardeb = ones(1,size(handles.score,2));
+handles.add_eoi = ones(1,size(handles.score,2));
+mainplot(handles)
+% Update del user menu
+delete(get(handles.del_user,'Children'));
+handles.score = handles.Dmeg{1}.CRC.score;
+for isc=1:size(handles.score,2)
+    handles.scorers{isc} = uimenu(handles.del_user,'Label', ...
+        char(handles.score{2,isc}),'Callback',@delete_scorer) ;
+    handles.namesc{isc}=char(handles.score{2,isc});
+end
+
+% Update handles structure
+guidata(c, handles);
+return
+
 
 function defined_scorer(hObject, eventdata)
 % hObject    handle to score_user (see GCBO)
@@ -4403,6 +4605,7 @@ set(handles.figure1,'CurrentAxes',handles.axes1);
 mainplot(handles)
 % Update handles structure
 guidata(c, handles);
+guidata(gcbo, handles);
 return
 
 % -------------------------------------------------------------------
