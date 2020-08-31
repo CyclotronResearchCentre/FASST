@@ -130,7 +130,7 @@ handles.megmagscale =   [];
 handles.megplanarscale  =   [];
 handles.chan        =   [];
 
-%si ca revient de la détection automatique
+%si ca revient de la dÃ©tection automatique
 handles.artefacteeg = [];
 if isfield(handles.Dmeg{1},'CRC')
     if isfield (handles.Dmeg{1}.CRC,'artefacteeg')
@@ -1794,11 +1794,11 @@ try
 catch
     if strcmpi(eegsc,'V')
         handles.eegscale=10^-6;
-    elseif strcmpi(eegsc,'µV')
+    elseif strcmpi(eegsc,'ÂµV')
         handles.eegscale=1;
     else
         beep
-        disp('Enter scale in 10^-x format or V or µV')
+        disp('Enter scale in 10^-x format or V or ÂµV')
         handles.eegscale=[];
         return
     end
@@ -1819,11 +1819,11 @@ try
 catch
     if strcmpi(eogsc,'V')
         handles.eogscale=10^-6;
-    elseif strcmpi(eogsc,'µV')
+    elseif strcmpi(eogsc,'ÂµV')
         handles.eogscale=1;
     else
         beep
-        disp('Enter scale in 10^-x format or V or µV')
+        disp('Enter scale in 10^-x format or V or ÂµV')
         handles.eogscale=[];
         return
     end
@@ -1844,11 +1844,11 @@ try
 catch
     if strcmpi(emgsc,'V')
         handles.emgscale=10^-6;
-    elseif strcmpi(emgsc,'µV')
+    elseif strcmpi(emgsc,'ÂµV')
         handles.emgscale=1;
     else
         beep
-        disp('Enter scale in 10^-x format or V or µV')
+        disp('Enter scale in 10^-x format or V or ÂµV')
         handles.emgscale=[];
         return
     end
@@ -1869,11 +1869,11 @@ try
 catch
     if strcmpi(ecgsc,'V')
         handles.ecgscale=10^-6;
-    elseif strcmpi(ecgsc,'µV')
+    elseif strcmpi(ecgsc,'ÂµV')
         handles.ecgscale=1;
     else
         beep
-        disp('Enter scale in 10^-x format or V or µV')
+        disp('Enter scale in 10^-x format or V or ÂµV')
         handles.ecgscale=[];
         return
     end
@@ -1894,11 +1894,11 @@ try
 catch
     if strcmpi(ecgsc,'V')
         handles.lfpscale=10^-6;
-    elseif strcmpi(ecgsc,'µV')
+    elseif strcmpi(ecgsc,'ÂµV')
         handles.lfpscale=1;
     else
         beep
-        disp('Enter scale in 10^-x format or V or µV')
+        disp('Enter scale in 10^-x format or V or ÂµV')
         handles.lfpscale=[];
         return
     end
@@ -2761,7 +2761,7 @@ function score_importneo_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-[file,path,indx] = uigetfile('*.neo');
+[file,path,indx] = uigetfile('*.neo', '*.json');
 if ~indx
     return;
 end
@@ -4951,7 +4951,7 @@ else
     touch = int2str(get(handles.figure1,'CurrentCharacter'));
     if and(handles.move~=0,strcmpi(touch,'28'))
         ev = events(handles.Dmeg{1});
-        ev(handles.move).time = ev(handles.move).time - 1/fsample(handles.Dmeg{1}); % On avance par échantillon
+        ev(handles.move).time = ev(handles.move).time - 1/fsample(handles.Dmeg{1}); % On avance par Ã©chantillon
         handles.evt = ev;
         handles.Dmeg{1} = events(handles.Dmeg{1},1,ev);
         save(handles.Dmeg{1});
@@ -4960,7 +4960,7 @@ else
     elseif and(handles.move~=0,strcmpi(touch,'29'))
         ev = events(handles.Dmeg{1});
         ev(handles.move).time + 1/fsample(handles.Dmeg{1});
-        ev(handles.move).time = ev(handles.move).time + 1/fsample(handles.Dmeg{1}); % On avance par échantillon
+        ev(handles.move).time = ev(handles.move).time + 1/fsample(handles.Dmeg{1}); % On avance par Ã©chantillon
         handles.evt = ev;
         handles.Dmeg{1} = events(handles.Dmeg{1},1,ev);
         save(handles.Dmeg{1});
@@ -5401,13 +5401,13 @@ for i=1:maxi
             
             %artefacts on single channel  (To be checked)
             if  ~isempty(handles.artefact)
-                deb_epoch   =   find(and(handles.artefact>temps(1),handles.artefact<=temps(end)+1/fsample(handles.Dmeg{1})));%1 seconde = fenetre d'analyse pour la détection des artefacts de courtes durées
+                deb_epoch   =   find(and(handles.artefact>temps(1),handles.artefact<=temps(end)+1/fsample(handles.Dmeg{1})));%1 seconde = fenetre d'analyse pour la dÃ©tection des artefacts de courtes durÃ©es
                 for epo     =   1 : length(deb_epoch)
                     X   =   get(plt,'YData');
-                    deb =  (handles.artefact(deb_epoch(epo)) - (win-1)*handles.winsize/1 - 1)*fsample(handles.Dmeg{1}) + 1; %1=temps d'une époque artefactée
+                    deb =  (handles.artefact(deb_epoch(epo)) - (win-1)*handles.winsize/1 - 1)*fsample(handles.Dmeg{1}) + 1; %1=temps d'une Ã©poque artefactÃ©e
                     fin =  min(length(X)+win*handles.winsize*fsample(handles.Dmeg{1}),(handles.artefact(deb_epoch(epo)) - (win-1)*handles.winsize/1)*fsample(handles.Dmeg{1}));
                     time_epo = [(handles.artefact(deb_epoch(epo))-1) + 1/fsample(handles.Dmeg{1}) : 1/fsample(handles.Dmeg{1}) : ((handles.artefact(deb_epoch(epo))-1) + 1/fsample(handles.Dmeg{1}))+length(deb:fin)/fsample(handles.Dmeg{1})-1/fsample(handles.Dmeg{1})];
-                    X   =   X(deb:fin);%fs est le nombre d'échantillons contenus dans une seconde
+                    X   =   X(deb:fin);%fs est le nombre d'Ã©chantillons contenus dans une seconde
                     plot(time_epo,X,'-.','color','r');
                 end
             end
@@ -5828,7 +5828,7 @@ if ~handles.multcomp
         for jj = 1:Nev_dis
             %if types or values are chosen by the user, only display their
             %names
-            if isempty(handles.base) || isempty(intersect(handles.base(:,1),{ev(indextrig).type})) % pas de selection faite ou pas de trigger correspondant à la selection faite
+            if isempty(handles.base) || isempty(intersect(handles.base(:,1),{ev(indextrig).type})) % pas de selection faite ou pas de trigger correspondant Ã  la selection faite
                 if disc && chostype && strcmpi(etpv{jj},typevt) && ~fmric
                     msg = etpv{jj};
                 elseif disc && chostype && strcmpi(etpv{jj},typevt) && fmric
@@ -6080,7 +6080,7 @@ if strcmp(get(hObject,'SelectionType'),'normal')
         axis auto
         xd  = str2double(get(handles.pwrblw,'String'));
         xf = str2double(get(handles.pwrabv,'String'));
-        xlim([xd xf])      %(on zoom sur ce qui nous intéresse)
+        xlim([xd xf])      %(on zoom sur ce qui nous intÃ©resse)
         set(p_fft,'tag', 'powerspctrm')
     end
     return;
@@ -6302,7 +6302,7 @@ guidata(hObject,handles)
 % flags.winsize = handles.winsize;
 % flags.user = handles.currentscore;
 %
-% %faire passer la taille des époques choisies pour l'analyse des artefacts
+% %faire passer la taille des Ã©poques choisies pour l'analyse des artefacts
 % DC_detection(flags);
 
 function saveart(handles)
@@ -6411,7 +6411,7 @@ if get(handles.counterspect,'Value')
         axis auto
         xd  = str2double(get(handles.pwrblw,'String'));
         xf = str2double(get(handles.pwrabv,'String'));
-        xlim([xd xf])      %(on zoom sur ce qui nous intéresse)
+        xlim([xd xf])      %(on zoom sur ce qui nous intÃ©resse)
         set(p_fft,'tag', 'powerspctrm')
     end
     return;
@@ -6496,7 +6496,7 @@ if get(handles.counterspect,'Value')
         axis auto
         xd  = str2double(get(handles.pwrblw,'String'));
         xf = str2double(get(handles.pwrabv,'String'));
-        xlim([xd xf])      %(on zoom sur ce qui nous intéresse)
+        xlim([xd xf])      %(on zoom sur ce qui nous intÃ©resse)
         set(p_fft,'tag', 'powerspctrm')
     end
     return;
