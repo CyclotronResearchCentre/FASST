@@ -28,6 +28,14 @@ end
 optargs(1:numvarargs) = varargin;
 [compress, hash] = optargs{:};
 
+%apply a dc block filter
+p = dcblock(0.1,samplingRate);             
+b = [1 -1];                         % set up differentiator
+a = [1 -p];                         % set up integrator
+for i=1:4
+    EEGData(i,:) = filter(b, a, EEGData(i,:));
+end
+
 %Order 50 FIR filter
 %Basic Settings
 SRATE = 100; %Hz

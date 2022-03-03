@@ -1,6 +1,6 @@
 function varargout = crc_dis_main(varargin)
 % CRC_DIS_MAIN M-file for crc_dis_main.fig
-% CRC_DIS_MAIN, by itself, creates a new CRC_DIS_MAIN or raises the 
+% CRC_DIS_MAIN, by itself, creates a new CRC_DIS_MAIN or raises the
 % existing singleton*.
 %
 %      H = CRC_DIS_MAIN returns the handle to a new CRC_DIS_MAIN or the handle to
@@ -94,10 +94,10 @@ handles.indexMEEG   =   fliplr(intersect(meegchannels(handles.Dmeg{1}),handles.i
 handles.indnomeeg   =   setdiff(handles.index, handles.indexMEEG)';
 if size(handles.indnomeeg,1)>1
     handles.indnomeeg = handles.indnomeeg';
-end 
+end
 if size(handles.indexMEEG,1)>1
     handles.indexMEEG = handles.indexMEEG';
-end 
+end
 handles.inddis      =   [handles.indnomeeg handles.indexMEEG];
 % handles.inddis      =   [handles.index];
 handles.indeeg = [meegchannels(D,'EEG') meegchannels(D,'LFP')];
@@ -109,12 +109,12 @@ if handles.scoring % scoring sleep data
     if isfield (handles.Dmeg{1},'CRC')
         if isfield (handles.Dmeg{1}.CRC,'score')
             handles.winsize   =   handles.Dmeg{1}.CRC.score{3,1};
-        else 
+        else
             handles.winsize   =   crc_get_defaults('score.winsize');
         end
-    else 
+    else
         handles.winsize     =   crc_get_defaults('score.winsize');
-    end 
+    end
 else % no scoring
     handles.winsize     =   crcdef.winsize;
 end
@@ -130,13 +130,13 @@ handles.megmagscale =   [];
 handles.megplanarscale  =   [];
 handles.chan        =   [];
 
-%si ca revient de la détection automatique
+%si ca revient de la dÃ©tection automatique
 handles.artefacteeg = [];
 if isfield(handles.Dmeg{1},'CRC')
     if isfield (handles.Dmeg{1}.CRC,'artefacteeg')
-        handles.artefacteeg = handles.Dmeg{1}.CRC.artefacteeg; 
-    end 
-end  
+        handles.artefacteeg = handles.Dmeg{1}.CRC.artefacteeg;
+    end
+end
 handles.artefact = [];
 if isfield(D,'CRC')
     if isfield(D.CRC,'DC')
@@ -180,7 +180,7 @@ else       % It's the begining
             tpt = {tp(:).type};
             [goodev int_tpt int_sauv] = intersect(tpt,type_sauv(:,1));
             handles.type = type_sauv(int_sauv,:);
-        else    
+        else
             evs    = events(D);
             if ~isempty(evs)
                 valev  = {evs(:).value};
@@ -197,23 +197,23 @@ else       % It's the begining
                             end
                         end
                     end
-                else          
+                else
                     for vv = 1 : length(valev)
                         if any(strcmpi('Newuser',valev{vv}))
                             type(evm) = {evs(vv).type};
                             evm = evm + 1;
                         end
                     end
-                end      
+                end
                 tevm = cellstr(unique(char(type(:)),'rows'));
                 ntevm = size(tevm,1);
                 if ~isempty(type(:))
                     handles.type(1:ntevm,1)  = tevm;
-                    handles.type(1:ntevm,2)  = cellstr('red');  
+                    handles.type(1:ntevm,2)  = cellstr('red');
                 end
             end
         end
-    end 
+    end
 end
 
 [path, ~,~] = fileparts([mfilename('fullpath') '.m']);
@@ -221,9 +221,9 @@ settings_path = fullfile(path,'/settings.mat');
 
 if exist(settings_path, 'file') == 2,
     load(settings_path);
-    set(handles.validity,'string',['License Validity: ' settings.validity ' UTC.']) 
+    set(handles.validity,'string',['License Validity: ' settings.validity ' UTC.'])
 else
-    set(handles.validity,'string','License Validity: NA') 
+    set(handles.validity,'string','License Validity: NA')
 end
 
 delete(get(handles.manevent,'Children'));
@@ -331,7 +331,7 @@ if isfield(varargin{1},'multcomp') % if comparing multiple files
     set(handles.multother,'enable','on')
     set(handles.multclose,'enable','on')
     set(handles.axes4,'visible','off')
-    set(handles.addundefart,'visible','off') 
+    set(handles.addundefart,'visible','off')
     set(handles.addspecart,'visible','off')
     set(handles.addaro,'visible','off')
     set(handles.addeoi,'visible','off')
@@ -341,14 +341,14 @@ if isfield(varargin{1},'multcomp') % if comparing multiple files
     set(handles.Delaro,'visible','off')
     set(handles.Del_eoi,'visible','off')
     set(handles.Delartonlyone,'visible','off')
-	%set(handles.Detection,'visible','off')
-    set(handles.addonlyone,'visible','off')	
-%     set(handles.others,'enable','off','visible','off')
-%     set(handles.com,'enable','off','visible','off')
-	set(handles.manevent,'enable','off','visible','off')
+    %set(handles.Detection,'visible','off')
+    set(handles.addonlyone,'visible','off')
+    %     set(handles.others,'enable','off','visible','off')
+    %     set(handles.com,'enable','off','visible','off')
+    set(handles.manevent,'enable','off','visible','off')
     set(handles.event_menu,'enable','off')
-    set(handles.counterspect,'enable','off','visible','off')	
-	for ii  =   1   :   size(handles.chanset,2)
+    set(handles.counterspect,'enable','off','visible','off')
+    for ii  =   1   :   size(handles.chanset,2)
         handles.multchanlab{ii}     =   uimenu(handles.multchan,'Label',...
             char(handles.chanset{ii}),'Callback',...
             {@Chantodisp});
@@ -358,13 +358,13 @@ if isfield(varargin{1},'multcomp') % if comparing multiple files
         end
     end
     set(handles.figure1,'name','Multiple files comparison')
-
+    
 else %if only one file to display
     %set(handles.Detection,'visible','off') %Not ready yet
     handles.multcomp=0;
     set(handles.axes5,'visible','on');
     set(handles.axes4,'visible','on');
-
+    
     %handles date and hour and slider
     if isfield(handles.Dmeg{1},'info')
         if isfield(handles.Dmeg{1}.info,'hour')
@@ -383,11 +383,11 @@ else %if only one file to display
     set(handles.totaltime,'String',['/ ' ...
         num2str(round(nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})))]);
     set(handles.currenttime,'String',num2str(round(handles.winsize/2)));
-%new index for page
+    %new index for page
     set(handles.totalpage,'String',['/ ' ...
         num2str(ceil((nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1}))/handles.winsize))]);
     set(handles.currentpage,'String',num2str(1));
-   % Number of channels displayed
+    % Number of channels displayed
     Nchdisp     =   str2double(get(handles.NbreChan,'String'));
     set(handles.NbreChan,'String', num2str(min(Nchdisp, length(handles.indexMEEG) + length(handles.indnomeeg))))
     Nchdisp     =   str2double(get(handles.NbreChan,'String'));
@@ -396,8 +396,8 @@ else %if only one file to display
         'Min',1,...
         'Max',totind - Nchdisp+1,...
         'Value',1,...
-        'SliderStep', [Nchdisp/totind Nchdisp/totind]) 
-
+        'SliderStep', [Nchdisp/totind Nchdisp/totind])
+    
     popupmenustring     =   chanlabels(handles.Dmeg{1}) ;
     if sum(strcmp(chanlabels(handles.Dmeg{1}),'REF2'))
         popupmenustring =   [popupmenustring 'MEAN OF REF'];
@@ -476,7 +476,7 @@ if ~handles.multcomp
     if ~isempty(evt)
         for i = 1:max(size(evt,2),size(evt,1))
             if ~isempty(evt(i)) && ~any(strcmpi(evt(i).type, pmstring)) &&...
-                     ~isempty(evt(i).time)
+                    ~isempty(evt(i).time)
                 pmstring    =   [pmstring, {evt(i).type}];
             end
         end
@@ -508,7 +508,7 @@ if ~handles.multcomp
         set(handles.slider1,'Value',slidval)
     end
     set(handles.figure1,'MenuBar','figure')
-
+    
     %Scoring information if only one file
     handles.vert_grid   =   0;
     handles.hor_grid    =   0;
@@ -520,23 +520,23 @@ if ~handles.multcomp
     else
         handles.score   =   cell(8,1);
         handles.score{4,1}  =   [1/fsample(handles.Dmeg{1}) ...
-                                nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})];
+            nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})];
         handles.score{2,1}  =   'Newuser';
         handles.score{1,1}  =   [0/0, 0/0];
         set(handles.figure1,'CurrentAxes',handles.axes4)
         %Select the scorer according to the last used
-		if isfield(varargin{1},'user')
+        if isfield(varargin{1},'user')
             handles.currentscore = varargin{1}.user;
-        else 
+        else
             handles.currentscore    =   1;
         end
-
+        
         crc_hypnoplot(handles.axes4, ...
             handles,handles.winsize)
-
+        
         set(handles.figure1,'CurrentAxes',handles.axes1)
-        set(handles.addundefart,'visible','off')        
-		set(handles.addonlyone,'visible','off')
+        set(handles.addundefart,'visible','off')
+        set(handles.addonlyone,'visible','off')
         set(handles.addspecart,'visible','off')
         set(handles.addaro,'visible','off')
         set(handles.addeoi,'visible','off')
@@ -577,7 +577,7 @@ if ~isempty(aevt)
                 indsw	=   [indsw,j];
             end
         end
-        for i   =  1    :   size(D.CRC.SW.SW,2)       
+        for i   =  1    :   size(D.CRC.SW.SW,2)
             a   =   [aevt(indsw).time];
             [d1,b]  =   sort(abs(round(a)-round([D.CRC.SW.SW(i).negmax]/1000)));
             if ~isfield(D.CRC.SW.SW(i),'good')
@@ -701,7 +701,7 @@ set(handles.slider1,'Max',maxiwin)
 set(handles.slider1,'Min',miniwin)
 set(handles.slider1,'SliderStep',[handles.winsize/maxiwin 0.1])
 set(handles.totalpage,'String',['/ ' ...
-        num2str(ceil((nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1}))/handles.winsize))]);
+    num2str(ceil((nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1}))/handles.winsize))]);
 mainplot(handles)
 
 % Update handles structure
@@ -745,7 +745,7 @@ else
     Chanslidval =   get(handles.Chanslider,'Value');
     slidpos     =   Chanslidval-rem(Chanslidval,1);
     NbreChandisp    =   str2double(get(handles.NbreChan,'String'));
-    i   =   min(length(handles.indexMEEG) + length(handles.indnomeeg),NbreChandisp); 
+    i   =   min(length(handles.indexMEEG) + length(handles.indnomeeg),NbreChandisp);
 end
 ylim([0 handles.scale*(i+1)]);
 set(handles.axes1,'YTick',[handles.scale/2:handles.scale/2:i*handles.scale+handles.scale/2]);
@@ -891,14 +891,14 @@ function frqabv_Callback(hObject, eventdata, handles)
 frbe = str2double(get(hObject,'String'));
 i = handles.minsamp;
 if not(isnan(frbe)) && length(frbe)==1
-
+    
     if frbe>fsample(handles.Dmeg{i})/2*.99
         handles.filter.other(2) = fsample(handles.Dmeg{i})/2*.99;
         set(hObject,'String',num2str(fsample(handles.Dmeg{i})/2));
     else
         handles.filter.other(2) = frbe;
     end
-
+    
 else
     beep
     set(hObject,'String',num2str(handles.filter.other(2)))
@@ -913,7 +913,7 @@ end
     handles.filter.other(2)/(fsample(handles.Dmeg{i})/2)],'pass');
 handles.filter.coeffother=[B;A];
 
-% Plot 
+% Plot
 mainplot(handles)
 
 % Update handles structure
@@ -944,9 +944,9 @@ settings_path = fullfile(path,'/settings.mat');
 
 if exist(settings_path, 'file') == 2,
     load(settings_path);
-    set(handles.validity,'string',['License Validity: ' settings.validity ' UTC.']) 
+    set(handles.validity,'string',['License Validity: ' settings.validity ' UTC.'])
 else
-    set(handles.validity,'string','License Validity: NA') 
+    set(handles.validity,'string','License Validity: NA')
 end
 
 guidata(hObject, handles);
@@ -966,6 +966,14 @@ return
 
 
 function autoscore_Callback(hObject, eventdata, handles)
+answer = questdlg('Scoring using Z3Score-FASST is not recommended. FASST can now import scores from NEO commandline directly (press Ctrl+I). Neo-commandline supports batch scoring, scoring using reduced channels, dynamic handling of noisy epochs. Find out more at z3score.com or contact support@neurobit.io.', ...
+	'Score using Neo-commandline', ...
+	'Continue','Cancel','Cancel');
+
+if strcmp(answer, 'Cancel')
+    return
+end
+
 handles.gui_active = 0;
 guidata(hObject, handles);
 flags.Dmeg=handles.Dmeg;
@@ -1062,7 +1070,7 @@ handles.filter.coeffEMG=[B;A];
 
 guidata(hObject, handles);
 
-% Main plot  
+% Main plot
 mainplot(handles)
 % Update handles structure
 guidata(hObject, handles);
@@ -1365,13 +1373,13 @@ if handles.multcomp
     fil     =   min(max(1,Chan),length(handles.Dmeg));
     Ctodis  =	handles.Chantodis;
     [dumb1,dumb2,Chan]  =   intersect(handles.chanset{Ctodis}, ...
-                            upper(chanlabels(handles.Dmeg{fil})));
+        upper(chanlabels(handles.Dmeg{fil})));
     start   =   datevec(handles.date(fil,1)-handles.mindate);
     start   =   start(4)*60^2+start(5)*60+start(6);
     beg     =   slidval - start;
     tdeb    =   round(beg*fsample(handles.Dmeg{fil}));
     temps   =   tdeb:1:min(tdeb+(fsample(handles.Dmeg{fil})*handles.winsize), ...
-                nsamples(handles.Dmeg{fil}));
+        nsamples(handles.Dmeg{fil}));
     toshow  =   temps;
     cmap 	=   hsv(length(handles.Dmeg));
     Col     =   fil;
@@ -1381,42 +1389,42 @@ else
     NbreChandisp    =   str2double(get(handles.NbreChan,'String'));
     Chanslidval     =   get(handles.Chanslider,'Value');
     slidpos         =   Chanslidval-rem(Chanslidval,1);
-	index           =   [handles.indnomeeg handles.indexMEEG];
-	handles.inddis  =   index(slidpos : 1 : slidpos + NbreChandisp -1);
+    index           =   [handles.indnomeeg handles.indexMEEG];
+    handles.inddis  =   index(slidpos : 1 : slidpos + NbreChandisp -1);
     Chan            =   index(Chan);
     chandis         =   chanlabels(handles.Dmeg{fil},Chan);
     fs              =   fsample(handles.Dmeg{fil});
     tdeb            =   round(slidval*fs);
     temps           =   tdeb:1:min(tdeb+(fs*handles.winsize), ...
-                        nsamples(handles.Dmeg{fil}));
+        nsamples(handles.Dmeg{fil}));
     toshow          =   temps;
     cmap            =   [0.2 0.9 0.5; 1 0 0; 0 0 1 ];
 end
 
 tdeb_w = round(slidval*fs);
 tend_w = min(tdeb+(fs*handles.winsize), ...
-                        nsamples(handles.Dmeg{fil}));
+    nsamples(handles.Dmeg{fil}));
 tohid_all = [];
-if ~isempty(handles.score{5,handles.currentscore}) 
+if ~isempty(handles.score{5,handles.currentscore})
     tdebs   =   str2double(get(handles.currenttime,'String')) - handles.winsize/2;
     tfins   =   str2double(get(handles.currenttime,'String')) + handles.winsize/2;
     art     =   find(and((or(and(handles.score{5,handles.currentscore}(:,2)>tdebs,handles.score{5,handles.currentscore}(:,2)<tfins),...
-                and(handles.score{5,handles.currentscore}(:,1)<tfins,handles.score{5,handles.currentscore}(:,1)>tdebs))),...
-                or(handles.score{5,handles.currentscore}(:,3) == 0,handles.score{5,handles.currentscore}(:,3) == Chan)));
+        and(handles.score{5,handles.currentscore}(:,1)<tfins,handles.score{5,handles.currentscore}(:,1)>tdebs))),...
+        or(handles.score{5,handles.currentscore}(:,3) == 0,handles.score{5,handles.currentscore}(:,3) == Chan)));
     art_concerned   =   handles.score{5,handles.currentscore}(art,1:2);
     if ~isempty(art_concerned)
         a=1;
         while a <= size(art_concerned,1)
             art_concerned(a);
             begart      =   max(tdeb_w,round(art_concerned(a,1)*fs));
-            endart      =   min(tend_w,round(art_concerned(a,2)*fs)); 
+            endart      =   min(tend_w,round(art_concerned(a,2)*fs));
             tohid2   	=   begart : endart;
             tohid_all   =   union(tohid_all,tohid2);
             tdeb_w      =   endart;
             a   =  a+1;
-        end 
+        end
         toshow 	=   setdiff(toshow,tohid_all);
-    end 
+    end
 end
 if length(toshow)<(handles.winsize/2)*fs        %More than 50% of artefacts
     h = msgbox('There is too much artefact on this channel');
@@ -1434,14 +1442,14 @@ else
                 upper(handles.names(handles.crc_types(index2))));
             try
                 X   =   handles.Dmeg{fil}(Chan,toshow) - ...
-                        handles.Dmeg{fil}(index1,toshow);
+                    handles.Dmeg{fil}(index1,toshow);
                 Col	= 1;
             catch
                 X   = 0;
             end
         else
             range   =   max(handles.Dmeg{fil}(Chan,toshow)) - ...
-                        min(handles.Dmeg{fil}(Chan,toshow));
+                min(handles.Dmeg{fil}(Chan,toshow));
             try
                 X   = 	(handles.scale)*handles.Dmeg{fil}(Chan,toshow)/range;
                 Col =   2;
@@ -1520,7 +1528,7 @@ for ii=1:size(cmap,1)
     temps=(temps)/fsample(handles.Dmeg{ii})+start;
     Ctodis = handles.Chantodis;
     [dumb1,dumb2,index] = intersect(handles.chanset{Ctodis}, ...
-                                    upper(chanlabels(handles.Dmeg{ii})));
+        upper(chanlabels(handles.Dmeg{ii})));
     hold on
     [dumb1,dumb2,index2] = ...
         intersect(upper(chanlabels(handles.Dmeg{ii},index)),handles.names);
@@ -1551,7 +1559,7 @@ for ii=1:size(cmap,1)
             X = 0;
         end
     end
-
+    
     if length(X) == 1
     else
         [P,F] = pwelch(X,[],[],[],fs);
@@ -1685,7 +1693,7 @@ if ~isnan(Nchdispmeeg) && length(Nchdispmeeg)==1
         'Min',1,...
         'Max', totind - Nchdisp+1,...
         'Value',1,...
-        'SliderStep', [Nchdisp/totind Nchdisp/totind]);   
+        'SliderStep', [Nchdisp/totind Nchdisp/totind]);
 else
     beep
     set(handles.NbreChan,'String', num2str(10))
@@ -1713,10 +1721,10 @@ if norm
     while n <=length(indexMEGPLAN)-1
         n = n+1;
         while (n<=length(indexMEGPLAN)-1)&&(S.channels(indexMEGPLAN(n)).X_plot2D == S.channels(indexMEGPLAN(n+1)).X_plot2D)&(S.channels(indexMEGPLAN(n)).Y_plot2D == S.channels(indexMEGPLAN(n+1)).Y_plot2D)
-                handles.indexnorm = [handles.indexnorm indexMEGPLAN(n)];
-                handles.nind = [handles.nind indexMEGPLAN(n+1)];
-                n = n+2;
-        end 
+            handles.indexnorm = [handles.indexnorm indexMEGPLAN(n)];
+            handles.nind = [handles.nind indexMEGPLAN(n+1)];
+            n = n+2;
+        end
         if n<=length(indexMEGPLAN)
             handles.nind = [handles.nind indexMEGPLAN(n)];
         end
@@ -1727,27 +1735,27 @@ if norm
         handles.indexMEEG = [handles.indexMEEG(1:ind(1)-1) handles.indexMEEG(ind(1) + 1 : length(handles.indexMEEG))];
         ind = ind(2:end);
     end
-else 
+else
     handles.indexMEEG = handles.index(length(handles.indnomeeg)+1:numel(handles.index));
 end
 %Update the number of channels available
-NbreChan    =   length(handles.indexMEEG) + length(handles.indnomeeg);   
+NbreChan    =   length(handles.indexMEEG) + length(handles.indnomeeg);
 Nchdisp     =   min(str2double(get(handles.NbreChan,'String')),NbreChan);
 handles.inddis = [handles.indnomeeg handles.indexMEEG];
 
 set(handles.NbreChan,'String',Nchdisp);
 totind  =   length(handles.indexMEEG)+length(handles.indnomeeg);
 set(handles.Chanslider,...
-        'Min',1,...
-        'Max',totind - Nchdisp+1,...
-        'Value',1,...
-        'SliderStep', [Nchdisp/totind Nchdisp/totind]);
+    'Min',1,...
+    'Max',totind - Nchdisp+1,...
+    'Value',1,...
+    'SliderStep', [Nchdisp/totind Nchdisp/totind]);
 guidata(hObject,handles);
 mainplot(handles);
 
 %--------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%end to be checked%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
+
 % --- Executes during object creation, after setting all properties.
 
 function NbreChan_CreateFcn(hObject, eventdata, handles)
@@ -1786,11 +1794,11 @@ try
 catch
     if strcmpi(eegsc,'V')
         handles.eegscale=10^-6;
-    elseif strcmpi(eegsc,'µV')
+    elseif strcmpi(eegsc,'ÂµV')
         handles.eegscale=1;
     else
         beep
-        disp('Enter scale in 10^-x format or V or µV')
+        disp('Enter scale in 10^-x format or V or ÂµV')
         handles.eegscale=[];
         return
     end
@@ -1811,11 +1819,11 @@ try
 catch
     if strcmpi(eogsc,'V')
         handles.eogscale=10^-6;
-    elseif strcmpi(eogsc,'µV')
+    elseif strcmpi(eogsc,'ÂµV')
         handles.eogscale=1;
     else
         beep
-        disp('Enter scale in 10^-x format or V or µV')
+        disp('Enter scale in 10^-x format or V or ÂµV')
         handles.eogscale=[];
         return
     end
@@ -1836,11 +1844,11 @@ try
 catch
     if strcmpi(emgsc,'V')
         handles.emgscale=10^-6;
-    elseif strcmpi(emgsc,'µV')
+    elseif strcmpi(emgsc,'ÂµV')
         handles.emgscale=1;
     else
         beep
-        disp('Enter scale in 10^-x format or V or µV')
+        disp('Enter scale in 10^-x format or V or ÂµV')
         handles.emgscale=[];
         return
     end
@@ -1861,11 +1869,11 @@ try
 catch
     if strcmpi(ecgsc,'V')
         handles.ecgscale=10^-6;
-    elseif strcmpi(ecgsc,'µV')
+    elseif strcmpi(ecgsc,'ÂµV')
         handles.ecgscale=1;
     else
         beep
-        disp('Enter scale in 10^-x format or V or µV')
+        disp('Enter scale in 10^-x format or V or ÂµV')
         handles.ecgscale=[];
         return
     end
@@ -1886,11 +1894,11 @@ try
 catch
     if strcmpi(ecgsc,'V')
         handles.lfpscale=10^-6;
-    elseif strcmpi(ecgsc,'µV')
+    elseif strcmpi(ecgsc,'ÂµV')
         handles.lfpscale=1;
     else
         beep
-        disp('Enter scale in 10^-x format or V or µV')
+        disp('Enter scale in 10^-x format or V or ÂµV')
         handles.lfpscale=[];
         return
     end
@@ -1974,7 +1982,7 @@ catch
 end
 mainplot(handles)
 guidata(hObject, handles);
-        
+
 
 
 %--------------------------------------------------------------------------
@@ -2000,7 +2008,7 @@ end
 
 chos=[];
 
-for i=1:max(size(handles.evt,2),size(handles.evt,1)) 
+for i=1:max(size(handles.evt,2),size(handles.evt,1))
     if any(strcmpi(handles.evt(i).type,evtype(evnum)))
         chos=[chos, i];
     end
@@ -2205,7 +2213,7 @@ if dispmap
     D=handles.Dmeg{1};
     aevt=events(D);
     if or(strcmpi(aevt(handles.displevt).type,'SW'), ...
-        strcmpi(aevt(handles.displevt).type,'delta'))
+            strcmpi(aevt(handles.displevt).type,'delta'))
         a=aevt(handles.displevt).time;
         asw=D.CRC.SW.SW;
         [d1,b]=sort(abs(round([asw(:).negmax])-round(a*1000)));
@@ -2232,7 +2240,7 @@ if dispmap
         delete(get(handles.axes5,'Children'));
         fig=handles.figure1;
         ax=handles.axes5;
-        [handles.delmap.hb,handles.delmap.titl]=crc_SWS_mapping(handles.Dmeg{1},toshow,handles.delmap.cas,handles.delmap.zebris_name,handles.delmap.elpos,fig,ax);  
+        [handles.delmap.hb,handles.delmap.titl]=crc_SWS_mapping(handles.Dmeg{1},toshow,handles.delmap.cas,handles.delmap.zebris_name,handles.delmap.elpos,fig,ax);
     end
 else
     delete(get(handles.axes5,'Children'));
@@ -2325,12 +2333,12 @@ handles.scoring=1;
 try
     if size(handles.Dmeg{1}.CRC.score,1)<7
         % Meaning it is an old cell array
-
+        
         handles.score = cell(8,size(handles.Dmeg{1}.CRC.score,2));
-
+        
         %Taking the score & username from the old cell array
         handles.score(1:2,:)=handles.Dmeg{1}.CRC.score(1:2,:);
-
+        
         for ii=1:size(handles.Dmeg{1}.CRC.score,2)
             % Old cell array had a 20 seconds windows size
             handles.score{3,ii} = 20;
@@ -2353,7 +2361,7 @@ try
             catch
                 handles.score{6,ii}=[];
             end
-
+            
             % Creating event of interest vector
             handles.score{7,ii}=[];
             %vector for names of artefacts
@@ -2366,7 +2374,7 @@ try
                 handles.score{8,isc}=cell(size(handles.score{5,isc},1),1);
             end
         end
-            
+        
     end
     handles.Dmeg{1}.CRC.score = handles.score;
     handles.currentscore = 1;
@@ -2396,14 +2404,14 @@ catch
     % 6: Arousals
     % 7: Events of Interests
     % 8: Labels of the artefacts (empty if unspecified)
-
+    
     %Defining user Name
     prompt = {'Please enter your name'};
     def= {'Newuser'};
     num_lines = 1;
     dlg_title = 'Name of the new scorer';
     handles.score(2,1) = inputdlg(prompt,dlg_title,num_lines,def);
-
+    
     %Choosing size of window to score
     prompt = {'Please choose the size of the scoring windows'};
     def= {'30'};
@@ -2411,23 +2419,23 @@ catch
     dlg_title = 'Size of the scoring windows (in sec)';
     handles.score(3,1) = inputdlg(prompt,dlg_title,num_lines,def);
     handles.score{3,1} = str2double(handles.score{3});
-
+    
     % Creating FPL & OPL
     handles.score{4,1} = [1/fsample(handles.Dmeg{1}) ...
         nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})];
-
+    
     % Creating artefacts
     handles.score{5,1} = [];
-
+    
     % Creating arousals
     handles.score{6,1} = [];
-
+    
     % Creating event of interest
     handles.score{7,1} = [];
-   
+    
     % Creating labels associated with artefacts
     handles.score{8,1} = [];
-
+    
     % Putting NaN in the score
     handles.score{1,1} = ...
         0/0*ones(1,ceil(nsamples(handles.Dmeg{1}) / ...
@@ -2506,7 +2514,7 @@ handles.scorers{isc+1}=uimenu(handles.score_user,'Label', ...
     'New scorer','Callback',@new_scorer,...
     'Separator', 'on') ;
 set(handles.scorers{handles.currentscore},'Checked','on');
-delete(get(handles.addspecart,'Children'));   
+delete(get(handles.addspecart,'Children'));
 crcdef = crc_get_defaults('score');
 for iart=1:size(crcdef.lab_art,2)
     uimenu(handles.addspecart,'Label', ...
@@ -2520,7 +2528,7 @@ crc_hypnoplot(handles.axes4, ...
 set(handles.figure1,'CurrentAxes',handles.axes1);
 delete(get(handles.addonlyone,'Children'));
 uimenu(handles.addonlyone,'Label', ...
-        ('Start an undefined artefact on this channel'),'Callback',{@addstart,handles}) ;
+    ('Start an undefined artefact on this channel'),'Callback',{@addstart,handles}) ;
 set(handles.edit1,'String',num2str(handles.winsize)); % To update the size of the window according to the scorer used
 % Update handles structure
 guidata(hObject, handles);
@@ -2748,6 +2756,118 @@ scores = handles.Dmeg{1}.CRC.score{1,handles.currentscore};
 csvwrite([path file], scores');
 
 % --------------------------------------------------------------------
+function score_importneo_Callback(hObject, eventdata, handles)
+% hObject    handle to score_import (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+[file,path,indx] = uigetfile('*.neo', '*.json');
+if ~indx
+    return;
+end
+
+try
+    fileID = fopen([path file],'r');
+    response = fscanf(fileID,'%s');
+    fclose(fileID);
+    response = loadjson(response);
+    scores = response.message;
+    
+    if response.status == 0,
+        close(h);
+        errordlg(['Error message:' response.message],'Error importing data.'); 
+        return;
+    end
+
+    
+    %check if structure exits
+    if(~isfieldRecursive(handles.Dmeg{1},'CRC','score')),
+        n = 1;
+        handles.Dmeg{1}.CRC.score = {};
+    else
+        n = find(ismember(handles.Dmeg{1}.CRC.score(2,:),'Oracle'),1,'first');
+        if(isempty(n))
+            n = size(handles.Dmeg{1}.CRC.score,2)+1;
+        end
+    end
+    
+    %save relative confidence
+    handles.Dmeg{1}.relConfidence = [];
+    handles.Dmeg{1}.relConfidence = scores(:,2);
+    
+    handles.Dmeg{1}.CRC.score{1,n} = scores(:,1)';
+    handles.Dmeg{1}.CRC.score{2,n} = 'Oracle';
+    handles.Dmeg{1}.CRC.score{3,n} = 30;
+    handles.Dmeg{1}.CRC.score{4,n} = [0.005,length(scores(:,1))*30];
+    handles.Dmeg{1}.CRC.score{5,n} = [];
+    handles.Dmeg{1}.CRC.score{6,n} = [];
+    handles.Dmeg{1}.CRC.score{7,n} = [];
+    
+    %Save artifacts if available
+    if isfield(response,'artifact'),
+        artifacts = response.artifact;
+        
+        n_art = find(ismember(handles.Dmeg{1}.CRC.score(2,:),'Oracle_Artifact'),1,'first');
+        if(isempty(n_art))
+            n_art = size(handles.Dmeg{1}.CRC.score,2)+1;
+        end
+        
+        handles.Dmeg{1}.CRC.score{1,n_art} = artifacts';
+        handles.Dmeg{1}.CRC.score{2,n_art} = 'Oracle_Artifact';
+        handles.Dmeg{1}.CRC.score{3,n_art} = 5;
+        handles.Dmeg{1}.CRC.score{4,n_art} = [0.005,length(artifacts)*5];
+        handles.Dmeg{1}.CRC.score{5,n_art} = [];
+        handles.Dmeg{1}.CRC.score{6,n_art} = [];
+        handles.Dmeg{1}.CRC.score{7,n_art} = [];
+        
+    end
+    
+    handles.flags.Dmeg{1} = save(handles.Dmeg{1});
+    % Update handles structure
+    
+    %update the uimenu to add this new scorer
+    delete(get(handles.score_user,'Children'));
+    handles.score = handles.Dmeg{1}.CRC.score;
+    for isc=1:size(handles.score,2)
+        handles.scorers{isc} = uimenu(handles.score_user,'Label', ...
+            char(handles.score{2,isc}),'Callback',@defined_scorer) ;
+        handles.namesc{isc}=char(handles.score{2,isc});
+    end
+    handles.num_scorers=isc;
+    handles.currentscore=isc;
+    handles.scorers{isc+1}=uimenu(handles.score_user,'Label', ...
+        'New scorer','Callback', @new_scorer,...
+        'Separator','on') ;
+    set(handles.scorers{handles.currentscore},'Checked','on');
+    set(handles.figure1,'CurrentAxes',handles.axes4);
+    crc_hypnoplot(handles.axes4, ...
+        handles,handles.score{3,handles.currentscore});
+    set(handles.figure1,'CurrentAxes',handles.axes1);
+    % Setting up the add artefact/arousal/event of interest.
+    handles.adddeb = ones(1,size(handles.score,2));
+    handles.addardeb = ones(1,size(handles.score,2));
+    handles.add_eoi = ones(1,size(handles.score,2));
+    mainplot(handles)
+    % Update del user menu
+    delete(get(handles.del_user,'Children'));
+    handles.score = handles.Dmeg{1}.CRC.score;
+    for isc=1:size(handles.score,2)
+        handles.scorers{isc} = uimenu(handles.del_user,'Label', ...
+            char(handles.score{2,isc}),'Callback',@delete_scorer) ;
+        handles.namesc{isc}=char(handles.score{2,isc});
+    end
+    % Update handles structure
+    guidata(hObject, handles);
+    msgbox('Sleep scores imported successfully','Success');
+catch e
+    disp(e.message);
+    msgbox('Error importing sleep scores.','Error');
+    return
+end
+
+
+
+% --------------------------------------------------------------------
 function score_importcsv_Callback(hObject, eventdata, handles)
 % hObject    handle to score_import (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -2779,7 +2899,7 @@ try
     handles.Dmeg{1}.CRC.score{5,n_imp} = [];
     handles.Dmeg{1}.CRC.score{6,n_imp} = [];
     handles.Dmeg{1}.CRC.score{7,n_imp} = [];
- 
+    
     handles.Dmeg{1} = save(handles.Dmeg{1});
     
     %update the uimenu to add this new scorer
@@ -2876,17 +2996,17 @@ if oksamples && okchannels && okscore
         end
     end
     % Create new menu without Guide
-
+    
     if handles.figz~=0
         z = handles.figz;
     else
         z = figure;
     end
-
+    
     figure(z)
     handles.figz = z;
     clf(z);
-
+    
     set(z,...% The main GUI figure
         'MenuBar','none', ...
         'Toolbar','none', ...
@@ -2895,13 +3015,13 @@ if oksamples && okchannels && okscore
         'defaultuicontrolbackgroundcolor'));
     set(z,'FileName',impfile);
     set(z,'Position',[218 210 990 632])
-
+    
     hPlotAxes = axes(...    % Axes for plotting the selected plot
         'Parent', z, ...
         'Units', 'normalized', ...
         'HandleVisibility','callback', ...
         'Position',[0.11 0.13 0.80 0.67]);
-
+    
     Mainhandle = gcbo;
     
     sc=[];
@@ -2917,7 +3037,7 @@ if oksamples && okchannels && okscore
         'String',sc,...
         'Callback', {@plothypnoimport,handles,Mainhandle},...
         'Style','popupmenu');
-
+    
     hUpdateButton = uicontrol(... % Button for updating selected plot
         'Parent', z, ...
         'Units','normalized',...
@@ -2925,10 +3045,10 @@ if oksamples && okchannels && okscore
         'Position',[0.6 0.85 0.3 0.1],...
         'String','Import score',...
         'Callback', {@saveimportscore,handles,Mainhandle});
-
+    
     crc_hypnoplot(hPlotAxes,handles,D.CRC.score{3,1}, ...
         D.CRC.score{1,1})
-
+    
 else
     errordlg(dlg, 'Error');
 end
@@ -2959,14 +3079,14 @@ D=crc_eeg_load(impfile);
 
 popVal=get(popidx,'Value');
 if size(D.CRC.score,2)>=popVal
-
+    
     D.CRC.score(:,popVal)
     if size(handles.Dmeg{1}.CRC.score,1) == size(D.CRC.score(:,popVal),1)
         handles.Dmeg{1}.CRC.score=[handles.Dmeg{1}.CRC.score D.CRC.score(:,popVal)];
     else
         errordlg('Scores do not have the same sizes', 'Error');
     end
-
+    
     handles.addardeb=[handles.addardeb 1];
     handles.adddeb = [handles.adddeb 1];
     handles.add_eoi = [handles.add_eoi 1];
@@ -2976,7 +3096,7 @@ else
             handles.Dmeg{1}.CRC.score=[handles.Dmeg{1}.CRC.score D.CRC.score(:,ii)];
         else
             errordlg('Scores do not have the same sizes', 'Error');
-        end    
+        end
         handles.addardeb=[handles.addardeb 1];
         handles.adddeb = [handles.adddeb 1];
         handles.add_eoi = [handles.add_eoi 1];
@@ -3094,7 +3214,7 @@ crc_hypnoplot(handles.subcmp(2),...
     handles.Dmeg{1}.CRC.score{1,2},handles.Dmeg{1}.CRC.score{2,2})
 
 [mtch,perc_match] = crc_hypnocompare([handles.subcmp(3) z], [1 2], ...
-                                handles.Dmeg{1}.CRC.score, handles);
+    handles.Dmeg{1}.CRC.score, handles);
 handles.match = mtch;
 handles.perc_match = perc_match;
 
@@ -3118,7 +3238,7 @@ if handles.popcmp(1)==hObject
         handles.Dmeg{1}.CRC.score{3,Valpop},...
         handles.Dmeg{1}.CRC.score{1,Valpop},...
         handles.Dmeg{1}.CRC.score{2,Valpop})
-
+    
 elseif handles.popcmp(2)==hObject
     cla(handles.subcmp(2))
     set(fig,'CurrentAxes',handles.subcmp(2))
@@ -3133,8 +3253,8 @@ Val1 = get(handles.popcmp(1),'Value');
 Val2 = get(handles.popcmp(2),'Value');
 
 [mtch,perc_match] = crc_hypnocompare([handles.subcmp(3) fig], ...
-                                [Val1 Val2], ...
-                                handles.Dmeg{1}.CRC.score, handles);
+    [Val1 Val2], ...
+    handles.Dmeg{1}.CRC.score, handles);
 handles.match = mtch;
 handles.perc_match = perc_match;
 
@@ -3160,54 +3280,54 @@ if size(handles.Dmeg{1}.CRC.score{5,Val1},2)<3
     handles.Dmeg{1}.CRC.score{5,Val1}(:,3) = 0;
 end
 if size(handles.Dmeg{1}.CRC.score{5,Val2},2)<3
-	handles.Dmeg{1}.CRC.score{5,Val2}(:,3) = 0;
+    handles.Dmeg{1}.CRC.score{5,Val2}(:,3) = 0;
 end
-        
-if handles.Dmeg{1}.CRC.score{3,Val1}==handles.Dmeg{1}.CRC.score{3,Val2}
 
+if handles.Dmeg{1}.CRC.score{3,Val1}==handles.Dmeg{1}.CRC.score{3,Val2}
+    
     tmpscore = handles.Dmeg{1}.CRC.score{1,Val1};
     tmpscore(notmatchidx) = NaN; %#ok<*FNDSB> % put a NaN where there are mismatch
-
+    
     handles.Dmeg{1}.CRC.score=...
         [handles.Dmeg{1}.CRC.score handles.Dmeg{1}.CRC.score(:,Val1)];
-
+    
     handles.Dmeg{1}.CRC.score{1,end} = tmpscore;
     handles.Dmeg{1}.CRC.score{2,end} = ...
         ['Merge ' handles.Dmeg{1}.CRC.score{2,Val1} '-', ...
-            handles.Dmeg{1}.CRC.score{2,Val2} ];
+        handles.Dmeg{1}.CRC.score{2,Val2} ];
     handles.Dmeg{1}.CRC.score{4,end}(1) = ...
         min(handles.Dmeg{1}.CRC.score{4,Val1}(1), ...
-            handles.Dmeg{1}.CRC.score{4,Val2}(1));
+        handles.Dmeg{1}.CRC.score{4,Val2}(1));
     handles.Dmeg{1}.CRC.score{4,end}(2) = ...
         max(handles.Dmeg{1}.CRC.score{4,Val1}(2), ...
-            handles.Dmeg{1}.CRC.score{4,Val2}(2));
+        handles.Dmeg{1}.CRC.score{4,Val2}(2));
     handles.Dmeg{1}.CRC.score{5,end} = ...
         [handles.Dmeg{1}.CRC.score{5,Val1}; ...
-         handles.Dmeg{1}.CRC.score{5,Val2}];
+        handles.Dmeg{1}.CRC.score{5,Val2}];
     handles.Dmeg{1}.CRC.score{6,end} = ...
         [handles.Dmeg{1}.CRC.score{6,Val1} ; ...
-         handles.Dmeg{1}.CRC.score{6,Val2}];
+        handles.Dmeg{1}.CRC.score{6,Val2}];
     handles.Dmeg{1}.CRC.score{7,end} = ...
         [handles.Dmeg{1}.CRC.score{7,Val1} ; ...
-         handles.Dmeg{1}.CRC.score{7,Val2}];
-
-     if isfield(handles.Dmeg{1}.CRC,'sc_merge')
-         Nmerge = size(handles.Dmeg{1}.CRC.sc_merge,1);
-         handles.Dmeg{1}.CRC.sc_merge{Nmerge+1,1} = handles.Dmeg{1}.CRC.score{2,end};
-         handles.Dmeg{1}.CRC.sc_merge{Nmerge+1,2} = handles.perc_match;
-     else
-         handles.Dmeg{1}.CRC.sc_merge{1,1} = handles.Dmeg{1}.CRC.score{2,end};
-         handles.Dmeg{1}.CRC.sc_merge{1,2} = handles.perc_match;
-     end
-     
+        handles.Dmeg{1}.CRC.score{7,Val2}];
+    
+    if isfield(handles.Dmeg{1}.CRC,'sc_merge')
+        Nmerge = size(handles.Dmeg{1}.CRC.sc_merge,1);
+        handles.Dmeg{1}.CRC.sc_merge{Nmerge+1,1} = handles.Dmeg{1}.CRC.score{2,end};
+        handles.Dmeg{1}.CRC.sc_merge{Nmerge+1,2} = handles.perc_match;
+    else
+        handles.Dmeg{1}.CRC.sc_merge{1,1} = handles.Dmeg{1}.CRC.score{2,end};
+        handles.Dmeg{1}.CRC.sc_merge{1,2} = handles.perc_match;
+    end
+    
     handles.addardeb = [handles.addardeb 1];
     handles.adddeb   = [handles.adddeb 1];
     handles.add_eoi  = [handles.add_eoi 1];
-
+    
     handles.score = handles.Dmeg{1}.CRC.score;
     D = handles.Dmeg{1};
     save(D);
-
+    
     delete(get(handles.score_user,'Children'));
     for isc=1:size(handles.score,2)
         handles.scorers{isc} = uimenu(handles.score_user,'Label', ...
@@ -3299,7 +3419,7 @@ minimum=min(min(abs(handles.score{5,handles.currentscore}-Mouse(1,1))));
 if length(row)==2
     handles.adddeb(handles.currentscore) = 1;
     if handles.unspecart
-       set(handles.addundefart,'Label','Add "start undefined Artefact"');
+        set(handles.addundefart,'Label','Add "start undefined Artefact"');
     else
         set(handles.addspecart,'Label','Add "start specified Artefact"');
     end
@@ -3455,8 +3575,8 @@ end
 if size(handles.score{5,handles.currentscore},2)<3
     for ii = 1 : size(handles.score{5,handles.currentscore},1)
         handles.score{5,handles.currentscore}(:,3)  =   0;
-    end 
-end 
+    end
+end
 
 if handles.adddeb(handles.currentscore) == 1
     if ~isempty(handles.score{5,handles.currentscore})
@@ -3478,9 +3598,9 @@ if handles.adddeb(handles.currentscore) == 1
             text(timedbtart,handles.scale*(fact+6/8), ...
                 'S.Art','Color',[0 0 0],'FontSize',14)
             set(handles.axes1,'Color',[0.9 0.7 0.7])
-
+            
         end
-
+        
     else
         handles.score{5,handles.currentscore}=...
             [handles.score{5,handles.currentscore}; timedbtart timedbtart 0];
@@ -3491,7 +3611,7 @@ if handles.adddeb(handles.currentscore) == 1
         fact    =  min(str2double(get(handles.NbreChan,'String')),length(handles.indnomeeg) + length(handles.indexMEEG));
         plot(ones(1,2)*timedbtart,[0 handles.scale*(fact+1)], ...
             'UIContextMenu',handles.Deletemenu,'Color',[0 0 0])
-
+        
         text(timedbtart,handles.scale*(fact+6/8), ...
             'S.Art','Color',[0 0 0],'FontSize',14)
         set(handles.axes1,'Color',[0.9 0.7 0.7])
@@ -3500,13 +3620,13 @@ else
     Mouse   =    get(handles.axes1,'CurrentPoint');
     timefinart  =   Mouse(1,1);
     [row]   =   find(and(and(timefinart>handles.score{5,handles.currentscore}(:,1),...
-                timefinart>handles.score{5,handles.currentscore}(:,2)),handles.score{5,handles.currentscore}(:,3)==0));
+        timefinart>handles.score{5,handles.currentscore}(:,2)),handles.score{5,handles.currentscore}(:,3)==0));
     test3   =   sum(and(handles.score{5,handles.currentscore}...
-                (size(handles.score{5,handles.currentscore},1),1)<...
-                handles.score{5,handles.currentscore}(row,1), ...
-                handles.score{5,handles.currentscore}...
-                (size(handles.score{5,handles.currentscore},1),2)<...
-                handles.score{5,handles.currentscore}(row,2)));
+        (size(handles.score{5,handles.currentscore},1),1)<...
+        handles.score{5,handles.currentscore}(row,1), ...
+        handles.score{5,handles.currentscore}...
+        (size(handles.score{5,handles.currentscore},1),2)<...
+        handles.score{5,handles.currentscore}(row,2)));
     if or(or(sum(and(and(timefinart>handles.score{5,handles.currentscore}(:,1),...
             timefinart<handles.score{5,handles.currentscore}(:,2)),handles.score{5,handles.currentscore}(:,3)==0))>0, ...
             timefinart<handles.score{5,handles.currentscore}...
@@ -3550,7 +3670,7 @@ function addonlyone_Callback(hObject,eventdata,handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
- 
+
 function addstart(hObject,eventdata,handles)
 
 set(handles.figure1,'CurrentAxes',handles.axes1)
@@ -3571,10 +3691,10 @@ end
 if size(handles.score{5,handles.currentscore},2)<3
     for ii = 1 : size(handles.score{5,handles.currentscore},1)
         handles.score{5,handles.currentscore}(:,3)=0;
-    end 
-end 
+    end
+end
 
-%Time pointed 
+%Time pointed
 chan = ceil((handles.Mouse(1,2)-handles.scale/2)/handles.scale);
 time = handles.Mouse(1,1);
 Chanslidval = get(handles.Chanslider,'Value');
@@ -3587,8 +3707,8 @@ channel     =   handles.inddis(chan);
 addend      =   intersect(handles.chan, channel);
 artchan     =   find(handles.score{5,:}(:,3)==channel);
 in_art = find(handles.score{5,:}(artchan,1)<time & handles.score{5,:}(artchan,2)>time);
-%label noted in the last line to describe the artefacts  
-lab = 'unspecified on only one channel';  
+%label noted in the last line to describe the artefacts
+lab = 'unspecified on only one channel';
 
 if ~isempty(strfind(chantodel,'Start'))
     if ~isempty(handles.score{5,handles.currentscore})
@@ -3603,37 +3723,37 @@ if ~isempty(strfind(chantodel,'Start'))
                 teststart = sum(or(and(handles.score{5,handles.currentscore}(line(l),2)>time, ...
                     handles.score{5,handles.currentscore}(line(l),1)<time),...
                     handles.score{5,handles.currentscore}(line(l),2)==handles.score{5,handles.currentscore}(line(l),1)));
-            end            
-            if teststart~=0 
-                    beep
-                    disp('Invalid "start Artefact" point, this zone is already been recovered')
-                    disp(' ') 
-            else 
+            end
+            if teststart~=0
+                beep
+                disp('Invalid "start Artefact" point, this zone is already been recovered')
+                disp(' ')
+            else
                 tfinal = nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1});
                 handles.score{5,handles.currentscore}=[handles.score{5,handles.currentscore}; time tfinal channel];
-                handles.score{8,handles.currentscore}=[handles.score{8,handles.currentscore}; {lab}];          
-              	handles.chan =[handles.chan channel]; 
+                handles.score{8,handles.currentscore}=[handles.score{8,handles.currentscore}; {lab}];
+                handles.chan =[handles.chan channel];
             end
-         end
+        end
     else
         tfinal = nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1});
         handles.score{5,handles.currentscore}=[handles.score{5,handles.currentscore}; time tfinal channel];
-        handles.score{8,handles.currentscore}=[handles.score{8,handles.currentscore}; {lab}]; 
-        handles.chan =[handles.chan channel];  
+        handles.score{8,handles.currentscore}=[handles.score{8,handles.currentscore}; {lab}];
+        handles.chan =[handles.chan channel];
     end
 else
     if isempty(addend)
         beep
         disp('Invalid "end Artefact" point, you must first determine the "Start artefact on this channel"')
         disp(' ')
-    else 
+    else
         [ch,check,dum] = intersect(handles.score{5,handles.currentscore}(:,3),channel);
         if length(check)>1
             [ch, in, dum] = intersect(handles.score{5,handles.currentscore}(:,3), channel);
             for i = 1:length(check)-1
                 chk = sum(or(handles.score{5,handles.currentscore}(in(end),1)>timefin),...
                     and(handles.score{5,handles.currentscore}(check(i),1)<timefin,...
-                        handles.score{5,handles.currentscore}(check(i),2)<timefin));
+                    handles.score{5,handles.currentscore}(check(i),2)<timefin));
             end
             if chk  ~= 0
                 beep
@@ -3642,8 +3762,8 @@ else
             else
                 handles.score{5,handles.currentscore}(in(end),2) = time;
                 handles.chan = setdiff(handles.chan, channel);
-             end 
-        else 
+            end
+        else
             [ch, in, dum] = intersect(handles.score{5,handles.currentscore}(:,3), channel);
             if handles.score{5,handles.currentscore}(in(end),1)>time
                 beep
@@ -3656,18 +3776,18 @@ else
         end
     end
 end
-% ---- save data ----  
+% ---- save data ----
 handles.Dmeg{1}.CRC.score = handles.score;
 D = handles.Dmeg{1};
 save(D);
 
 % ---- update menu ----
-delete(get(handles.addonlyone,'Children'));   
+delete(get(handles.addonlyone,'Children'));
 uimenu(handles.addonlyone,'Label', ...
-            ('Start artefact on this channel'),'Callback',{@addstart,handles}) ;
+    ('Start artefact on this channel'),'Callback',{@addstart,handles}) ;
 if ~isempty(handles.chan)
     uimenu(handles.addonlyone,'Label', ...
-            'End artefact on this channel ','Callback',{@addstart,handles});
+        'End artefact on this channel ','Callback',{@addstart,handles});
 end
 
 set(handles.figure1,'CurrentAxes',handles.axes4)
@@ -3704,34 +3824,34 @@ if size(handles.score,1)<8
 end
 
 if handles.adddeb(handles.currentscore) == 1
-
+    
     Mouse   =   handles.Mouse;
     timedbtart=Mouse(1,1);
-
+    
     if ~isempty(handles.score{5,handles.currentscore})
         if sum(and(timedbtart>handles.score{5,handles.currentscore}(:,1),...
                 timedbtart<handles.score{5,handles.currentscore}(:,2)))
-
+            
             beep
             disp('Invalid "start Artefact" point')
             disp(' ')
-
+            
         else
             lab=get(hObject,'Label');
-
+            
             handles.score{5,handles.currentscore}= ...
                 [handles.score{5,handles.currentscore};...
                 timedbtart timedbtart 0];
             handles.score{8,handles.currentscore}=[handles.score{8,handles.currentscore};...
                 {lab}];
-
+            
             set(handles.addspecart,'Label','Add "end specified Artefact"');
-
+            
             handles.adddeb(handles.currentscore) = 0;
             fact    =   min(str2double(get(handles.NbreChan,'String')),length(handles.indnomeeg) + length(handles.indexMEEG));
             plot(ones(1,2)*timedbtart,[0 handles.scale*(fact+1)], ...
                 'UIContextMenu',handles.Deletemenu,'Color',[0 0 0])
-
+            
             text(timedbtart,handles.scale*(fact+6/8), ...
                 'S.Art','Color',[0 0 0],'FontSize',14)
             set(handles.axes1,'Color',[0.9 0.7 0.7])
@@ -3743,18 +3863,18 @@ if handles.adddeb(handles.currentscore) == 1
             timedbtart timedbtart 0];
         handles.score{8,handles.currentscore}=[handles.score{8,handles.currentscore};...
             {lab}];
-
+        
         set(handles.addspecart,'Label','Add "end specified Artefact"');
-
+        
         handles.adddeb(handles.currentscore) = 0;
         fact    =   min(str2double(get(handles.NbreChan,'String')),length(handles.indnomeeg) + length(handles.indexMEEG));
         plot(ones(1,2)*timedbtart,[0 handles.scale*(fact+1)], ...
             'UIContextMenu',handles.Deletemenu,'Color',[0 0 0])
-
+        
         text(timedbtart,handles.scale*(fact+6/8), ...
             'S.Art','Color',[0 0 0],'FontSize',14)
         set(handles.axes1,'Color',[0.9 0.7 0.7])
-
+        
     end
 end
 handles.Dmeg{1}.CRC.score=handles.score;
@@ -3788,7 +3908,7 @@ Mouse   =   handles.Mouse;
 timefinart  =   Mouse(1,1);
 handles.unspecart   =   0;
 [row]   =   find(and(timefinart>handles.score{5,handles.currentscore}(:,1),...
-            timefinart>handles.score{5,handles.currentscore}(:,2)));
+    timefinart>handles.score{5,handles.currentscore}(:,2)));
 
 test3   =  sum(and(handles.score{5,handles.currentscore}...
     (size(handles.score{5,handles.currentscore},1),1)<...
@@ -3801,16 +3921,16 @@ if or(or(sum(and(timefinart>handles.score{5,handles.currentscore}(:,1),...
         timefinart<handles.score{5,handles.currentscore}(:,2)))>0, ...
         timefinart<handles.score{5,handles.currentscore}...
         (size(handles.score{5,handles.currentscore},1),2)),test3)
-
+    
     beep
     disp('Invalid "end Artefact" point')
     disp(' ')
 else
     set(handles.addspecart,'Label','Add "start specified Artefact"');
-
+    
     handles.score{5,handles.currentscore}...
         (size(handles.score{5,handles.currentscore},1),2)= timefinart;
-
+    
     handles.adddeb(handles.currentscore) = 1;
     fact    =   min(str2double(get(handles.NbreChan,'String')),length(handles.indnomeeg) + length(handles.indexMEEG));
     plot(ones(1,2)*timefinart,[0 handles.scale*(fact+1)], ...
@@ -3818,7 +3938,7 @@ else
     text(timefinart,handles.scale*(fact+6/8), ...
         'E.Art','Color',[0 0 0],'FontSize',14)
     set(handles.axes1,'Color',[1 1 1])
-
+    
 end
 handles.Dmeg{1}.CRC.score=handles.score;
 D=handles.Dmeg{1};
@@ -3846,23 +3966,23 @@ function addaro_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 Mouse   =   handles.Mouse;
-if handles.addardeb(handles.currentscore) == 1   
+if handles.addardeb(handles.currentscore) == 1
     timedbtaro  =   Mouse(1,1);
     if ~isempty(handles.score{6,handles.currentscore})
         
         if sum(and(timedbtaro>handles.score{6,handles.currentscore}(:,1),...
                 timedbtaro<handles.score{6,handles.currentscore}(:,2)))
-
+            
             beep
             disp('Invalid "start Arousal" point')
             disp(' ')
-
+            
         else
-        
+            
             handles.score{6,handles.currentscore}=...
                 [handles.score{6,handles.currentscore}; ...
                 timedbtaro timedbtaro];
-
+            
             set(handles.addaro,'Label','Add "end Arousal" point');
             handles.addardeb(handles.currentscore) = 0;
             fact    =   min(str2double(get(handles.NbreChan,'String')),length(handles.indnomeeg) + length(handles.indexMEEG));
@@ -3871,11 +3991,11 @@ if handles.addardeb(handles.currentscore) == 1
             text(timedbtaro,handles.scale*(fact+6/8), ...
                 'S.Aro.','Color',[1 0 0],'FontSize',14)
             set(handles.axes1,'Color',[0.8 0.8 0.95]);
-
+            
         end
-
+        
     else
-
+        
         handles.score{6,handles.currentscore}=...
             [handles.score{6,handles.currentscore};...
             timedbtaro timedbtaro];
@@ -3887,7 +4007,7 @@ if handles.addardeb(handles.currentscore) == 1
         text(timedbtaro,handles.scale*(fact+6/8), ...
             'S.Aro','Color',[1 0 0],'FontSize',14)
         set(handles.axes1,'Color',[0.8 0.8 0.95]);
-
+        
     end
 else
     timefinaro=Mouse(1,1);
@@ -3900,21 +4020,21 @@ else
         handles.score{6,handles.currentscore}...
         (size(handles.score{6,handles.currentscore},1),2)<...
         handles.score{6,handles.currentscore}(row,2)));
-
+    
     if or(or(sum(and(timefinaro>handles.score{6,handles.currentscore}(:,1),...
             timefinaro<handles.score{6,handles.currentscore}(:,2)))>0, ...
             timefinaro<handles.score{6,handles.currentscore}...
             (size(handles.score{6,handles.currentscore},1),2)),test3)
-
+        
         beep
         disp('Invalid "end Arousal" point')
         disp(' ')
     else
         set(handles.addaro,'Label','Add "start Arousal" point');
-
+        
         handles.score{6,handles.currentscore}...
             (size(handles.score{6,handles.currentscore},1),2)= timefinaro;
-
+        
         handles.addardeb(handles.currentscore) = 1;
         fact    =   min(str2double(get(handles.NbreChan,'String')),length(handles.indnomeeg) + length(handles.indexMEEG));
         plot(ones(1,2)*timefinaro,[0 handles.scale*(fact+1)], ...
@@ -3949,16 +4069,16 @@ if handles.add_eoi(handles.currentscore) == 1
     if ~isempty(handles.score{7,handles.currentscore})
         if sum(and(timedbteoi>handles.score{7,handles.currentscore}(:,1),...
                 timedbteoi<handles.score{7,handles.currentscore}(:,2)))
-
+            
             beep
             disp('Invalid "start Event of interest" point')
             disp(' ')
-
+            
         else
             handles.score{7,handles.currentscore}=...
                 [handles.score{7,handles.currentscore}; ...
                 timedbteoi timedbteoi];
-
+            
             set(handles.addeoi,'Label','Add "end Event of interest" point');
             handles.add_eoi(handles.currentscore) = 0;
             fact    =   min(str2double(get(handles.NbreChan,'String')),length(handles.indnomeeg) + length(handles.indexMEEG));
@@ -3971,7 +4091,7 @@ if handles.add_eoi(handles.currentscore) == 1
         handles.score{7,handles.currentscore}=...
             [handles.score{7,handles.currentscore};...
             timedbteoi timedbteoi];
-
+        
         set(handles.addeoi,'Label','Add "end Event of interest" point');
         handles.add_eoi(handles.currentscore) = 0;
         fact    =   min(str2double(get(handles.NbreChan,'String')),length(handles.indnomeeg) + length(handles.indexMEEG));
@@ -3982,31 +4102,31 @@ if handles.add_eoi(handles.currentscore) == 1
     end
 else
     timefineoi=Mouse(1,1);
-
+    
     [row]=find(and(timefineoi>handles.score{7,handles.currentscore}(:,1),...
         timefineoi>handles.score{7,handles.currentscore}(:,2)));
-
+    
     test3=sum(and(handles.score{7,handles.currentscore}...
         (size(handles.score{7,handles.currentscore},1),1)<...
         handles.score{7,handles.currentscore}(row,1), ...
         handles.score{7,handles.currentscore}...
         (size(handles.score{7,handles.currentscore},1),2)<...
         handles.score{7,handles.currentscore}(row,2)));
-
+    
     if or(or(sum(and(timefineoi>handles.score{7,handles.currentscore}(:,1),...
             timefineoi<handles.score{7,handles.currentscore}(:,2)))>0, ...
             timefineoi<handles.score{7,handles.currentscore}...
             (size(handles.score{7,handles.currentscore},1),2)),test3)
-
+        
         beep
         disp('Invalid "end Event of interest" point')
         disp(' ')
     else
         set(handles.addeoi,'Label','Add "start Event of interest" point');
-
+        
         handles.score{7,handles.currentscore}...
             (size(handles.score{7,handles.currentscore},1),2)= timefineoi;
-
+        
         handles.add_eoi(handles.currentscore) = 1;
         fact    =   min(str2double(get(handles.NbreChan,'String')),length(handles.indnomeeg) + length(handles.indexMEEG));
         plot(ones(1,2)*timefineoi,[0 handles.scale*(fact+1)], ...
@@ -4018,7 +4138,7 @@ else
             '+','MarkerSize',8,'MarkerFaceColor',[0.75 0.2 0.2],...
             'MarkerEdgeColor',[0.75 0.2 0.2],'tag','eoi')
         set(handles.figure1,'CurrentAxes',handles.axes1)
-
+        
     end
 end
 
@@ -4123,7 +4243,7 @@ uimenu(handles.manevent,'Label', ...
 
 %update the popupmenu10 (events)
 current_events = get(handles.popupmenu10,'String');
-events_updated = [current_events; type]; 
+events_updated = [current_events; type];
 set(handles.popupmenu10,'String',events_updated,'Value',length(events_updated))
 
 %update the popupmenu11 (Value of the event = scorer)
@@ -4165,7 +4285,7 @@ ev(Nev+1).time  = cpoint;
 ev(Nev+1).duration  = 0;
 ev(Nev+1).offset    = 0;
 
-%save 
+%save
 D = events(D,1,ev);
 D.CRC.goodevents    =   ones(1,numel(ev));
 save(D);
@@ -4240,7 +4360,7 @@ crc_hypnoplot(handles.axes4, ...
     handles,handles.score{3,handles.currentscore});
 set(handles.figure1,'CurrentAxes',handles.axes1);
 
-%Store data in the figure's application 
+%Store data in the figure's application
 guidata(d, handles);
 %plot the new event
 mainplot(handles)
@@ -4331,7 +4451,7 @@ set(handles.figure1,'CurrentAxes',handles.axes1);
 guidata(hObject,handles)
 mainplot(handles)
 
-function manevent_Callback(hObject,eventdata,handles)   
+function manevent_Callback(hObject,eventdata,handles)
 % hObject    handle to DetectSpike (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -4527,12 +4647,12 @@ end
 
 %keyboard
 answer = questdlg(sprintf('Are you sure you want to permanently delete the scorer: %s?',namuser) , ...
-	'Confirm delete', ...
-	'Yes','No', 'No');
+    'Confirm delete', ...
+    'Yes','No', 'No');
 % Handle response
 switch answer
     case 'No'
-        return    
+        return
 end
 
 handles.Dmeg{1}.CRC.score(:,delete_id) = [];
@@ -4614,7 +4734,7 @@ return
 function click(hObject, eventdata, handles)
 
 Mouse = get(handles.axes4,'CurrentPoint');
- 
+
 if Mouse(1,2) > 0   %Even without score sleep, possibility to access from axes4 where we want on main screen
     slidval = Mouse(1);
     slidval = floor(slidval/handles.winsize)*handles.winsize;
@@ -4638,104 +4758,104 @@ if Mouse(1,2) > 0   %Even without score sleep, possibility to access from axes4 
     handles.displevt=0;
     guidata(hObject, handles);
     mainplot(handles)
-end  
-    
+end
+
 % To plot the sensors on the localizer
 Mouse2 = get(handles.axes1,'CurrentPoint');
 X = get(handles.axes1,'XTick');
 Y = get(handles.axes1,'YTick');
 
 if ~get(handles.counterspect,'Value') && and(and(Mouse2(1,1)<X(end),Mouse2(1,1)>X(1)),and(Mouse2(1,2)<Y(end),Mouse2(1,2)>Y(1)))
-    if isfield(handles,'namesc') 
+    if isfield(handles,'namesc')
         C = Mouse2(1,1);
         E = [handles.evt(:).time];
-        [ve handles.move]=min(abs(E-C)); 
+        [ve handles.move]=min(abs(E-C));
         if and(any(abs(C-E) < 1),any(strcmpi(handles.evt(handles.move).value,handles.namesc)))
-            fprintf(['You are going to move the event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) '\n']) 
-        else 
-            handles.move = 0; 
+            fprintf(['You are going to move the event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) '\n'])
+        else
+            handles.move = 0;
         end
-    else 
+    else
         handles.move = 0;
     end
     guidata(hObject,handles);
-   
+    
     set(handles.figure1,'CurrentAxes',handles.axes5)
     delete(findobj('tag', 'powerspctrm'))   %Effacer le denier power spectrum
-    delete(findobj('tag', 'error')) 
+    delete(findobj('tag', 'error'))
     chan = get(handles.fftchan,'Value');
     list = cellstr(get(handles.fftchan,'String'));
     listcompl = chanlabels(handles.Dmeg{1},handles.index);
     [dumb1,dumb2,index]	=   intersect(upper(list),upper(handles.names));
-    chantodis  = list(chan);         
+    chantodis  = list(chan);
     [dumb1,dumb2,indextodis] = intersect(upper(chantodis),upper(handles.names));
-
+    
     if isempty(indextodis)
-
+        
         id = indchannel(handles.Dmeg{1},chantodis);
         iddis = indchannel(handles.Dmeg{1},list);
         idtot = indchannel(handles.Dmeg{1},listcompl);
-
-        xytot = coor2D(handles.Dmeg{1},idtot);           
+        
+        xytot = coor2D(handles.Dmeg{1},idtot);
         xbl = xytot(1,:);
         ybl = xytot(2,:);
-
-        xytodis = coor2D(handles.Dmeg{1},id);           
+        
+        xytodis = coor2D(handles.Dmeg{1},id);
         xblack = xytodis(1);
         yblack = xytodis(2);
-
+        
         xy = coor2D(handles.Dmeg{1},iddis);
         xblue = xy(1,:);
         yblue = xy(2,:);
-
+        
         cleargraph(handles.axes5)
-
+        
         if (xblack)==0
             cleargraph(handles.figure1,'axes5')
         end
-
+        
         hold on
         plot(xblack,yblack,'kv','tag','localizer'), plot(xblue,yblue,'b+','tag','localizer'),plot(xbl,ybl,'b.','tag','localizer')
         hold off
-
-    else 
-    idxred	=   index(find(handles.crc_types(index)<-1));
-    idxblue	=   index(find(handles.crc_types(index)>-2));
-
-    xred  	=   handles.pos(1,idxred);
-    yred    =   handles.pos(2,idxred);
-
-    xblu    =   handles.pos(1,idxblue);
-    yblu    =   handles.pos(2,idxblue);
-
-    xblack  =   handles.pos(1,indextodis);
-    yblack  =   handles.pos(2,indextodis);
-
-    cleargraph(handles.axes5)
-
-    hold on
-    plot(xred,yred,'r+','tag','localizer'), plot(xblu,yblu,'b+','tag','localizer'), plot(xblack,yblack,'kv','tag','localizer')
-    hold off
-    if and(length(xblu)==0,length(xred)==0)
-        cleargraph(handles.figure1,'axes5')
-    end
+        
+    else
+        idxred	=   index(find(handles.crc_types(index)<-1));
+        idxblue	=   index(find(handles.crc_types(index)>-2));
+        
+        xred  	=   handles.pos(1,idxred);
+        yred    =   handles.pos(2,idxred);
+        
+        xblu    =   handles.pos(1,idxblue);
+        yblu    =   handles.pos(2,idxblue);
+        
+        xblack  =   handles.pos(1,indextodis);
+        yblack  =   handles.pos(2,indextodis);
+        
+        cleargraph(handles.axes5)
+        
+        hold on
+        plot(xred,yred,'r+','tag','localizer'), plot(xblu,yblu,'b+','tag','localizer'), plot(xblack,yblack,'kv','tag','localizer')
+        hold off
+        if and(length(xblu)==0,length(xred)==0)
+            cleargraph(handles.figure1,'axes5')
+        end
     end
     xlim([0 1])
     ylim([0 1])
-
+    
     set(handles.fftchan,'visible','off');
 end
 
-set(handles.figure1,'CurrentAxes',handles.axes5); 
+set(handles.figure1,'CurrentAxes',handles.axes5);
 
 % Plot the power spectrum on a bigger figure
 
 %Mouse3 = abs(get(handles.axes5,'CurrentPoint'));
 %X = abs(get(handles.axes5,'XTick'));
 %Y = abs(get(handles.axes5,'YTick'));
-%grid off   
-%if ~or(isempty(X),isempty(Y))     
-%    if and(and(Mouse3(1,1)<X(end),Mouse3(1,1)>X(1)),or(and(Mouse3(1,2)<Y(end),Mouse3(1,2)>Y(1)),and(Mouse3(1,2)<Y(1),Mouse3(1,2)>Y(end))))                   
+%grid off
+%if ~or(isempty(X),isempty(Y))
+%    if and(and(Mouse3(1,1)<X(end),Mouse3(1,1)>X(1)),or(and(Mouse3(1,2)<Y(end),Mouse3(1,2)>Y(1)),and(Mouse3(1,2)<Y(1),Mouse3(1,2)>Y(end))))
 %        set(handles.figure1,'CurrentAxes',handles.axes5);
 %        pl = get(findobj('tag', 'powerspctrm'));
 %        if handles.figz~=0
@@ -4750,16 +4870,16 @@ set(handles.figure1,'CurrentAxes',handles.axes5);
 %            handles.notdetect = 0;
 %            handles.figz = z;
 %    end
-%end 
-   
-    
+%end
+
+
 % --- E
 function keypress(hObject, eventdata, handles)
 
 crcdef  =   crc_get_defaults('score');
 key     =   str2double(get(handles.figure1,'CurrentCharacter'));
 currentwindow   =	floor(str2double(get(handles.currenttime,'String')) ...
-                                /handles.winsize)+1;
+    /handles.winsize)+1;
 %winsize_select  =   str2double(get(handles.edit1,'String'));
 %winsize_score   =   handles.Dmeg{1}.CRC.score{3,handles.currentscore};
 
@@ -4767,24 +4887,24 @@ if handles.scoring && (key>-1 && key<crcdef.nrStage)
     handles.move = 0;
     % Update Score
     maxwindow   =   ceil(nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})/...
-                            handles.score{3,handles.currentscore});
+        handles.score{3,handles.currentscore});
     if currentwindow>maxwindow
-       currentwindow    =   maxwindow;
+        currentwindow    =   maxwindow;
     end
     handles.score{1,handles.currentscore}(currentwindow)    =   key;
-
+    
     % Save Score
     handles.Dmeg{1}.CRC.score = handles.score;
     save(handles.Dmeg{1});
-
+    
     hypjustplot = 0;
-
+    
     set(handles.figure1,'CurrentAxes',handles.axes1);
     % Goes to next window
     slidval     =   str2double(get(handles.currenttime,'String'));
     slidval     =   (floor(slidval/handles.winsize)+1)*(handles.winsize);
     slidval     =   max(slidval,1/fsample(handles.Dmeg{1}));
-
+    
     if slidval>=nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2
         slidval     =   currentwindow*handles.winsize;
     else
@@ -4803,7 +4923,7 @@ elseif or(get(handles.figure1,'CurrentCharacter')=='B',get(handles.figure1,'Curr
     slidval = max(slidval,1/fsample(handles.Dmeg{1}));
     slidval = min(slidval, currentwindow*handles.winsize);
     %         nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2);
-
+    
     set(handles.slider1,'Value',slidval);
     set(handles.figure1,'CurrentAxes',handles.axes4);
     crc_hypnoplot(handles.axes4,...
@@ -4815,7 +4935,7 @@ elseif or(get(handles.figure1,'CurrentCharacter')=='F',get(handles.figure1,'Curr
     slidval     =   str2double(get(handles.currenttime,'String'));
     slidval     =   (floor(slidval/handles.winsize)+1)*handles.winsize;
     slidval     =   max(slidval,1/fsample(handles.Dmeg{1}));
-
+    
     if slidval>=nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})
         slidval     =   currentwindow*handles.winsize;
     else
@@ -4831,31 +4951,31 @@ else
     touch = int2str(get(handles.figure1,'CurrentCharacter'));
     if and(handles.move~=0,strcmpi(touch,'28'))
         ev = events(handles.Dmeg{1});
-        ev(handles.move).time = ev(handles.move).time - 1/fsample(handles.Dmeg{1}); % On avance par échantillon
+        ev(handles.move).time = ev(handles.move).time - 1/fsample(handles.Dmeg{1}); % On avance par Ã©chantillon
         handles.evt = ev;
         handles.Dmeg{1} = events(handles.Dmeg{1},1,ev);
         save(handles.Dmeg{1});
-        fprintf(['The event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) ' is moving on the left : ' num2str(handles.evt(handles.move).time) 'sec \n']) 
+        fprintf(['The event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) ' is moving on the left : ' num2str(handles.evt(handles.move).time) 'sec \n'])
         mainplot(handles)
     elseif and(handles.move~=0,strcmpi(touch,'29'))
         ev = events(handles.Dmeg{1});
         ev(handles.move).time + 1/fsample(handles.Dmeg{1});
-        ev(handles.move).time = ev(handles.move).time + 1/fsample(handles.Dmeg{1}); % On avance par échantillon
+        ev(handles.move).time = ev(handles.move).time + 1/fsample(handles.Dmeg{1}); % On avance par Ã©chantillon
         handles.evt = ev;
         handles.Dmeg{1} = events(handles.Dmeg{1},1,ev);
         save(handles.Dmeg{1});
-        fprintf(['The event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) ' is moving on the right : ' num2str(handles.evt(handles.move).time) 'sec \n']) 
+        fprintf(['The event ' char(handles.evt(handles.move).type) ' of ' char(handles.evt(handles.move).value) ' is moving on the right : ' num2str(handles.evt(handles.move).time) 'sec \n'])
         mainplot(handles)
-    else 
+    else
         beep;
         fprintf('Wrong key pressed! Please choose press a number between 0 and %d.\n',crcdef.nrStage-1)
         for ii = 1    :   crcdef.nrStage
             fprintf('%d : %s\n',ii-1,crcdef.stnames_L{ii})
         end
-        fprintf('\n')   
+        fprintf('\n')
     end
     hypjustplot     =  1;
-end 
+end
 
 if hypjustplot
     slidval = get(handles.slider1,'Value');
@@ -4963,11 +5083,11 @@ if handles.displevt
     slidval=handles.evt(handles.displevt).time-handles.winsize/2;
     if slidval<=1
         slidval=max(handles.evt(handles.displevt).time-2,1/fsample(handles.Dmeg{1})); %default value if first event is at the boundary of the file
-    elseif slidval>=(nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2)        
+    elseif slidval>=(nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2)
         slidval=min(handles.evt(handles.displevt).time-2,nsamples(handles.Dmeg{1})/fsample(handles.Dmeg{1})-handles.winsize/2); %default value if last event is at the boundary of the file
     end
-else           
-    slidval = floor((get(handles.slider1,'Value')/handles.winsize))*handles.winsize;  
+else
+    slidval = floor((get(handles.slider1,'Value')/handles.winsize))*handles.winsize;
     if slidval<1/fsample(handles.Dmeg{1})
         slidval=1/fsample(handles.Dmeg{1});
         set(handles.slider1,'Value',slidval);
@@ -4995,7 +5115,7 @@ if handles.export
     h=axs;
 else
     cleargraph(handles.figure1,'axes1');
-    h=handles.axes1; 
+    h=handles.axes1;
 end
 axes(h);
 
@@ -5030,15 +5150,15 @@ for i=1:maxi
             beg     =   slidval - start;
             tdeb    =   round(beg*fsample(handles.Dmeg{i}));
             temps   =   tdeb:1:min(tdeb+(fsample(handles.Dmeg{i})*handles.winsize)-1, ...
-                        nsamples(handles.Dmeg{i}));
+                nsamples(handles.Dmeg{i}));
             toshow  =   temps;
             temps   =   temps/fsample(handles.Dmeg{i})+start;
         end
         %handles channel to display
         Ctodis  =   handles.Chantodis;
         [dumb1,dumb2,index]     =   intersect(handles.chanset{Ctodis}, ...
-                                    upper(chanlabels(handles.Dmeg{i})));
-   else 
+            upper(chanlabels(handles.Dmeg{i})));
+    else
         %timing
         tdeb = min(round(slidval*fsample(handles.Dmeg{i})),nsamples(handles.Dmeg{i})-10);
         %channels
@@ -5051,15 +5171,15 @@ for i=1:maxi
         set(handles.fftchan,'String',chanlabels(handles.Dmeg{1},handles.inddis))
         maxj    =   length(handles.inddis); %number of channels
         temps   =   tdeb:1:min(tdeb+(fsample(handles.Dmeg{i})*handles.winsize)-1, ...
-                    nsamples(handles.Dmeg{i}));
+            nsamples(handles.Dmeg{i}));
         toshow  =   temps;
         temps   =   temps/fsample(handles.Dmeg{i});
         win =  floor((str2double(get(handles.currenttime,'String')) - handles.winsize/2)/handles.winsize + 1);
-   end
-   
+    end
+    
     if ~nosign  %if multiple comparison and no signal in the considered file
         text(slidval+1*handles.winsize/50,handles.scale*i, ...
-            'No Signal here','Color',[0 0 0],'FontSize',14);        
+            'No Signal here','Color',[0 0 0],'FontSize',14);
     else
         for j=1:maxj
             hold on
@@ -5069,7 +5189,7 @@ for i=1:maxi
             if handles.multcomp
                 factscale = handles.scale*i; %cycle on files if mult comp
             else
-                factscale = handles.scale*j; %cycle on channels if one file    
+                factscale = handles.scale*j; %cycle on channels if one file
             end
             if  any(index(j)==emgchannels(handles.Dmeg{i}))  %strfind(testcond{:},'EMG')
                 contents = get(handles.EMGpopmenu,'String');
@@ -5125,7 +5245,7 @@ for i=1:maxi
                     end
                 end
                 filtparam=handles.filter.coeffother;
-            elseif any(index(j)==meegchannels(handles.Dmeg{i})) %'EEG', 'MEGMAG', MEGPLANAR'               
+            elseif any(index(j)==meegchannels(handles.Dmeg{i})) %'EEG', 'MEGMAG', MEGPLANAR'
                 contents = get(handles.EEGpopmenu,'String');
                 selchan=upper(contents{get(handles.EEGpopmenu,'Value')});
                 chtyp=chantype(handles.Dmeg{i},index(j));
@@ -5176,7 +5296,7 @@ for i=1:maxi
                             end
                         end
                     end
-                 elseif strcmpi(chtyp,'LFP')
+                elseif strcmpi(chtyp,'LFP')
                     if isfield(handles,'lfpscale') && ~isempty(handles.lfpscale)
                         scal=handles.lfpscale;
                     else
@@ -5216,40 +5336,40 @@ for i=1:maxi
                 end
                 filtparam=handles.filter.coeffother;
             end
-           %Plot data   
+            %Plot data
             switch  selchan
                 case 'MEG'
                     % MEG data
                     normalize   =   get(handles.normalize,'Value');
                     chtyp = chantype(handles.Dmeg{i},index(j));
-                    if  strcmpi(chtyp,'MEGMAG') 
+                    if  strcmpi(chtyp,'MEGMAG')
                         plt     =   plot(temps,factscale+(handles.Dmeg{i}(index(j),toshow))/scal,'Color',[0.25 0.25 0.25]);
                     elseif  strcmpi(chtyp,'MEGPLANAR')
                         if (~normalize)
                             plt     =   plot(temps,factscale+(handles.Dmeg{i}(index(j),toshow))/scal,'Color',[0.5 0.5 0]);
                         else
                             plt     =   plot(temps,factscale+(((handles.Dmeg{i}(index(j),toshow)).^2+...
-                                        (handles.Dmeg{i}(index(j)+1,toshow)).^2).^0.5)/scal,'Color',[0 0.5 0]);
+                                (handles.Dmeg{i}(index(j)+1,toshow)).^2).^0.5)/scal,'Color',[0 0.5 0]);
                         end
                     end
-                 case    'REF1'
-                    plt         = 	plot(temps,factscale + (handles.Dmeg{i}(index(j),toshow))/scal);             
-                 case    'MEAN OF REF'
+                case    'REF1'
+                    plt         = 	plot(temps,factscale + (handles.Dmeg{i}(index(j),toshow))/scal);
+                case    'MEAN OF REF'
                     basedata    =   handles.Dmeg{i}(index(j),toshow);
                     ref2idx     =   find(strcmp(chanlabels(handles.Dmeg{i}),'REF2'));
-                    scnddata    =   handles.Dmeg{i}(index(j),toshow) - handles.Dmeg{i}(ref2idx,toshow);                         
+                    scnddata    =   handles.Dmeg{i}(index(j),toshow) - handles.Dmeg{i}(ref2idx,toshow);
                     toplotdat   =   mean([basedata ; scnddata]);
                     plt         =   plot(temps,factscale+(toplotdat)/scal);
-
+                    
                 case    'M1-M2'
                     basedata    =   handles.Dmeg{i}(index(j),toshow);
                     M1idx       =   find(strcmp(chanlabels(handles.Dmeg{i}),'M1'));
                     M2idx       =   find(strcmp(chanlabels(handles.Dmeg{i}),'M2'));
                     meanM       =   mean([handles.Dmeg{i}(M1idx,toshow) ; ...
-                                            handles.Dmeg{i}(M2idx,toshow)]);
+                        handles.Dmeg{i}(M2idx,toshow)]);
                     toplotdat   = 	basedata - meanM;
                     plt         =   plot(temps,factscale+(toplotdat)/scal);
-
+                    
                 case    'BIPOLAR'
                     if handles.crc_types(index2)>0
                         [dumb1,index3] = ...
@@ -5262,11 +5382,11 @@ for i=1:maxi
                         bipolar	=   handles.Dmeg{i}(index(j),toshow) - handles.Dmeg{i}(index3,toshow);
                         plt  	=   plot(temps,factscale+(bipolar)/scal,'Color','k');
                     else
-                        plt     =   plot(temps,factscale+(handles.Dmeg{i}(index(j),toshow))/scal,'Color','k');       
+                        plt     =   plot(temps,factscale+(handles.Dmeg{i}(index(j),toshow))/scal,'Color','k');
                     end
-
+                    
                 otherwise
-                    [dumb1,index3]  =   intersect(upper(chanlabels(handles.Dmeg{i})),selchan);       
+                    [dumb1,index3]  =   intersect(upper(chanlabels(handles.Dmeg{i})),selchan);
                     basedata        =   handles.Dmeg{i}(index(j),toshow);
                     toplotdat       =   basedata - handles.Dmeg{i}(index3,toshow);
                     plt  	=   plot(temps,factscale+(toplotdat)/scal);
@@ -5277,54 +5397,54 @@ for i=1:maxi
             end
             if plt~=0 && handles.multcomp
                 set(plt,'Color',cmap(i,:))
-            end    
+            end
             
-            %artefacts on single channel  (To be checked) 
+            %artefacts on single channel  (To be checked)
             if  ~isempty(handles.artefact)
-                deb_epoch   =   find(and(handles.artefact>temps(1),handles.artefact<=temps(end)+1/fsample(handles.Dmeg{1})));%1 seconde = fenetre d'analyse pour la détection des artefacts de courtes durées
-                for epo     =   1 : length(deb_epoch)  
+                deb_epoch   =   find(and(handles.artefact>temps(1),handles.artefact<=temps(end)+1/fsample(handles.Dmeg{1})));%1 seconde = fenetre d'analyse pour la dÃ©tection des artefacts de courtes durÃ©es
+                for epo     =   1 : length(deb_epoch)
                     X   =   get(plt,'YData');
-                    deb =  (handles.artefact(deb_epoch(epo)) - (win-1)*handles.winsize/1 - 1)*fsample(handles.Dmeg{1}) + 1; %1=temps d'une époque artefactée
+                    deb =  (handles.artefact(deb_epoch(epo)) - (win-1)*handles.winsize/1 - 1)*fsample(handles.Dmeg{1}) + 1; %1=temps d'une Ã©poque artefactÃ©e
                     fin =  min(length(X)+win*handles.winsize*fsample(handles.Dmeg{1}),(handles.artefact(deb_epoch(epo)) - (win-1)*handles.winsize/1)*fsample(handles.Dmeg{1}));
                     time_epo = [(handles.artefact(deb_epoch(epo))-1) + 1/fsample(handles.Dmeg{1}) : 1/fsample(handles.Dmeg{1}) : ((handles.artefact(deb_epoch(epo))-1) + 1/fsample(handles.Dmeg{1}))+length(deb:fin)/fsample(handles.Dmeg{1})-1/fsample(handles.Dmeg{1})];
-                    X   =   X(deb:fin);%fs est le nombre d'échantillons contenus dans une seconde
+                    X   =   X(deb:fin);%fs est le nombre d'Ã©chantillons contenus dans une seconde
                     plot(time_epo,X,'-.','color','r');
                 end
             end
-            %artefacts channels: automatic 
+            %artefacts channels: automatic
             if ~isempty(handles.badchannels)&& ~isempty(find(handles.badchannels == win)) %isfield(handles.Dmeg{1}.CRC,'badchannels')
-                [electr gum]=find(handles.badchannels == win);            
+                [electr gum]=find(handles.badchannels == win);
                 electr = handles.chanlab(electr);
-            	if any(index(j) ==  electr)
+                if any(index(j) ==  electr)
                     X   =   get(plt,'YData');
                     plot(temps,X,'-r');
                 end
             end
-            %artefacts on single channel  (To be checked) 
+            %artefacts on single channel  (To be checked)
             if handles.scoring && ~isempty(handles.score{5,handles.currentscore}) && any(index(j)== handles.score{5,handles.currentscore}(:,3))
-                [indice gum]= find(handles.score{5,handles.currentscore}(:,3)==index(j)); 
+                [indice gum]= find(handles.score{5,handles.currentscore}(:,3)==index(j));
                 l=1;
                 tdebs   =   str2double(get(handles.currenttime,'String'))-handles.winsize/2;
                 tfins   =	str2double(get(handles.currenttime,'String'))+handles.winsize/2;
-                while l<=length(indice) 
+                while l<=length(indice)
                     if(or(or(handles.score{5,handles.currentscore}(indice(l),2)>tdebs,handles.score{5,handles.currentscore}(indice(l),1)<tdebs),...
-                        or(handles.score{5,handles.currentscore}(indice(l),1)<tfins,handles.score{5,handles.currentscore}(indice(l),2)>tfins)))
+                            or(handles.score{5,handles.currentscore}(indice(l),1)<tfins,handles.score{5,handles.currentscore}(indice(l),2)>tfins)))
                         [dum ind]=intersect(handles.inddis,index(j));
                         if handles.score{5,handles.currentscore}(indice(l),1)>tdebs
                             text(handles.score{5,handles.currentscore}(indice(l),1),...
-                            (ind*handles.scale + handles.scale/2), ...
-                            'Start Bad Chan','Color',[0 0 0],'FontSize',12) ;
+                                (ind*handles.scale + handles.scale/2), ...
+                                'Start Bad Chan','Color',[0 0 0],'FontSize',12) ;
                             plot(ones(1,2)*handles.score{5,handles.currentscore}(indice(l),1), ...
-                            [(ind*handles.scale-handles.scale/2) (ind*handles.scale + handles.scale/2)], ...
-                            'Color',[0 0 0])
+                                [(ind*handles.scale-handles.scale/2) (ind*handles.scale + handles.scale/2)], ...
+                                'Color',[0 0 0])
                         end
                         if handles.score{5,handles.currentscore}(indice(l),2)<tfins
                             text(handles.score{5,handles.currentscore}(indice(l),2),...
-                            (ind*handles.scale + handles.scale/2), ...
-                            'End Bad Chan','Color',[0 0 0],'FontSize',12) 
+                                (ind*handles.scale + handles.scale/2), ...
+                                'End Bad Chan','Color',[0 0 0],'FontSize',12)
                             plot(ones(1,2)*handles.score{5,handles.currentscore}(indice(l),2), ...
-                            [(ind*handles.scale-handles.scale/2) (ind*handles.scale + handles.scale/2)], ...
-                            'Color',[0 0 0])
+                                [(ind*handles.scale-handles.scale/2) (ind*handles.scale + handles.scale/2)], ...
+                                'Color',[0 0 0])
                         end
                         if handles.score{5,handles.currentscore}(indice(l),2) ~= handles.score{5,handles.currentscore}(indice(l),1)
                             sfin = min(tfins*fsample(handles.Dmeg{1}),handles.score{5,handles.currentscore}(indice(l),2)*fsample(handles.Dmeg{1}));
@@ -5332,8 +5452,8 @@ for i=1:maxi
                             sfin = tfins*fsample(handles.Dmeg{1});
                         end
                         %tdeb = min(round(slidval*fsample(handles.Dmeg{1})),nsamples(handles.Dmeg{1})-10);
-                        sdebut = max(handles.score{5,handles.currentscore}(indice(l),1)*fsample(handles.Dmeg{1}), tdebs*fsample(handles.Dmeg{1}));               
-                        time = sdebut+1 : sfin;               
+                        sdebut = max(handles.score{5,handles.currentscore}(indice(l),1)*fsample(handles.Dmeg{1}), tdebs*fsample(handles.Dmeg{1}));
+                        time = sdebut+1 : sfin;
                         time = time/fsample(handles.Dmeg{1});
                         X = get(plt,'YData');
                         
@@ -5341,7 +5461,7 @@ for i=1:maxi
                         X = X(sdebut-tdebs*fsample(handles.Dmeg{1})+1:sfin-tdebs*fsample(handles.Dmeg{1}));
                         if handles.export
                             plot(time,X,'Color',[0.8 0.8 0.8]);
-                        else  
+                        else
                             plot(time,X,'UIContextMenu',handles.Deletemenuone,'Color',[0.8 0.8 0.8]);
                         end
                     end
@@ -5367,9 +5487,9 @@ else
     li=length(index);
 end
 
- ylim([0 handles.scale*(li+1)])
- set(handles.axes1,'YTick',[handles.scale/2 :handles.scale/2:li*handles.scale+handles.scale/2]);
- ylabels=[num2str(round(handles.scale/2))];
+ylim([0 handles.scale*(li+1)])
+set(handles.axes1,'YTick',[handles.scale/2 :handles.scale/2:li*handles.scale+handles.scale/2]);
+ylabels=[num2str(round(handles.scale/2))];
 
 for j = 1 : li
     if handles.multcomp
@@ -5379,8 +5499,8 @@ for j = 1 : li
             stringn = char(chanlabels(handles.Dmeg{1},index(j)+2));
             string = [stringn(1:end-1), 'N'];
             ylabels  = [ylabels {string}];
-        else 
-           ylabels = [ylabels chanlabels(handles.Dmeg{1},index(j))];
+        else
+            ylabels = [ylabels chanlabels(handles.Dmeg{1},index(j))];
         end
     end
     ylabels = [ylabels num2str(round(handles.scale/2))];
@@ -5417,7 +5537,7 @@ end
 if handles.scoring && handles.winsize == handles.score{3,handles.currentscore} % New gardian to check the window size corresponds to those is used to score file
     ll  =   str2double(get(handles.NbreChan,'String'));
     fact    =   min(ll,length(handles.indexMEEG) + length(handles.indnomeeg));
-    currentwindow = floor(str2double(get(handles.currenttime,'String'))/handles.winsize)+1;  
+    currentwindow = floor(str2double(get(handles.currenttime,'String'))/handles.winsize)+1;
     if currentwindow>size(handles.score{1,handles.currentscore},2)
         currentwindow = currentwindow-1;
     end
@@ -5449,7 +5569,7 @@ if handles.scoring && handles.winsize == handles.score{3,handles.currentscore} %
             plot(temps,((li+1)*handles.scale-1/10000000)*ones(1,length(temps)), ...
                 'linewidth',10,'color',[0.9 0.6 0.3])
     end
-
+    
     % Plot opl & fpl
     tdebs = str2double(get(handles.currenttime,'String'))-handles.winsize/2;
     tfins = str2double(get(handles.currenttime,'String'))+handles.winsize/2;
@@ -5468,37 +5588,37 @@ if handles.scoring && handles.winsize == handles.score{3,handles.currentscore} %
     % Display art
     if ~isempty(handles.score{5,handles.currentscore})
         tdebs=str2double(get(handles.currenttime,'String'))-handles.winsize/2;
-        tfins=str2double(get(handles.currenttime,'String'))+handles.winsize/2;       
+        tfins=str2double(get(handles.currenttime,'String'))+handles.winsize/2;
         %---artefact on all channels
         startart=find(and(and(handles.score{5,handles.currentscore}(:,1)>tdebs,...
             handles.score{5,handles.currentscore}(:,1)<tfins),handles.score{5,handles.currentscore}(:,3)==0));
         endart=find(and(and(handles.score{5,handles.currentscore}(:,2)>tdebs,...
             handles.score{5,handles.currentscore}(:,2)<tfins),handles.score{5,handles.currentscore}(:,3)==0));
         for i=1:length(startart)
-            if handles.export 
+            if handles.export
                 plot(ones(1,2)*handles.score{5,handles.currentscore}(startart(i),1), ...
                     [0 handles.scale*(fact+1)], ...
                     'Color',[0 0 0])
                 text(handles.score{5,handles.currentscore}(startart(i),1),...
                     handles.scale*(fact+6/8), ...
-                    'S.Art','Color',[0 0 0],'FontSize',14)             
+                    'S.Art','Color',[0 0 0],'FontSize',14)
             else
                 plot(ones(1,2)*handles.score{5,handles.currentscore}(startart(i),1), ...
                     [0 handles.scale*(fact+1)], ...
                     'UIContextMenu',handles.Deletemenu,'Color',[0 0 0])
                 text(handles.score{5,handles.currentscore}(startart(i),1),...
                     handles.scale*(fact+6/8), ...
-                    'S.Art','Color',[0 0 0],'FontSize',14)                              
+                    'S.Art','Color',[0 0 0],'FontSize',14)
             end
         end
         for i=1:length(endart)
             if handles.export
                 plot(ones(1,2)*handles.score{5,handles.currentscore}(endart(i),2), ...
-                	[0 handles.scale*(fact+1)], ...
-                   	'Color',[0 0 0])
+                    [0 handles.scale*(fact+1)], ...
+                    'Color',[0 0 0])
                 text(handles.score{5,handles.currentscore}(endart(i),1),...
                     handles.scale*(fact+6/8), ...
-                    'E.Art','Color',[0 0 0],'FontSize',14)         
+                    'E.Art','Color',[0 0 0],'FontSize',14)
             else
                 plot(ones(1,2)*handles.score{5,handles.currentscore}(endart(i),2), ...
                     [0 handles.scale*(fact+1)],'UIContextMenu', ...
@@ -5507,9 +5627,9 @@ if handles.scoring && handles.winsize == handles.score{3,handles.currentscore} %
                     handles.scale*(fact+6/8), ...
                     'E.Art','Color',[0 0 0],'FontSize',14)
             end
-        end  
-    end 
-                                                
+        end
+    end
+    
     % Display arousal
     if ~isempty(handles.score{6,handles.currentscore})
         tdebs=str2double(get(handles.currenttime,'String'))-handles.winsize/2;
@@ -5547,7 +5667,7 @@ if handles.scoring && handles.winsize == handles.score{3,handles.currentscore} %
                 'E.Aro','Color',[1 0 0],'FontSize',14)
         end
     end
-
+    
     % Display EOI
     if ~isempty(handles.score{7,handles.currentscore})
         tdebs=str2double(get(handles.currenttime,'String'))-handles.winsize/2;
@@ -5591,7 +5711,7 @@ grid on
 % Display trigger
 if ~handles.multcomp
     ev = events(handles.Dmeg{1});
-
+    
     if iscell(ev)
         ev=cell2mat(ev);
     end
@@ -5609,26 +5729,26 @@ if ~handles.multcomp
             itrigger = [itrigger find([ev(:).time] == ev(indextrig(tr)).time)];
         end
     end
-
-%     %Check if some events happens at the same time (je ne pense pas que
-%     %cette partie de code fonctionne!)
-%     if ~isempty(indextrig) && indextrig(1)~=1
-%         if and(ev(indextrig(1)).time == ev(indextrig(1)-1).time,length(indextrig)~=length(indextrig(1):indextrig(end)))
-%             trou=diff(indextrig);
-%             trouve=find(trou==2)+1;
-%             int = sort([int(1) int int(trouve)]);
-%             indextrig = sort([(indextrig(1)-1) indextrig (indextrig(trouve)-1)]);
-%         elseif ev(indextrig(1)).time == ev(indextrig(1)-1).time
-%             int = sort([int(1) int]);
-%             indextrig = sort([(indextrig(1)-1) indextrig]);
-%         end
-%     end
-%     if ~isempty(indextrig) && length(indextrig)~=length(indextrig(1):indextrig(end))
-%         trou=diff(indextrig);
-%         trouve=find(trou==2)+1;
-%         int = sort([int int(trouve)]);
-%         indextrig = sort([indextrig (indextrig(trouve)-1)]);
-%     end
+    
+    %     %Check if some events happens at the same time (je ne pense pas que
+    %     %cette partie de code fonctionne!)
+    %     if ~isempty(indextrig) && indextrig(1)~=1
+    %         if and(ev(indextrig(1)).time == ev(indextrig(1)-1).time,length(indextrig)~=length(indextrig(1):indextrig(end)))
+    %             trou=diff(indextrig);
+    %             trouve=find(trou==2)+1;
+    %             int = sort([int(1) int int(trouve)]);
+    %             indextrig = sort([(indextrig(1)-1) indextrig (indextrig(trouve)-1)]);
+    %         elseif ev(indextrig(1)).time == ev(indextrig(1)-1).time
+    %             int = sort([int(1) int]);
+    %             indextrig = sort([(indextrig(1)-1) indextrig]);
+    %         end
+    %     end
+    %     if ~isempty(indextrig) && length(indextrig)~=length(indextrig(1):indextrig(end))
+    %         trou=diff(indextrig);
+    %         trouve=find(trou==2)+1;
+    %         int = sort([int int(trouve)]);
+    %         indextrig = sort([indextrig (indextrig(trouve)-1)]);
+    %     end
     int = int/fsample(handles.Dmeg{1});
     Nev_dis = length(int);
     if Nev_dis % do all this if there are several triggers to be displayed !
@@ -5655,7 +5775,7 @@ if ~handles.multcomp
             'k^','LineWidth',2.5)
         if ~isempty(handles.type)
             [manev inte intm] = intersect(etpv,handles.type(:,1));
-        else 
+        else
             manev = [];
         end
         nme = length(manev);
@@ -5663,20 +5783,20 @@ if ~handles.multcomp
             inte = find(strcmpi(etpv,manev(me)));
             col = char(handles.type(intm(me),2));
             incol = col(:,1);
-            if ~handles.export 
+            if ~handles.export
                 plot(int(inte),0.5*ones(1,length(int(inte)))*handles.scale/50*(NbreChandisp),'^','Color',incol,'UIContextMenu',handles.DeletEvents,...
                     'LineWidth',2.5)
                 for nse = 1 : length(inte)
                     plot(ones(1,2).*int(inte(nse)),[handles.scale/2 handles.scale*(NbreChandisp)+handles.scale],'Color',incol,'UIContextMenu',handles.DeletEvents,...
                         'LineWidth',0.5)
                 end
-            else 
+            else
                 plot(int(inte),0.5*ones(1,length(int(inte)))*handles.scale/50*(NbreChandisp),'^','Color',incol,...
                     'LineWidth',2.5)
                 for nse = 1 : length(inte)
                     plot(ones(1,2).*int(inte(nse)),[handles.scale/2 handles.scale*(NbreChandisp)+handles.scale],'Color',incol,'LineWidth',0.5)
                 end
-            end                
+            end
         end
         %chose between the display of type or of value
         fmric=0;
@@ -5708,11 +5828,11 @@ if ~handles.multcomp
         for jj = 1:Nev_dis
             %if types or values are chosen by the user, only display their
             %names
-             if isempty(handles.base) || isempty(intersect(handles.base(:,1),{ev(indextrig).type})) % pas de selection faite ou pas de trigger correspondant à la selection faite
+            if isempty(handles.base) || isempty(intersect(handles.base(:,1),{ev(indextrig).type})) % pas de selection faite ou pas de trigger correspondant Ã  la selection faite
                 if disc && chostype && strcmpi(etpv{jj},typevt) && ~fmric
                     msg = etpv{jj};
                 elseif disc && chostype && strcmpi(etpv{jj},typevt) && fmric
-                    msg = etype{jj};                
+                    msg = etype{jj};
                 elseif disc && ~(strcmpi(etype{jj},typevt)) %(disc && chostype && strcmpi(etpv{jj},typevt)) || ...
                     msg='';
                 elseif disc && ~chostype && strcmpi(etype{jj},typevt) || fmric
@@ -5720,9 +5840,9 @@ if ~handles.multcomp
                 elseif ~disc
                     msg = num2str(etpv{jj});
                 end
-             else
+            else
                 %msg must contain value in base 10 :
-                m = find([ev(itrigger(:)).time]==ev(indextrig(jj)).time);      
+                m = find([ev(itrigger(:)).time]==ev(indextrig(jj)).time);
                 [evsel itri ibase]= intersect({ev(itrigger(m)).type},handles.base(:,1));
                 if isempty(evsel)
                     sumtrig = 0;
@@ -5732,18 +5852,18 @@ if ~handles.multcomp
                 msg = num2str(sumtrig);
             end
             %Affichage
-                if isempty(msg), msg = ''; end
-                lgmsg = length(msg);
-                if isfield(handles.Dmeg{1},'CRC') && ...
-                        isfield(handles.Dmeg{1}.CRC,'goodevents') && ...
-                            size(handles.Dmeg{1}.CRC.goodevents,2)>=indextrig(jj)&& ...
-                                handles.Dmeg{1}.CRC.goodevents(indextrig(jj))==0
-                    b=[0.8 0.2 0.2];
-                else
-                    b = 'k';
-                end
-                text(int(jj)-(0.4*lgmsg/(lgmsg+1))*handles.winsize/20, ...
-                    2.1*handles.scale/50*NbreChandisp,msg,'Color',b);
+            if isempty(msg), msg = ''; end
+            lgmsg = length(msg);
+            if isfield(handles.Dmeg{1},'CRC') && ...
+                    isfield(handles.Dmeg{1}.CRC,'goodevents') && ...
+                    size(handles.Dmeg{1}.CRC.goodevents,2)>=indextrig(jj)&& ...
+                    handles.Dmeg{1}.CRC.goodevents(indextrig(jj))==0
+                b=[0.8 0.2 0.2];
+            else
+                b = 'k';
+            end
+            text(int(jj)-(0.4*lgmsg/(lgmsg+1))*handles.winsize/20, ...
+                2.1*handles.scale/50*NbreChandisp,msg,'Color',b);
         end
     end
 end
@@ -5828,7 +5948,7 @@ else
     delete(findobj('tag','trc'))
     set(handles.counterspect,'BackgroundColor',[0.8 0.8 0.8])
     set(handles.figure1, 'windowbuttonmotionfcn', @update_powerspect)
-    set(handles.figure1, 'WindowButtonUpFcn','') 
+    set(handles.figure1, 'WindowButtonUpFcn','')
     set(handles.Cmp_Pwr_Sp,'Enable','on','Visible','on')
 end
 
@@ -5846,7 +5966,7 @@ if strcmp(get(hObject,'SelectionType'),'open')
     handles.xinit = cp(1,1); handles.yinit = cp(1,2);
     plot(cp(1,1),cp(1,2),'.','color','b','tag','O');
     set(hObject,'WindowButtonMotionFcn',@wbmcb)
-    set(hObject,'WindowButtonUpFcn',@wbucb) 
+    set(hObject,'WindowButtonUpFcn',@wbucb)
 end
 guidata(hObject,handles)
 
@@ -5857,7 +5977,7 @@ handles = guidata(hObject);
 cp = get(handles.axes1,'CurrentPoint');
 
 xinit =   handles.xinit;
-yinit =   handles.yinit;  
+yinit =   handles.yinit;
 
 delete(findobj('tag','trc'))
 
@@ -5883,34 +6003,34 @@ function wbucb(hObject,eventdata)
 
 handles = guidata(hObject);
 if strcmp(get(hObject,'SelectionType'),'normal')
-
+    
     set(hObject,'Pointer','arrow')
     set(hObject,'WindowButtonMotionFcn',@wbdcb)
     set(handles.figure1,'CurrentAxes',handles.axes5);
-
+    
     delete(findobj('tag', 'powerspctrm'))   %Effacer le denier power spectrum
-    delete(findobj('tag', 'error')) 
-    delete(findobj('tag', 'localizer')) 
-
+    delete(findobj('tag', 'error'))
+    delete(findobj('tag', 'localizer'))
+    
     NbreChandisp    =   str2double(get(handles.NbreChan,'String'));
     Chanslidval     =   get(handles.Chanslider,'Value');
     slidpos         =   Chanslidval-rem(Chanslidval,1);
     index           =   [handles.indnomeeg handles.indexMEEG];
     chan            =   index(slidpos : 1 : slidpos + NbreChandisp -1);
-
+    
     chandeb = floor(min(handles.coor(2,:))/handles.scale)+1;
-    chanfin = floor(max(handles.coor(2,:))/handles.scale);  
+    chanfin = floor(max(handles.coor(2,:))/handles.scale);
     chan    =   chan(chandeb : chanfin);
-    fs      =   fsample(handles.Dmeg{1});   
-
+    fs      =   fsample(handles.Dmeg{1});
+    
     tt = sort(handles.coor(1,:));
     temps = tt(1) :1/fs: tt(end);
     toshow = ceil(temps*fs);
-        
+    
     set(handles.figure1,'CurrentAxes',handles.axes5);
     Xtot = 0;
     X = 0;
-    for ichan = 1 : length(chan)       
+    for ichan = 1 : length(chan)
         hold on
         [dumb1,dumb2,index2] = ...
             intersect(upper(chanlabels(handles.Dmeg{1},chan(ichan))),handles.names);
@@ -5921,13 +6041,13 @@ if strcmp(get(hObject,'SelectionType'),'normal')
                     upper(handles.names(handles.crc_types(index2))));
                 try
                     X   =   handles.Dmeg{1}(chan(ichan),toshow) - ...
-                            handles.Dmeg{1}(index1,toshow);
+                        handles.Dmeg{1}(index1,toshow);
                 catch
                     X   = 0;
                 end
             else
                 range   =   max(handles.Dmeg{1}(chan(ichan),toshow)) - ...
-                            min(handles.Dmeg{1}(chan(ichan),toshow));
+                    min(handles.Dmeg{1}(chan(ichan),toshow));
                 try
                     X  = 	(handles.scale)*handles.Dmeg{1}(chan(ichan),toshow)/range;
                 catch
@@ -5944,7 +6064,7 @@ if strcmp(get(hObject,'SelectionType'),'normal')
         end
         Xtot = Xtot + X;
     end
-
+    
     if length(X) == 1
         set(handles.figure1,'CurrentAxes',handles.axes5);
         text(0.75,1, 'No Signal here')
@@ -5953,28 +6073,28 @@ if strcmp(get(hObject,'SelectionType'),'normal')
         grid off
     else
         X       =   filterforspect(handles,X,[0.001 fs/3],1);
-        [P,F]   =   pwelch(X,[],[],[],fs);           
-        P       =   log(P);       
+        [P,F]   =   pwelch(X,[],[],[],fs);
+        P       =   log(P);
         p_fft   =   plot(F,P,'Color','r');
         grid on
         axis auto
         xd  = str2double(get(handles.pwrblw,'String'));
         xf = str2double(get(handles.pwrabv,'String'));
-        xlim([xd xf])      %(on zoom sur ce qui nous intéresse)
+        xlim([xd xf])      %(on zoom sur ce qui nous intÃ©resse)
         set(p_fft,'tag', 'powerspctrm')
-    end  
+    end
     return;
-
-elseif strcmp(get(hObject,'SelectionType'),'alt')   
+    
+elseif strcmp(get(hObject,'SelectionType'),'alt')
     set(hObject,'Pointer','arrow')
     delete(findobj('tag','trc'))
     delete(findobj('tag','O'))
     set(handles.figure1, 'windowbuttonmotionfcn', @wbdcb)
-    set(hObject,'WindowButtonUpFcn','')    
+    set(hObject,'WindowButtonUpFcn','')
 else
     
-  return
-  
+    return
+    
 end
 
 guidata(hObject,handles)
@@ -5992,30 +6112,30 @@ function fftchan_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns fftchan contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from fftchan
 if handles.gui_active ~= 1,
-    return; 
+    return;
 end
 set(handles.fftchan,'visible','off');
 %set(handles.figure1,'Parent',handles.axes5);
-axes(handles.axes5); 
-Chan    =   get(handles.fftchan, 'Value');                  
+axes(handles.axes5);
+Chan    =   get(handles.fftchan, 'Value');
 delete(findobj('tag', 'powerspctrm'))   %Effacer le denier power spectrum
-delete(findobj('tag', 'error')) 
-delete(findobj('tag', 'localizer')) 
+delete(findobj('tag', 'error'))
+delete(findobj('tag', 'localizer'))
 
-fs      =   fsample(handles.Dmeg{1});   
+fs      =   fsample(handles.Dmeg{1});
 slidval =   get(handles.slider1,'Value');    %Prendre le pos actuelle
 
 if handles.multcomp % To be checked : I just take this part form old version but never tried to use it
     fil     =   min(max(1,Chan),length(handles.Dmeg));
     Ctodis  =	handles.Chantodis;
     [dumb1,dumb2,Chan]  =   intersect(handles.chanset{Ctodis}, ...
-                            upper(chanlabels(handles.Dmeg{fil})));
+        upper(chanlabels(handles.Dmeg{fil})));
     start   =   datevec(handles.date(fil,1)-handles.mindate);
     start   =   start(4)*60^2+start(5)*60+start(6);
     beg     =   slidval - start;
     tdeb    =   round(beg*fsample(handles.Dmeg{fil}));
     temps   =   tdeb:1:min(tdeb+(fsample(handles.Dmeg{fil})*handles.winsize), ...
-                nsamples(handles.Dmeg{fil}));
+        nsamples(handles.Dmeg{fil}));
     toshow  =   temps;
     cmap 	=   hsv(length(handles.Dmeg));
     Col     =   fil;
@@ -6033,35 +6153,35 @@ else
     fs              =   fsample(handles.Dmeg{fil});
     tdeb            =   round(slidval*fs);
     temps           =   tdeb:1:min(tdeb+(fs*handles.winsize), ...
-                        nsamples(handles.Dmeg{fil}));
+        nsamples(handles.Dmeg{fil}));
     toshow          =   temps;
     cmap            =   [0 0 0; 1 0 0; 0 0 1];
 end
 
 tdeb_w = round(slidval*fs);
 tend_w = min(tdeb+(fs*handles.winsize), ...
-                        nsamples(handles.Dmeg{fil}));
+    nsamples(handles.Dmeg{fil}));
 tohid_all = [];
-if ~isempty(handles.score{5,handles.currentscore}) 
+if ~isempty(handles.score{5,handles.currentscore})
     tdebs   =   str2double(get(handles.currenttime,'String')) - handles.winsize/2;
     tfins   =   str2double(get(handles.currenttime,'String')) + handles.winsize/2;
     art     =   find(and((or(and(handles.score{5,handles.currentscore}(:,2)>tdebs,handles.score{5,handles.currentscore}(:,2)<tfins),...
-                and(handles.score{5,handles.currentscore}(:,1)<tfins,handles.score{5,handles.currentscore}(:,1)>tdebs))),...
-                or(handles.score{5,handles.currentscore}(:,3) == 0,handles.score{5,handles.currentscore}(:,3) == Chan)));
+        and(handles.score{5,handles.currentscore}(:,1)<tfins,handles.score{5,handles.currentscore}(:,1)>tdebs))),...
+        or(handles.score{5,handles.currentscore}(:,3) == 0,handles.score{5,handles.currentscore}(:,3) == Chan)));
     art_concerned   =   handles.score{5,handles.currentscore}(art,1:2);
     if ~isempty(art_concerned)
         a=1;
         while a <= size(art_concerned,1)
             art_concerned(a);
             begart      =   max(tdeb_w,round(art_concerned(a,1)*fs));
-            endart      =   min(tend_w,round(art_concerned(a,2)*fs)); 
+            endart      =   min(tend_w,round(art_concerned(a,2)*fs));
             tohid2   	=   begart : endart;
             tohid_all   =   union(tohid_all,tohid2);
             tdeb_w      =   endart;
             a   =  a+1;
-        end 
+        end
         toshow 	=   setdiff(toshow,tohid_all);
-    end 
+    end
 end
 
 %set(handles.figure1,'Parent',handles.axes5);
@@ -6078,14 +6198,14 @@ if abs(handles.crc_types(index2))>1
             upper(handles.names(handles.crc_types(index2))));
         try
             X   =   handles.Dmeg{fil}(Chan,toshow) - ...
-                    handles.Dmeg{fil}(index1,toshow);
+                handles.Dmeg{fil}(index1,toshow);
             Col	= 1;
         catch
             X   = 0;
         end
     else
         range   =   max(handles.Dmeg{fil}(Chan,toshow)) - ...
-                    min(handles.Dmeg{fil}(Chan,toshow));
+            min(handles.Dmeg{fil}(Chan,toshow));
         try
             X   = 	(handles.scale)*handles.Dmeg{fil}(Chan,toshow)/range;
             Col =   2;
@@ -6114,7 +6234,7 @@ else
     axes(handles.axes5);
     reset(handles.axes5);
     X       =   filterforspect(handles,X,[0.001 fs/3],fil);
-    [P,F]   =   pwelch(X,[],[],[],fs);    
+    [P,F]   =   pwelch(X,[],[],[],fs);
     P       =   log(P);
     p_fft   =   plot(handles.axes5,F,P,'Color',cmap(Col,:));
     set(p_fft,'tag', 'powerspctrm')
@@ -6122,20 +6242,20 @@ else
     title(handles.axes5,titre,'FontSize',12,'FontWeight','demi','FontName','Consolas')
     ylabel(handles.axes5,'Log of (power/Hz) / ','FontSize',10,'FontName','Consolas')
     xlabel(handles.axes5,'Frequency (Hz)','FontSize',10,'FontName','Consolas')
-%     if P<0
-%         set(handles.axes5,'XTick',[0 5 10 15 20],'YTick',[-60 -40 -20 0],'ZTick',[],...
-%             'XTickLabel',{'0' '5' '10' '15' '20'},'YTickLabel',{'-60' '-40' '-20' '0'},'ZTickLabel',{})
-%         axis([0 20 -60 0])
-%     else
-%         set(handles.axes5,'XTick',[0 5 10 15 20],'YTick',[0 2 4 6 8],'ZTick',[],...
-%             'XTickLabel',{'0' '5' '10' '15' '20'},'YTickLabel',{'0' '2' '4' '6' '8'},'ZTickLabel',{})
-%          axis([0 20 0 8])
-%     end
+    %     if P<0
+    %         set(handles.axes5,'XTick',[0 5 10 15 20],'YTick',[-60 -40 -20 0],'ZTick',[],...
+    %             'XTickLabel',{'0' '5' '10' '15' '20'},'YTickLabel',{'-60' '-40' '-20' '0'},'ZTickLabel',{})
+    %         axis([0 20 -60 0])
+    %     else
+    %         set(handles.axes5,'XTick',[0 5 10 15 20],'YTick',[0 2 4 6 8],'ZTick',[],...
+    %             'XTickLabel',{'0' '5' '10' '15' '20'},'YTickLabel',{'0' '2' '4' '6' '8'},'ZTickLabel',{})
+    %          axis([0 20 0 8])
+    %     end
     xd = str2double(get(handles.pwrblw,'String'));
     xf = str2double(get(handles.pwrabv,'String'));
     xlim(handles.axes5,[xd xf])
     grid on
-end  
+end
 return;
 
 
@@ -6150,7 +6270,7 @@ function fftchan_CreateFcn(hObject, eventdata, handles)
 % Hint: popupmenu controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
+    set(hObject,'BackgroundColor','white');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -6166,23 +6286,23 @@ if and(and(Mouse(1,1)<x(end),Mouse(1,1)>x(1)),and(Mouse(1,2)<y(end),Mouse(1,2)>y
     chan    =   ceil((Mouse(1,2)-handles.scale/2)/handles.scale);
     propo 	=   cellstr(get(handles.fftchan,'String'));
     chanpop =   propo(chan);
-	[chanpop in] =   intersect(propo,chanpop); 
-	set(handles.fftchan,'Value', in);
-    fftchan_Callback(hObject,eventdata,handles); 
+    [chanpop in] =   intersect(propo,chanpop);
+    set(handles.fftchan,'Value', in);
+    fftchan_Callback(hObject,eventdata,handles);
 end
 guidata(hObject,handles)
 
 % function Detection_Callback(hObject, eventdata, handles)
-% 
+%
 % set(handles.figure1, 'windowbuttonmotionfcn', '')
-% 
+%
 % flags.index	=   handles.index;
 % flags.Dmeg  =   handles.Dmeg;
 % flags.file  =   handles.file;
 % flags.winsize = handles.winsize;
 % flags.user = handles.currentscore;
-% 
-% %faire passer la taille des époques choisies pour l'analyse des artefacts
+%
+% %faire passer la taille des Ã©poques choisies pour l'analyse des artefacts
 % DC_detection(flags);
 
 function saveart(handles)
@@ -6218,30 +6338,30 @@ function pwrabv_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if get(handles.counterspect,'Value')
     set(handles.figure1,'CurrentAxes',handles.axes5);
-
+    
     delete(findobj('tag', 'powerspctrm'))   %Effacer le denier power spectrum
-    delete(findobj('tag', 'error')) 
-    delete(findobj('tag', 'localizer')) 
-
+    delete(findobj('tag', 'error'))
+    delete(findobj('tag', 'localizer'))
+    
     NbreChandisp    =   str2double(get(handles.NbreChan,'String'));
     Chanslidval     =   get(handles.Chanslider,'Value');
     slidpos         =   Chanslidval-rem(Chanslidval,1);
     index           =   [handles.indnomeeg handles.indexMEEG];
     chan            =   index(slidpos : 1 : slidpos + NbreChandisp -1);
-
+    
     chandeb = floor(min(handles.coor(2,:))/handles.scale)+1;
-    chanfin = floor(max(handles.coor(2,:))/handles.scale);  
+    chanfin = floor(max(handles.coor(2,:))/handles.scale);
     chan    = chan(chandeb : chanfin);
-    fs      = fsample(handles.Dmeg{1});   
-
+    fs      = fsample(handles.Dmeg{1});
+    
     tt = sort(handles.coor(1,:));
     temps = tt(1) :1/fs: tt(end);
     toshow = ceil(temps*fs);
-        
+    
     set(handles.figure1,'CurrentAxes',handles.axes5);
     Xtot = 0;
     X = 0;
-    for ichan = 1 : length(chan)       
+    for ichan = 1 : length(chan)
         hold on
         [dumb1,dumb2,index2] = ...
             intersect(upper(chanlabels(handles.Dmeg{1},chan(ichan))),handles.names);
@@ -6252,13 +6372,13 @@ if get(handles.counterspect,'Value')
                     upper(handles.names(handles.crc_types(index2))));
                 try
                     X   =   handles.Dmeg{1}(chan(ichan),toshow) - ...
-                            handles.Dmeg{1}(index1,toshow);
+                        handles.Dmeg{1}(index1,toshow);
                 catch
                     X   = 0;
                 end
             else
                 range   =   max(handles.Dmeg{1}(chan(ichan),toshow)) - ...
-                            min(handles.Dmeg{1}(chan(ichan),toshow));
+                    min(handles.Dmeg{1}(chan(ichan),toshow));
                 try
                     X  = 	(handles.scale)*handles.Dmeg{1}(chan(ichan),toshow)/range;
                 catch
@@ -6275,7 +6395,7 @@ if get(handles.counterspect,'Value')
         end
         Xtot = Xtot + X;
     end
-
+    
     if length(X) == 1
         set(handles.figure1,'CurrentAxes',handles.axes5);
         text(0.75,1, 'No Signal here')
@@ -6284,16 +6404,16 @@ if get(handles.counterspect,'Value')
         grid off
     else
         X       =   filterforspect(handles,X,[0.001 fs/3],1);
-        [P,F]   =   pwelch(X,[],[],[],fs);           
-        P       =   log(P);       
+        [P,F]   =   pwelch(X,[],[],[],fs);
+        P       =   log(P);
         p_fft   =   plot(F,P,'Color','r');
         grid on
         axis auto
         xd  = str2double(get(handles.pwrblw,'String'));
         xf = str2double(get(handles.pwrabv,'String'));
-        xlim([xd xf])      %(on zoom sur ce qui nous intéresse)
+        xlim([xd xf])      %(on zoom sur ce qui nous intÃ©resse)
         set(p_fft,'tag', 'powerspctrm')
-    end  
+    end
     return;
 end
 
@@ -6303,30 +6423,30 @@ function pwrblw_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if get(handles.counterspect,'Value')
     set(handles.figure1,'CurrentAxes',handles.axes5);
-
+    
     delete(findobj('tag', 'powerspctrm'))   %Effacer le denier power spectrum
-    delete(findobj('tag', 'error')) 
-    delete(findobj('tag', 'localizer')) 
-
+    delete(findobj('tag', 'error'))
+    delete(findobj('tag', 'localizer'))
+    
     NbreChandisp    =   str2double(get(handles.NbreChan,'String'));
     Chanslidval     =   get(handles.Chanslider,'Value');
     slidpos         =   Chanslidval-rem(Chanslidval,1);
     index           =   [handles.indnomeeg handles.indexMEEG];
     chan            =   index(slidpos : 1 : slidpos + NbreChandisp -1);
-
+    
     chandeb = floor(min(handles.coor(2,:))/handles.scale)+1;
-    chanfin = floor(max(handles.coor(2,:))/handles.scale);  
+    chanfin = floor(max(handles.coor(2,:))/handles.scale);
     chan    =   chan(chandeb : chanfin);
-    fs      =   fsample(handles.Dmeg{1});   
-
+    fs      =   fsample(handles.Dmeg{1});
+    
     tt = sort(handles.coor(1,:));
     temps = tt(1) :1/fs: tt(end);
     toshow = ceil(temps*fs);
-        
+    
     set(handles.figure1,'CurrentAxes',handles.axes5);
     Xtot = 0;
     X = 0;
-    for ichan = 1 : length(chan)       
+    for ichan = 1 : length(chan)
         hold on
         [dumb1,dumb2,index2] = ...
             intersect(upper(chanlabels(handles.Dmeg{1},chan(ichan))),handles.names);
@@ -6337,13 +6457,13 @@ if get(handles.counterspect,'Value')
                     upper(handles.names(handles.crc_types(index2))));
                 try
                     X   =   handles.Dmeg{1}(chan(ichan),toshow) - ...
-                            handles.Dmeg{1}(index1,toshow);
+                        handles.Dmeg{1}(index1,toshow);
                 catch
                     X   = 0;
                 end
             else
                 range   =   max(handles.Dmeg{1}(chan(ichan),toshow)) - ...
-                            min(handles.Dmeg{1}(chan(ichan),toshow));
+                    min(handles.Dmeg{1}(chan(ichan),toshow));
                 try
                     X  = 	(handles.scale)*handles.Dmeg{1}(chan(ichan),toshow)/range;
                 catch
@@ -6360,7 +6480,7 @@ if get(handles.counterspect,'Value')
         end
         Xtot = Xtot + X;
     end
-
+    
     if length(X) == 1
         set(handles.figure1,'CurrentAxes',handles.axes5);
         text(0.75,1, 'No Signal here')
@@ -6369,15 +6489,15 @@ if get(handles.counterspect,'Value')
         grid off
     else
         X       =   filterforspect(handles,X,[0.001 fs/3],1);
-        [P,F]   =   pwelch(X,[],[],[],fs);           
-        P       =   log(P);       
+        [P,F]   =   pwelch(X,[],[],[],fs);
+        P       =   log(P);
         p_fft   =   plot(F,P,'Color','r');
         grid on
         axis auto
         xd  = str2double(get(handles.pwrblw,'String'));
         xf = str2double(get(handles.pwrabv,'String'));
-        xlim([xd xf])      %(on zoom sur ce qui nous intéresse)
+        xlim([xd xf])      %(on zoom sur ce qui nous intÃ©resse)
         set(p_fft,'tag', 'powerspctrm')
-    end  
+    end
     return;
 end

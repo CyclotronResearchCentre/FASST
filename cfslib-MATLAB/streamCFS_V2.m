@@ -61,6 +61,28 @@ LOWPASSEOG = 35.0;  % Hz
 LOWPASSEMG = 80.0; % Hz
 threshold = 10;
 
+%DC blocking filter EEG
+p = dcblock(0.1,fsamp_EEG);             
+b = [1 -1];                         % set up differentiator
+a = [1 -p];                         % set up integrator
+C3 = filter(b,a,C3); 
+C4 = filter(b,a,C4);
+
+%DC blocking filter EOG
+p = dcblock(0.1,fsamp_EOG);             
+b = [1 -1];                         % set up differentiator
+a = [1 -p];                         % set up integrator
+EOGL = filter(b,a,EOGL); 
+EOGR = filter(b,a,EOGR);
+
+%DC blocking filter EMG
+p = dcblock(0.1,fsamp_EMG);             
+b = [1 -1];                         % set up differentiator
+a = [1 -p];                         % set up integrator
+EMG = filter(b,a,EMG); 
+
+
+
 Fs_EEG = fsamp_EEG/2;
 Fs_EOG = fsamp_EOG/2;
 Fs_EMG = fsamp_EMG/2;
