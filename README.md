@@ -1,7 +1,10 @@
-# FASST-Z3Score - One Click Automatic Sleep Scoring
+# FASST - with automatic sleep scoring powered by Neurobit 
 
-FASST-Z3Score is a fork of FASST toolbox (fMRI Artefact rejection and Sleep Scoring Toolbox, see below). It includes modifications to allow automatic scoring using the z3score.com/Z3Score-Server sleep scoring API. Read about the API here: https://github.com/neurobittechnologies/z3score-api
+FASST-Neurobit is a fork of FASST toolbox (fMRI Artefact rejection and Sleep Scoring Toolbox, see below). It includes modifications to allow importing automatic scoring using the Neurobit PSG Automatic Scoring Platform.
 The getting started guide is included in this repo (getting started.pdf)
+
+## Version 2.0.4
+Added support for importing scores from Neurobit PSG. Z3Score is deprecated. 
 
 ## Version 2.0.3
 Added support for importing sleep scores from Neo-commandline. Scoring from within FASST is discouraged. 

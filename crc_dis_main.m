@@ -2761,7 +2761,7 @@ function score_importneo_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-[file,path,indx] = uigetfile('*.neo', '*.json');
+[file,path,indx] = uigetfile('*.json');
 if ~indx
     return;
 end
@@ -2771,21 +2771,24 @@ try
     response = fscanf(fileID,'%s');
     fclose(fileID);
     response = loadjson(response);
-    scores = response.message;
-    
-    if response.status == 0,
+
+    if (~isfield(response,'stages') || ~isfield(response,'probabilities')),
         close(h);
-        errordlg(['Error message:' response.message],'Error importing data.'); 
+        errordlg(['Error message:' response.message],'Invalid data.'); 
         return;
     end
 
-    
+    stages = response.stages;
+    prob = response.probabilities;
+    prob_sort = sort(prob, 2, 'descend');
+    conf = prob_sort(:,1)./(prob_sort(:,2) + 1e-10);
+
     %check if structure exits
     if(~isfieldRecursive(handles.Dmeg{1},'CRC','score')),
         n = 1;
         handles.Dmeg{1}.CRC.score = {};
     else
-        n = find(ismember(handles.Dmeg{1}.CRC.score(2,:),'Oracle'),1,'first');
+        n = find(ismember(handles.Dmeg{1}.CRC.score(2,:),'NeurobitPSG'),1,'first');
         if(isempty(n))
             n = size(handles.Dmeg{1}.CRC.score,2)+1;
         end
@@ -2793,12 +2796,12 @@ try
     
     %save relative confidence
     handles.Dmeg{1}.relConfidence = [];
-    handles.Dmeg{1}.relConfidence = scores(:,2);
+    handles.Dmeg{1}.relConfidence = conf';
     
-    handles.Dmeg{1}.CRC.score{1,n} = scores(:,1)';
-    handles.Dmeg{1}.CRC.score{2,n} = 'Oracle';
+    handles.Dmeg{1}.CRC.score{1,n} = stages;
+    handles.Dmeg{1}.CRC.score{2,n} = 'NeurobitPSG';
     handles.Dmeg{1}.CRC.score{3,n} = 30;
-    handles.Dmeg{1}.CRC.score{4,n} = [0.005,length(scores(:,1))*30];
+    handles.Dmeg{1}.CRC.score{4,n} = [0.005,length(stages)*30];
     handles.Dmeg{1}.CRC.score{5,n} = [];
     handles.Dmeg{1}.CRC.score{6,n} = [];
     handles.Dmeg{1}.CRC.score{7,n} = [];
